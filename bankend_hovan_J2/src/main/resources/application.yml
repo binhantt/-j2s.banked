@@ -1,0 +1,99 @@
+server:
+  port: 8080
+  tomcat:
+    threads:
+      max: 500
+      min-spare: 50
+    max-connections: 10000
+    accept-count: 500
+    connection-timeout: 20000
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+      file-size-threshold: 2KB
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/hovan?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true&cachePrepStmts=true&useServerPrepStmts=true&rewriteBatchedStatements=true
+    username: root
+    password: ""
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 100
+      minimum-idle: 20
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      leak-detection-threshold: 60000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: false
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+        query:
+          in_clause_parameter_padding: true
+
+  flyway:
+    enabled: false
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2000
+      lettuce:
+        pool:
+          max-active: 100
+          max-idle: 20
+          min-idle: 5
+          max-wait: 1000
+
+google:
+  client-id: 273697303002-9pbu7fmp2og73cvfoqes1buh1779eftu.apps.googleusercontent.com
+
+github:
+  client-id: Ov23lilqZFdq7a0Euerg 
+  client-secret: d7d2a239ed12224db1311e95395379627a122dc5
+
+facebook:
+  app-id: 
+  app-secret: ${FACEBOOK_APP_SECRET:your-facebook-app-secret}
+
+jwt:
+  secret: hovan_google_login_system_super_secure_jwt_secret_key_2026_512bits_minimum_length_token_auth
+  expiration: 86400000
+
+imgbb:
+  api:
+    key: 76cbe35884a59e2a3cee66b8113d0753
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.example.bankend_hovan_J2: INFO
+    org.hibernate.SQL: WARN
+    org.springframework.web: INFO

@@ -1,0 +1,12 @@
+package com.example.bankend_hovan_J2.infrastructure.persistence.company;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface CompanyImageJpaRepository extends JpaRepository<CompanyImageEntityJpa, Long> {
+    List<CompanyImageEntityJpa> findByCompanyIdOrderByDisplayOrderAsc(Long companyId);
+    void deleteByCompanyId(Long companyId);
+}
