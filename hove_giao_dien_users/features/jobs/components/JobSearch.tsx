@@ -6,17 +6,16 @@ export const JobSearch = () => {
   const { searchQuery, setSearchQuery } = useJobStore();
 
   return (
-    <div className="w-full mb-10">
-      <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
-        <div className="flex flex-col md:flex-row gap-4">
+    <div className="w-full mb-8">
+      <div className="bg-white rounded-lg shadow-md p-4 border border-gray-100">
+        <div className="flex flex-col md:flex-row gap-3">
           <div className="flex-1">
             <Input
               size="large"
               placeholder="Tìm theo vị trí, công ty, kỹ năng..."
-              prefix={<SearchOutlined className="text-indigo-500 text-lg" />}
+              prefix={<SearchOutlined className="text-indigo-500" />}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-14 text-base"
             />
           </div>
           <Select
@@ -48,7 +47,7 @@ export const JobSearch = () => {
             type="primary"
             size="large"
             icon={<SearchOutlined />}
-            className="h-14 px-8 font-medium text-base"
+            className="font-medium"
           >
             Tìm kiếm
           </Button>

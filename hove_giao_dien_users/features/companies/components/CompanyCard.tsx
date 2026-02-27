@@ -3,9 +3,9 @@ import {
   EnvironmentOutlined,
   TeamOutlined,
   FileTextOutlined,
-  HeartOutlined,
 } from '@ant-design/icons';
 import Link from 'next/link';
+import SaveCompanyButton from '@/components/SaveCompanyButton';
 import type { Company } from '@/store/useCompanyStore';
 
 interface CompanyCardProps {
@@ -25,14 +25,10 @@ export const CompanyCard = ({ company }: CompanyCardProps) => {
           shape="square"
           className="border border-gray-200"
         />
-        <Button
-          type="text"
-          icon={<HeartOutlined />}
-          className="text-gray-400 hover:text-red-500"
-          onClick={(e) => {
-            e.preventDefault();
-            // Handle follow company
-          }}
+        <SaveCompanyButton 
+          companyId={Number(company.id)} 
+          size="small" 
+          showText={false}
         />
       </div>
 

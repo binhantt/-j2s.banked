@@ -23,7 +23,7 @@ public class SecurityConfig {
             .sessionManagement(session -> 
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/api/auth/**", "/api/profile/**", "/api/candidate-profile/**", "/api/jobs/**", "/api/applications/**", "/api/chat/**", "/api/saved-jobs/**", "/api/companies/**", "/api/company-blogs/**", "/api/company-images/**", "/api/job-comments/**", "/api/user-cvs/**", "/api/upload/**", "/uploads/**", "/api/blog/**", "/api/notifications/**", "/api/cv/**", "/api/users/**", "/actuator/**").permitAll()
+                .requestMatchers("/", "/api/auth/**", "/api/profile/**", "/api/candidate-profile/**", "/api/jobs/**", "/api/applications/**", "/api/chat/**", "/api/saved-jobs/**", "/api/saved-companies/**", "/api/companies/**", "/api/company-blogs/**", "/api/company-images/**", "/api/company-reviews/**", "/api/job-comments/**", "/api/user-cvs/**", "/api/upload/**", "/uploads/**", "/api/blog/**", "/api/notifications/**", "/api/cv/**", "/api/users/**", "/api/freelance/**", "/actuator/**").permitAll()
                 .anyRequest().authenticated()
             );
 

@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Upload, Avatar, message, Button, Space } from 'antd';
+import { Upload, Avatar, message, Button } from 'antd';
 import { UserOutlined, CameraOutlined, DeleteOutlined } from '@ant-design/icons';
 import { userApi } from '@/lib/userApi';
-import type { UploadFile } from 'antd/es/upload/interface';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface AvatarUploadProps {
   userId: number;
@@ -19,16 +19,15 @@ export default function AvatarUpload({
 }: AvatarUploadProps) {
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(currentAvatar);
   const [loading, setLoading] = useState(false);
+  const { updateUserAvatar } = useAuthStore();
 
   const handleUpload = async (file: File) => {
-    // Validate file type
     const isImage = file.type.startsWith('image/');
     if (!isImage) {
       message.error('Chỉ có thể upload file ảnh!');
       return false;
     }
 
-    // Validate file size (max 5MB)
     const isLt5M = file.size / 1024 / 1024 < 5;
     if (!isLt5M) {
       message.error('Ảnh phải nhỏ hơn 5MB!');
@@ -39,6 +38,10 @@ export default function AvatarUpload({
     try {
       const result = await userApi.uploadAvatar(userId, file);
       setAvatarUrl(result.avatarUrl);
+      
+      // Cập nhật auth store
+      updateUserAvatar(result.avatarUrl);
+      
       message.success('Cập nhật avatar thành công!');
       
       if (onAvatarChange) {
@@ -51,7 +54,7 @@ export default function AvatarUpload({
       setLoading(false);
     }
 
-    return false; // Prevent default upload behavior
+    return false;
   };
 
   const handleDelete = async () => {
@@ -59,6 +62,10 @@ export default function AvatarUpload({
     try {
       await userApi.deleteAvatar(userId);
       setAvatarUrl(undefined);
+      
+      // Cập nhật auth store
+      updateUserAvatar(null);
+      
       message.success('Đã xóa avatar');
       
       if (onAvatarChange) {
@@ -72,16 +79,13 @@ export default function AvatarUpload({
   };
 
   return (
-    <div style={{ textAlign: 'center' }}>
-      <div style={{ position: 'relative', display: 'inline-block' }}>
+    <div className="text-center">
+      <div className="relative inline-block">
         <Avatar
           size={size}
           src={avatarUrl}
           icon={!avatarUrl && <UserOutlined />}
-          style={{ 
-            border: '3px solid #f0f0f0',
-            cursor: 'pointer'
-          }}
+          className="border-2 border-gray-200"
         />
         
         <Upload
@@ -94,17 +98,14 @@ export default function AvatarUpload({
             shape="circle"
             icon={<CameraOutlined />}
             loading={loading}
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              right: 0,
-            }}
+            size="small"
+            className="absolute bottom-0 right-0"
           />
         </Upload>
       </div>
 
       {avatarUrl && (
-        <div style={{ marginTop: 12 }}>
+        <div className="mt-3">
           <Button
             danger
             size="small"

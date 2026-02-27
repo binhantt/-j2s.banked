@@ -3,14 +3,18 @@ package com.example.bankend_hovan_J2.presentation.user;
 import com.example.bankend_hovan_J2.infrastructure.persistence.user.UserEntityJpa;
 import com.example.bankend_hovan_J2.infrastructure.persistence.user.UserJpaRepository;
 import com.example.bankend_hovan_J2.infrastructure.service.ImageUploadService;
+import com.example.bankend_hovan_J2.presentation.user.dto.LocationUpdateRequest;
+import com.example.bankend_hovan_J2.presentation.user.dto.LocationResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
+@CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
 
     private final UserJpaRepository userRepository;
@@ -41,6 +45,27 @@ public class UserController {
                     }
                     if (request.getAvatarUrl() != null) {
                         user.setAvatarUrl(request.getAvatarUrl());
+                    }
+                    if (request.getCurrentPosition() != null) {
+                        user.setCurrentPosition(request.getCurrentPosition());
+                    }
+                    if (request.getHometown() != null) {
+                        user.setHometown(request.getHometown());
+                    }
+                    if (request.getCurrentLocation() != null) {
+                        user.setCurrentLocation(request.getCurrentLocation());
+                    }
+                    if (request.getPhone() != null) {
+                        user.setPhone(request.getPhone());
+                    }
+                    if (request.getBio() != null) {
+                        user.setBio(request.getBio());
+                    }
+                    if (request.getCvUrl() != null) {
+                        user.setCvUrl(request.getCvUrl());
+                    }
+                    if (request.getCertificateImages() != null) {
+                        user.setCertificateImages(request.getCertificateImages());
                     }
                     UserEntityJpa updated = userRepository.save(user);
                     return ResponseEntity.ok(updated);
@@ -79,7 +104,7 @@ public class UserController {
             }
 
             // Upload to Google Drive
-            String imageUrl = imageUploadService.uploadImage(file, "avatars");
+            String imageUrl = imageUploadService.uploadImage(file);
             System.out.println("Uploaded avatar URL: " + imageUrl);
 
             // Update user avatar
@@ -114,15 +139,89 @@ public class UserController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    // Update current location with GPS coordinates
+    @PostMapping("/{id}/location")
+    public ResponseEntity<?> updateLocation(
+            @PathVariable Long id,
+            @RequestBody LocationUpdateRequest request) {
+        try {
+            return userRepository.findById(id)
+                    .map(user -> {
+                        user.setCurrentLatitude(request.getLatitude());
+                        user.setCurrentLongitude(request.getLongitude());
+                        user.setCurrentLocation(request.getAddress());
+                        user.setLocationUpdatedAt(LocalDateTime.now());
+                        userRepository.save(user);
+
+                        LocationResponse response = LocationResponse.builder()
+                                .latitude(user.getCurrentLatitude())
+                                .longitude(user.getCurrentLongitude())
+                                .address(user.getCurrentLocation())
+                                .updatedAt(user.getLocationUpdatedAt())
+                                .build();
+
+                        return ResponseEntity.ok(response);
+                    })
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("error", "Failed to update location: " + e.getMessage()));
+        }
+    }
+
+    // Get current location
+    @GetMapping("/{id}/location")
+    public ResponseEntity<?> getLocation(@PathVariable Long id) {
+        return userRepository.findById(id)
+                .map(user -> {
+                    LocationResponse response = LocationResponse.builder()
+                            .latitude(user.getCurrentLatitude())
+                            .longitude(user.getCurrentLongitude())
+                            .address(user.getCurrentLocation())
+                            .updatedAt(user.getLocationUpdatedAt())
+                            .build();
+                    return ResponseEntity.ok(response);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
 }
 
 class UserUpdateRequest {
     private String name;
     private String avatarUrl;
+    private String currentPosition;
+    private String hometown;
+    private String currentLocation;
+    private String phone;
+    private String bio;
+    private String cvUrl;
+    private String certificateImages;
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
     public String getAvatarUrl() { return avatarUrl; }
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
+    
+    public String getCurrentPosition() { return currentPosition; }
+    public void setCurrentPosition(String currentPosition) { this.currentPosition = currentPosition; }
+    
+    public String getHometown() { return hometown; }
+    public void setHometown(String hometown) { this.hometown = hometown; }
+    
+    public String getCurrentLocation() { return currentLocation; }
+    public void setCurrentLocation(String currentLocation) { this.currentLocation = currentLocation; }
+    
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+    
+    public String getBio() { return bio; }
+    public void setBio(String bio) { this.bio = bio; }
+    
+    public String getCvUrl() { return cvUrl; }
+    public void setCvUrl(String cvUrl) { this.cvUrl = cvUrl; }
+    
+    public String getCertificateImages() { return certificateImages; }
+    public void setCertificateImages(String certificateImages) { this.certificateImages = certificateImages; }
 }

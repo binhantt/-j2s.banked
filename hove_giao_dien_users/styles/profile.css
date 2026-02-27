@@ -1,0 +1,187 @@
+/* Profile page responsive styles */
+.profile-tabs .ant-tabs-nav {
+  margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+  .profile-tabs .ant-tabs-nav {
+    margin-bottom: 16px;
+  }
+  
+  .profile-tabs .ant-tabs-tab {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  .profile-tabs .ant-tabs-nav-wrap {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .profile-tabs .ant-tabs-nav-wrap::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .profile-tabs .ant-tabs-tab {
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+}
+
+/* Card responsive spacing - Chuẩn Navbar */
+.ant-card {
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  transition: box-shadow 200ms;
+}
+
+.ant-card:hover {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+@media (max-width: 640px) {
+  .ant-card-body {
+    padding: 16px;
+  }
+  
+  .ant-form-item {
+    margin-bottom: 16px;
+  }
+}
+
+/* Button group responsive */
+@media (max-width: 768px) {
+  .ant-btn-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .ant-btn-group .ant-btn {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+}
+
+/* Button styles - Chuẩn Navbar với gradient 3 màu giống logo */
+.ant-btn-primary {
+  background: linear-gradient(135deg, #2563eb 0%, #06b6d4 50%, #14b8a6 100%);
+  border: none;
+  font-weight: 500;
+  transition: all 200ms;
+}
+
+.ant-btn-primary:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #0891b2 50%, #0d9488 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.ant-btn-lg {
+  height: 40px;
+  padding: 0 16px;
+  font-size: 14px;
+  border-radius: 0.5rem;
+}
+
+/* Input styles - Nhỏ gọn */
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-select-selector,
+.ant-input-number {
+  border-radius: 0.5rem;
+  border-color: #e5e7eb;
+  transition: all 200ms;
+  font-size: 14px;
+}
+
+.ant-input:focus,
+.ant-input-affix-wrapper:focus,
+.ant-input-affix-wrapper-focused {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+}
+
+.ant-input-lg,
+.ant-input-affix-wrapper-lg,
+.ant-select-lg .ant-select-selector {
+  height: 40px;
+  font-size: 14px;
+  padding: 8px 12px;
+}
+
+.ant-input-number-lg {
+  height: 40px;
+  font-size: 14px;
+}
+
+/* Select dropdown */
+.ant-select-lg {
+  font-size: 14px;
+}
+
+.ant-select-lg .ant-select-selector {
+  height: 40px !important;
+  padding: 4px 11px !important;
+}
+
+.ant-select-lg .ant-select-selection-item {
+  line-height: 30px !important;
+}
+
+/* TextArea */
+.ant-input-textarea-lg textarea {
+  font-size: 14px;
+  padding: 8px 12px;
+}
+
+/* Tag styles - Chuẩn Navbar */
+.ant-tag {
+  border-radius: 9999px;
+  padding: 4px 12px;
+  font-weight: 500;
+  border: none;
+  font-size: 13px;
+}
+
+/* Modal styles */
+.ant-modal-content {
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.ant-modal-header {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 16px 20px;
+}
+
+.ant-modal-body {
+  padding: 20px;
+}
+
+/* Progress bar */
+.ant-progress-bg {
+  background: linear-gradient(90deg, #4f46e5 0%, #6366f1 100%);
+}
+
+/* Form labels */
+.ant-form-item-label > label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Responsive utilities */
+@media (max-width: 640px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 641px) {
+  .show-mobile {
+    display: none !important;
+  }
+}

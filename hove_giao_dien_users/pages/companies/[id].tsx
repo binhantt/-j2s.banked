@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { CompanyDetailFeature } from '@/features/companies/CompanyDetailFeature';
+import { CompanyDetailFeature } from '@/features/companies';
 import { MainLayout } from '@/components/layout/MainLayout';
 
 const CompanyDetailPage = () => {

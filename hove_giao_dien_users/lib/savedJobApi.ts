@@ -2,8 +2,11 @@ import { api } from './api';
 
 export const savedJobApi = {
   // Save a job
-  saveJob: async (userId: number, jobPostingId: number) => {
-    const response = await api.post('/api/saved-jobs', { userId, jobPostingId });
+  saveJob: async (userId: number, jobId: number) => {
+    const response = await api.post('/api/saved-jobs', {
+      userId,
+      jobId,
+    });
     return response.data;
   },
 
@@ -13,7 +16,7 @@ export const savedJobApi = {
     return response.data;
   },
 
-  // Check if saved
+  // Check if job is saved
   checkSaved: async (userId: number, jobId: number) => {
     const response = await api.get(`/api/saved-jobs/check/${userId}/${jobId}`);
     return response.data;

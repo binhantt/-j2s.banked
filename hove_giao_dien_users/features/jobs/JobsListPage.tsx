@@ -131,7 +131,7 @@ export default function JobsListPage() {
       <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 20px' }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <h1 style={{ fontSize: 42, fontWeight: 700, marginBottom: 12, color: '#1a1a1a' }}>
+          <h1 style={{ fontSize: 42, fontWeight: 700, marginBottom: 12, color: '#1e293b' }}>
             Tìm Công Việc Mơ Ước
           </h1>
           <p style={{ fontSize: 16, color: '#666' }}>
@@ -179,7 +179,7 @@ export default function JobsListPage() {
           
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ color: '#666' }}>
-              Tìm thấy <strong style={{ color: '#1890ff' }}>{filteredJobs.length}</strong> công việc
+              Tìm thấy <strong style={{ color: '#0ea5e9' }}>{filteredJobs.length}</strong> công việc
             </span>
             <Space>
               <Tag color="blue">{jobs.length} việc đang tuyển</Tag>
@@ -223,7 +223,7 @@ export default function JobsListPage() {
                   width: 60,
                   height: 60,
                   borderRadius: 8,
-                  background: job.companyLogoUrl ? 'transparent' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  background: job.companyLogoUrl ? 'transparent' : 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #14b8a6 100%)',
                   marginBottom: 16,
                   display: 'flex',
                   alignItems: 'center',
@@ -241,7 +241,7 @@ export default function JobsListPage() {
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
-                        e.currentTarget.parentElement!.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                        e.currentTarget.parentElement!.style.background = 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #14b8a6 100%)';
                         e.currentTarget.parentElement!.innerHTML = (job.companyName?.charAt(0) || job.title.charAt(0));
                       }}
                     />
@@ -255,7 +255,7 @@ export default function JobsListPage() {
                   fontSize: 18, 
                   fontWeight: 600,
                   marginBottom: 8,
-                  color: '#1a1a1a',
+                  color: '#1e293b',
                   cursor: 'pointer',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -306,7 +306,7 @@ export default function JobsListPage() {
                     onClick={() => router.push(`/jobs/${job.id}`)}
                     style={{ 
                       borderRadius: 8,
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      background: 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #14b8a6 100%)',
                       border: 'none',
                       fontWeight: 500
                     }}

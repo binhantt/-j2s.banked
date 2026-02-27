@@ -13,40 +13,40 @@ import Link from 'next/link';
 export const HomeFeature = () => {
   const features = [
     {
-      icon: <SearchOutlined className="text-4xl text-indigo-600" />,
+      icon: <SearchOutlined className="text-3xl text-blue-600" />,
       title: 'Tìm kiếm thông minh',
       description:
-        'Tìm công việc phù hợp với bộ lọc nâng cao. Tìm kiếm theo vị trí, địa điểm, mức lương và nhiều hơn nữa.',
+        'Tìm công việc phù hợp với bộ lọc nâng cao theo vị trí, địa điểm, mức lương.',
     },
     {
-      icon: <FileTextOutlined className="text-4xl text-indigo-600" />,
+      icon: <FileTextOutlined className="text-3xl text-cyan-600" />,
       title: 'Ứng tuyển dễ dàng',
       description:
-        'Ứng tuyển nhiều công việc chỉ với một cú click. Upload CV một lần và ứng tuyển hàng trăm vị trí.',
+        'Upload CV một lần và ứng tuyển nhiều vị trí chỉ với một cú click.',
     },
     {
-      icon: <BellOutlined className="text-4xl text-indigo-600" />,
+      icon: <BellOutlined className="text-3xl text-teal-600" />,
       title: 'Thông báo việc làm',
       description:
-        'Nhận thông báo khi có việc làm mới phù hợp với tiêu chí của bạn. Không bỏ lỡ cơ hội nào.',
+        'Nhận thông báo khi có việc làm mới phù hợp. Không bỏ lỡ cơ hội nào.',
     },
     {
-      icon: <SafetyOutlined className="text-4xl text-indigo-600" />,
+      icon: <SafetyOutlined className="text-3xl text-blue-600" />,
       title: 'Công ty uy tín',
       description:
-        'Tất cả công ty đều được xác minh để đảm bảo độ tin cậy. Ứng tuyển với sự tự tin vào nhà tuyển dụng.',
+        'Tất cả công ty đều được xác minh để đảm bảo độ tin cậy cao nhất.',
     },
     {
-      icon: <RocketOutlined className="text-4xl text-indigo-600" />,
+      icon: <RocketOutlined className="text-3xl text-cyan-600" />,
       title: 'Phát triển sự nghiệp',
       description:
-        'Truy cập tài nguyên nghề nghiệp, mẹo và hướng dẫn để giúp bạn thăng tiến trong hành trình chuyên môn.',
+        'Truy cập tài nguyên nghề nghiệp, mẹo và hướng dẫn phát triển.',
     },
     {
-      icon: <TeamOutlined className="text-4xl text-indigo-600" />,
+      icon: <TeamOutlined className="text-3xl text-teal-600" />,
       title: 'Đánh giá công ty',
       description:
-        'Đọc đánh giá từ nhân viên hiện tại và cũ. Đưa ra quyết định sáng suốt về nhà tuyển dụng tiếp theo.',
+        'Đọc đánh giá từ nhân viên. Đưa ra quyết định sáng suốt.',
     },
   ];
 
@@ -60,49 +60,51 @@ export const HomeFeature = () => {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-20 px-6">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+      <div className="bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-slate-800 mb-4 sm:mb-6">
             Tìm Công Việc{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600">
               Mơ Ước
             </span>
           </h1>
-          <p className="text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl text-gray-600 mb-8 sm:mb-10 max-w-3xl mx-auto">
             Kết nối với các nhà tuyển dụng hàng đầu và khám phá hàng nghìn cơ
-            hội nghề nghiệp phù hợp với kỹ năng và nguyện vọng của bạn.
+            hội nghề nghiệp phù hợp với kỹ năng của bạn.
           </p>
-          <div className="flex gap-4 justify-center flex-wrap">
+          <div className="flex gap-3 sm:gap-4 justify-center flex-wrap">
             <Link href="/jobs">
               <Button
                 type="primary"
                 size="large"
                 icon={<SearchOutlined />}
-                className="h-14 px-10 text-lg font-medium shadow-lg hover:shadow-xl"
+                className="h-12 sm:h-14 px-6 sm:px-10 text-base sm:text-lg font-medium"
               >
                 Bắt đầu tìm việc
               </Button>
             </Link>
-            <Button
-              size="large"
-              className="h-14 px-10 text-lg font-medium border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50"
-            >
-              Dành cho nhà tuyển dụng
-            </Button>
+            <Link href="/register">
+              <Button
+                size="large"
+                className="h-12 sm:h-14 px-6 sm:px-10 text-base sm:text-lg font-medium"
+              >
+                Dành cho nhà tuyển dụng
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
 
       {/* Stats Section */}
-      <div className="max-w-7xl mx-auto px-6 -mt-10 mb-20">
-        <Row gutter={[24, 24]}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 sm:-mt-10 mb-16 sm:mb-20">
+        <Row gutter={[16, 16]}>
           {stats.map((stat, index) => (
             <Col key={index} xs={12} sm={12} md={6}>
-              <div className="text-center bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
-                <div className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-3">
+              <div className="text-center bg-white rounded-xl p-6 sm:p-8 shadow-md hover:shadow-lg transition-shadow">
+                <div className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent mb-2">
                   {stat.number}
                 </div>
-                <div className="text-gray-600 font-medium text-lg">
+                <div className="text-gray-600 font-medium text-sm sm:text-base md:text-lg">
                   {stat.label}
                 </div>
               </div>
@@ -112,28 +114,28 @@ export const HomeFeature = () => {
       </div>
 
       {/* Features Section */}
-      <div className="max-w-7xl mx-auto px-6 mb-20">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 sm:mb-20">
+        <div className="text-center mb-12 sm:mb-16">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-800 mb-3 sm:mb-4">
             Tại sao chọn ViệcLàm24h?
           </h2>
-          <p className="text-xl text-gray-600">
+          <p className="text-lg sm:text-xl text-gray-600">
             Mọi thứ bạn cần để tìm cơ hội nghề nghiệp tiếp theo
           </p>
         </div>
 
-        <Row gutter={[32, 32]}>
+        <Row gutter={[16, 16]}>
           {features.map((feature, index) => (
             <Col key={index} xs={24} sm={12} md={8}>
               <Card
-                className="h-full border-2 border-gray-100 rounded-2xl hover:shadow-xl hover:border-indigo-200 transition-all duration-300"
-                bodyStyle={{ padding: '40px' }}
+                className="h-full hover:shadow-lg transition-all"
+                bodyStyle={{ padding: '24px' }}
               >
-                <div className="mb-6">{feature.icon}</div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                <div className="mb-4">{feature.icon}</div>
+                <h3 className="text-xl font-bold text-slate-800 mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600 leading-relaxed text-base">
+                <p className="text-gray-600 text-sm leading-relaxed">
                   {feature.description}
                 </p>
               </Card>
@@ -143,12 +145,12 @@ export const HomeFeature = () => {
       </div>
 
       {/* CTA Section */}
-      <div className="max-w-7xl mx-auto px-6 mb-20">
-        <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-16 text-center text-white shadow-2xl">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 sm:mb-20">
+        <div className="bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 rounded-2xl p-8 sm:p-12 md:p-16 text-center text-white">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
             Sẵn sàng bắt đầu chưa?
           </h2>
-          <p className="text-xl mb-10 opacity-95 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-10 opacity-95 max-w-2xl mx-auto">
             Tham gia cùng hàng nghìn ứng viên đã tìm được công việc mơ ước
             thông qua nền tảng của chúng tôi
           </p>
@@ -156,7 +158,7 @@ export const HomeFeature = () => {
             <Button
               type="default"
               size="large"
-              className="h-14 px-10 text-lg font-medium bg-white text-indigo-600 hover:bg-gray-50 border-0 shadow-lg"
+              className="h-12 sm:h-14 px-6 sm:px-10 text-base sm:text-lg font-medium bg-white text-blue-600 hover:bg-gray-50"
               icon={<ArrowRightOutlined />}
             >
               Khám phá việc làm ngay

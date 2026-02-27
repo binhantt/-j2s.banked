@@ -73,7 +73,7 @@ export const BlogDetailFeature = ({ postId }: BlogDetailFeatureProps) => {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Breadcrumb */}
         <div className="mb-8">
-          <Link href="/blog" className="text-indigo-600 hover:text-indigo-700 text-sm font-medium inline-flex items-center gap-2 transition-colors">
+          <Link href="/blog" className="text-blue-600 hover:text-blue-700 text-sm font-medium inline-flex items-center gap-2 transition-colors">
             <span>←</span> Quay lại danh sách bài viết
           </Link>
         </div>
@@ -93,7 +93,7 @@ export const BlogDetailFeature = ({ postId }: BlogDetailFeatureProps) => {
                 src={post.authorAvatar} 
                 size={56} 
                 icon={<UserOutlined />}
-                className="border-2 border-indigo-100"
+                className="border-2 border-blue-100"
               />
               <div>
                 <div className="font-semibold text-gray-900 text-base">{post.author}</div>
@@ -103,11 +103,11 @@ export const BlogDetailFeature = ({ postId }: BlogDetailFeatureProps) => {
             
             <div className="flex items-center gap-4 text-sm text-gray-600 ml-auto">
               <div className="flex items-center gap-1.5">
-                <ClockCircleOutlined className="text-indigo-500" />
+                <ClockCircleOutlined className="text-blue-500" />
                 <span>{post.readTime}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <EyeOutlined className="text-indigo-500" />
+                <EyeOutlined className="text-cyan-500" />
                 <span>{post.views} lượt xem</span>
               </div>
             </div>
@@ -141,7 +141,7 @@ export const BlogDetailFeature = ({ postId }: BlogDetailFeatureProps) => {
           {post.tags && post.tags.length > 0 && (
             <div className="mb-10">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <span className="text-indigo-600">#</span> Tags
+                <span className="text-blue-600">#</span> Tags
               </h3>
               <div className="flex flex-wrap gap-2">
                 {post.tags.map((tag: string, index: number) => (
