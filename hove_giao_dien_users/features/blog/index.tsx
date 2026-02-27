@@ -20,7 +20,7 @@ export const BlogFeature = () => {
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
       <div className="text-center mb-10">
-        <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-3">
+        <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 mb-3">
           Blog & Cẩm nang nghề nghiệp
         </h1>
         <p className="text-lg text-gray-600">
@@ -34,7 +34,7 @@ export const BlogFeature = () => {
           <Input
             size="large"
             placeholder="Tìm kiếm bài viết..."
-            prefix={<SearchOutlined className="text-indigo-500" />}
+            prefix={<SearchOutlined className="text-blue-500" />}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="flex-1 min-w-[200px]"

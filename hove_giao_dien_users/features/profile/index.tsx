@@ -8,9 +8,15 @@ import { jobApi } from '@/lib/jobApi';
 import { companyBlogApi, CompanyBlog } from '@/lib/companyBlogApi';
 import { companyApi } from '@/lib/companyApi';
 import { uploadApi } from '@/lib/uploadApi';
+import { api } from '@/lib/api';
+import { locationApi } from '@/lib/locationApi';
 import { CVManagement } from './CVManagement';
 import { ExperienceManagement } from './ExperienceManagement';
 import { EducationManagement } from './EducationManagement';
+import { FreelanceManagement } from './FreelanceManagement';
+import AvatarUpload from '@/components/AvatarUpload';
+import CertificateUpload from '@/components/CertificateUpload';
+import { LAYOUT } from '@/lib/constants';
 
 
 const { TabPane } = Tabs;
@@ -22,6 +28,8 @@ export const ProfileFeature = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [form] = Form.useForm();
   const [mounted, setMounted] = useState(false);
+  const [gettingLocation, setGettingLocation] = useState(false);
+  const [certificateImages, setCertificateImages] = useState('');
 
   // Wait for client-side hydration
   useEffect(() => {
@@ -79,6 +87,17 @@ export const ProfileFeature = () => {
         } catch {
           await jobSeekerProfileApi.createProfile(profileData);
         }
+
+        // Also update user entity with currentPosition, hometown, currentLocation, certificateImages
+        await api.put(`/api/users/${user.id}`, {
+          name: values.name,
+          currentPosition: values.currentPosition,
+          hometown: values.hometown,
+          currentLocation: values.currentLocation,
+          phone: values.phone,
+          bio: values.bio,
+          certificateImages,
+        });
       }
       
       message.success('Cập nhật hồ sơ thành công!');
@@ -95,40 +114,104 @@ export const ProfileFeature = () => {
     }
   };
 
+  const handleGetCurrentLocation = async () => {
+    if (!navigator.geolocation) {
+      message.error('Trình duyệt không hỗ trợ định vị!');
+      return;
+    }
+
+    setGettingLocation(true);
+    message.loading({ content: 'Đang lấy vị trí...', key: 'location' });
+    
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 0
+        });
+      });
+
+      const { latitude, longitude } = position.coords;
+      console.log('Got coordinates:', latitude, longitude);
+      
+      // Format location string with coordinates
+      const locationString = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+      
+      // Set value to form field "currentLocation"
+      form.setFieldsValue({ currentLocation: locationString });
+      
+      // Try to save to database (optional - will fail silently if backend not running)
+      if (user?.id) {
+        try {
+          await locationApi.updateLocation(user.id, {
+            latitude,
+            longitude,
+            address: locationString
+          });
+          message.success({ 
+            content: `Đã lưu vị trí: ${locationString}`, 
+            key: 'location',
+            duration: 3
+          });
+        } catch (saveError) {
+          console.error('Save location error:', saveError);
+          // Still show success even if save fails
+          message.success({ 
+            content: `Đã lấy vị trí: ${locationString}`, 
+            key: 'location',
+            duration: 3
+          });
+        }
+      } else {
+        message.success({ 
+          content: `Đã lấy vị trí: ${locationString}`, 
+          key: 'location',
+          duration: 3
+        });
+      }
+    } catch (error: any) {
+      console.error('Geolocation error:', error);
+      message.destroy('location');
+      
+      if (error.code === 1) {
+        message.error('Bạn cần cho phép truy cập vị trí trong trình duyệt!');
+      } else if (error.code === 2) {
+        message.error('Không thể xác định vị trí. Vui lòng nhập thủ công.');
+      } else if (error.code === 3) {
+        message.error('Hết thời gian chờ. Vui lòng thử lại.');
+      } else {
+        message.error('Lỗi khi lấy vị trí. Vui lòng nhập thủ công.');
+      }
+    } finally {
+      setGettingLocation(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4">
+    <div className="min-h-screen bg-gray-50 pt-16">
+      <div className={`${LAYOUT.container} py-4`}>
         {/* Header Card */}
-        <Card className="mb-6 shadow-lg">
-          <div className="flex flex-col md:flex-row items-center gap-6">
+        <Card className="mb-4">
+          <div className="flex flex-col md:flex-row items-center gap-4">
             <div className="relative">
-              <Avatar
-                size={120}
-                src={user?.avatar}
-                icon={<UserOutlined />}
-                className="border-4 border-white shadow-lg"
+              <AvatarUpload
+                userId={user?.id || 0}
+                currentAvatar={user?.avatarUrl}
+                onAvatarChange={(url) => {
+                  // Avatar will be updated via auth store
+                }}
+                size={typeof window !== 'undefined' && window.innerWidth < 640 ? 80 : 100}
               />
-              <Upload
-                showUploadList={false}
-                onChange={handleAvatarUpload}
-                accept="image/*"
-              >
-                <Button
-                  icon={<UploadOutlined />}
-                  size="small"
-                  className="absolute bottom-0 right-0 rounded-full"
-                  type="primary"
-                />
-              </Upload>
             </div>
             
             <div className="flex-1 text-center md:text-left">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{user?.name}</h1>
-              <p className="text-gray-600 mb-2 flex items-center justify-center md:justify-start gap-2">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">{user?.name}</h1>
+              <p className="text-sm text-gray-600 mb-2 flex items-center justify-center md:justify-start gap-2">
                 <MailOutlined /> {user?.email}
               </p>
-              <div className="flex gap-2 justify-center md:justify-start">
-                <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">
+              <div className="flex gap-2 justify-center md:justify-start flex-wrap">
+                <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium">
                   {user?.userType === 'job_seeker' 
                     ? 'Người tìm việc' 
                     : user?.userType === 'freelancer' 
@@ -138,12 +221,12 @@ export const ProfileFeature = () => {
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full md:w-auto">
               <Button
                 type="primary"
                 icon={<EditOutlined />}
-                size="large"
                 onClick={() => setIsEditing(!isEditing)}
+                className="flex-1 md:flex-none"
               >
                 {isEditing ? 'Hủy' : 'Chỉnh sửa'}
               </Button>
@@ -152,7 +235,6 @@ export const ProfileFeature = () => {
                 <Button
                   danger
                   icon={<LogoutOutlined />}
-                  size="large"
                   onClick={() => {
                     Modal.confirm({
                       title: 'Xác nhận đăng xuất',
@@ -166,6 +248,7 @@ export const ProfileFeature = () => {
                       },
                     });
                   }}
+                  className="flex-1 md:flex-none"
                 >
                   Thoát
                 </Button>
@@ -175,28 +258,40 @@ export const ProfileFeature = () => {
         </Card>
 
         {/* Content Tabs */}
-        <Card className="shadow-lg">
+        <Card>
           {user?.userType === 'hr' ? (
-            // HR tabs - job posting management and blog management
-            <Tabs defaultActiveKey="1" size="large">
+            // HR tabs
+            <Tabs defaultActiveKey="1" className="profile-tabs">
               <TabPane tab="Thông tin công ty" key="1">
                 <CompanyInfoSection isEditing={isEditing} form={form} handleSave={handleSave} />
               </TabPane>
               <TabPane tab="Quản lý tin tuyển dụng" key="2">
                 <JobPostingManagementSection />
               </TabPane>
-              <TabPane tab="Quản lý Blog" key="3">
+              <TabPane tab="📋 Quản lý Freelance" key="3">
+                <FreelanceManagement />
+              </TabPane>
+              <TabPane tab="Quản lý Blog" key="4">
                 <BlogManagementSection />
               </TabPane>
-              <TabPane tab="Quản lý hình ảnh" key="4">
+              <TabPane tab="Quản lý hình ảnh" key="5">
                 <ImageGalleryManagementSection />
               </TabPane>
             </Tabs>
           ) : (
             // Job seeker and Freelancer tabs
-            <Tabs defaultActiveKey="1" size="large">
+            <Tabs defaultActiveKey="1" className="profile-tabs">
               <TabPane tab="Thông tin cá nhân" key="1">
-                <PersonalInfoSection isEditing={isEditing} form={form} handleSave={handleSave} user={user} />
+                <PersonalInfoSection 
+                  isEditing={isEditing} 
+                  form={form} 
+                  handleSave={handleSave} 
+                  user={user}
+                  gettingLocation={gettingLocation}
+                  handleGetCurrentLocation={handleGetCurrentLocation}
+                  certificateImages={certificateImages}
+                  setCertificateImages={setCertificateImages}
+                />
               </TabPane>
               <TabPane tab="Quản lý CV" key="2">
                 <CVManagement />
@@ -218,7 +313,16 @@ export const ProfileFeature = () => {
   );
 };
 
-const PersonalInfoSection = ({ isEditing, form, handleSave, user }: any) => {
+const PersonalInfoSection = ({ 
+  isEditing, 
+  form, 
+  handleSave, 
+  user, 
+  gettingLocation, 
+  handleGetCurrentLocation,
+  certificateImages,
+  setCertificateImages 
+}: any) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -231,13 +335,22 @@ const PersonalInfoSection = ({ isEditing, form, handleSave, user }: any) => {
     setLoading(true);
     try {
       const profile = await jobSeekerProfileApi.getProfile(user.id);
+      
+      // Also load user data to get currentPosition, hometown, currentLocation, certificateImages
+      const userData = await api.get(`/api/users/${user.id}`);
+      
       form.setFieldsValue({
         name: user.name,
         email: user.email,
         phone: profile.phone,
         location: profile.location,
         bio: profile.bio,
+        currentPosition: userData.data.currentPosition || '',
+        hometown: userData.data.hometown || '',
+        currentLocation: userData.data.currentLocation || '',
       });
+      
+      setCertificateImages(userData.data.certificateImages || '');
     } catch (error) {
       console.error('Load profile error:', error);
       // Profile doesn't exist yet, set defaults
@@ -247,6 +360,9 @@ const PersonalInfoSection = ({ isEditing, form, handleSave, user }: any) => {
         phone: '',
         location: '',
         bio: '',
+        currentPosition: '',
+        hometown: '',
+        currentLocation: '',
       });
     } finally {
       setLoading(false);
@@ -289,23 +405,68 @@ const PersonalInfoSection = ({ isEditing, form, handleSave, user }: any) => {
         </Form.Item>
 
         <Form.Item
+          label="Vị trí công việc hiện tại"
+          name="currentPosition"
+        >
+          <Input
+            size="large"
+            prefix={<UserOutlined />}
+            placeholder="VD: Senior Frontend Developer, Product Manager"
+            disabled={!isEditing}
+          />
+        </Form.Item>
+
+        <Form.Item
           label="Số điện thoại"
           name="phone"
         >
           <Input
             size="large"
             prefix={<PhoneOutlined />}
+            placeholder="VD: 0123456789"
+            disabled={!isEditing}
+          />
+        </Form.Item>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Form.Item
+          label="Quê quán (vị trí cố định)"
+          name="hometown"
+        >
+          <Input
+            size="large"
+            prefix={<EnvironmentOutlined />}
+            placeholder="VD: Hà Nội, TP. Hồ Chí Minh"
             disabled={!isEditing}
           />
         </Form.Item>
 
         <Form.Item
-          label="Địa chỉ"
-          name="location"
+          label={
+            <span>
+              Vị trí hiện tại (để ứng tuyển Freelance){' '}
+              {isEditing && (
+                <Button
+                  type="link"
+                  size="small"
+                  icon={<EnvironmentOutlined />}
+                  onClick={handleGetCurrentLocation}
+                  loading={gettingLocation}
+                  style={{ padding: 0, height: 'auto' }}
+                >
+                  Lấy GPS
+                </Button>
+              )}
+            </span>
+          }
+          name="currentLocation"
+          extra={isEditing ? "Nhấn 'Lấy GPS' để tự động lấy vị trí hiện tại" : undefined}
         >
           <Input
             size="large"
             prefix={<EnvironmentOutlined />}
+            placeholder="Hoặc nhập thủ công"
             disabled={!isEditing}
           />
         </Form.Item>
@@ -321,6 +482,23 @@ const PersonalInfoSection = ({ isEditing, form, handleSave, user }: any) => {
           disabled={!isEditing}
         />
       </Form.Item>
+
+      {isEditing && (
+        <Form.Item
+          label={
+            <span>
+              Ảnh chứng chỉ / Bằng cấp{' '}
+              <span style={{ color: '#ff4d4f' }}>* Bắt buộc để ứng tuyển Freelance</span>
+            </span>
+          }
+        >
+          <CertificateUpload
+            userId={user?.id || 0}
+            currentImages={certificateImages}
+            onImagesChange={setCertificateImages}
+          />
+        </Form.Item>
+      )}
 
       {isEditing && (
         <Form.Item>
@@ -354,34 +532,39 @@ const CompanyInfoSection = ({ isEditing, form, handleSave }: any) => {
   const loadCompanyInfo = async () => {
     setLoading(true);
     try {
-      // Try to get company by HR ID
+      // Try to get company by HR ID (returns null if not found)
       const companyData = await companyApi.getCompanyByHrId(user!.id);
-      setCompany(companyData);
-      setLogoUrl(companyData.logoUrl || '');
       
-      form.setFieldsValue({
-        logoUrl: companyData.logoUrl || '',
-        name: companyData.name,
-        companySize: companyData.companySize,
-        industry: companyData.industry,
-        website: companyData.website,
-        email: companyData.email,
-        phone: companyData.phone,
-        address: companyData.address,
-        description: companyData.description,
-        mission: companyData.mission,
-        vision: companyData.vision,
-        values: companyData.values,
-        benefits: companyData.benefits,
-        workingHours: companyData.workingHours,
-      });
-    } catch (error: any) {
-      // Silently handle 404 - company doesn't exist yet
-      if (error?.response?.status === 404) {
-        console.log('Company not found for HR, will create on save');
+      if (companyData) {
+        setCompany(companyData);
+        setLogoUrl(companyData.logoUrl || '');
+        
+        form.setFieldsValue({
+          logoUrl: companyData.logoUrl || '',
+          name: companyData.name,
+          companySize: companyData.companySize,
+          industry: companyData.industry,
+          website: companyData.website,
+          email: companyData.email,
+          phone: companyData.phone,
+          address: companyData.address,
+          description: companyData.description,
+          mission: companyData.mission,
+          vision: companyData.vision,
+          values: companyData.values,
+          benefits: companyData.benefits,
+          workingHours: companyData.workingHours,
+        });
       } else {
-        console.error('Load company error:', error);
+        // Company doesn't exist yet - this is normal for new HR users
+        console.log('Company not found for HR, will create on save');
+        setCompany(null);
+        setLogoUrl('');
+        form.resetFields();
       }
+    } catch (error: any) {
+      console.error('Load company error:', error);
+      message.error('Không thể tải thông tin công ty');
       setCompany(null);
       setLogoUrl('');
     } finally {
@@ -1171,16 +1354,20 @@ const BlogManagementSection = () => {
     
     setLoading(true);
     try {
-      // Load company info first
+      // Load company info first (returns null if not found)
       const companyData = await companyApi.getCompanyByHrId(user.id);
       setCompany(companyData);
       
-      // Load blogs by HR ID
-      const blogsData = await companyBlogApi.getBlogsByHR(user.id);
-      setBlogs(blogsData);
-    } catch (error) {
+      // Only load blogs if company exists
+      if (companyData) {
+        const blogsData = await companyBlogApi.getBlogsByHR(user.id);
+        setBlogs(blogsData);
+      } else {
+        setBlogs([]);
+      }
+    } catch (error: any) {
       console.error('Load error:', error);
-      message.error('Không thể tải thông tin. Vui lòng tạo thông tin công ty trước.');
+      message.error('Không thể tải thông tin. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }

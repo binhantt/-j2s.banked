@@ -1,12 +1,10 @@
-import { JobsFeature } from '@/features/jobs';
+import JobsListPage from '@/features/jobs/JobsListPage';
 import { MainLayout } from '@/components/layout/MainLayout';
 
-const JobsPage = () => {
+export default function JobsPage() {
   return (
     <MainLayout>
-      <JobsFeature />
+      <JobsListPage />
     </MainLayout>
   );
-};
-
-export default JobsPage;
+}

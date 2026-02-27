@@ -25,6 +25,14 @@ public class RateLimitFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         
+        String path = httpRequest.getRequestURI();
+        
+        // Whitelist certain endpoints from rate limiting
+        if (isWhitelisted(path)) {
+            chain.doFilter(request, response);
+            return;
+        }
+        
         String key = getClientIP(httpRequest);
         Bucket bucket = resolveBucket(key);
 
@@ -32,8 +40,19 @@ public class RateLimitFilter implements Filter {
             chain.doFilter(request, response);
         } else {
             httpResponse.setStatus(429);
-            httpResponse.getWriter().write("{\"error\":\"Too many requests\"}");
+            httpResponse.setContentType("application/json");
+            httpResponse.getWriter().write("{\"error\":\"Too many requests. Please try again later.\"}");
         }
+    }
+    
+    private boolean isWhitelisted(String path) {
+        // Whitelist endpoints that should not be rate limited
+        return path.startsWith("/api/notifications/") ||  // Notification polling
+               path.startsWith("/api/auth/") ||           // Authentication
+               path.startsWith("/api/upload/") ||         // File uploads (CV, images)
+               path.startsWith("/api/cv/") ||             // CV management
+               path.startsWith("/uploads/") ||            // Static file serving
+               path.equals("/api/health");                // Health check
     }
 
     private Bucket resolveBucket(String key) {
@@ -41,7 +60,8 @@ public class RateLimitFilter implements Filter {
     }
 
     private Bucket createNewBucket() {
-        Bandwidth limit = Bandwidth.classic(100, Refill.intervally(100, Duration.ofMinutes(1)));
+        // Increased limit: 200 requests per minute
+        Bandwidth limit = Bandwidth.classic(200, Refill.intervally(200, Duration.ofMinutes(1)));
         return Bucket.builder()
                 .addLimit(limit)
                 .build();

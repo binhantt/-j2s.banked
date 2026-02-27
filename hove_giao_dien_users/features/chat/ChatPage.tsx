@@ -11,6 +11,7 @@ import { useRouter } from 'next/router';
 import { chatApi } from '@/lib/chatApi';
 import { useAuthStore } from '@/store/useAuthStore';
 import { MainLayout } from '@/components/layout/MainLayout';
+import { COLORS } from '@/lib/constants';
 
 function ChatPageContent() {
   const [conversations, setConversations] = useState<any[]>([]);
@@ -124,14 +125,14 @@ function ChatPageContent() {
           {/* Header */}
           <div style={{ 
             padding: '20px',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: COLORS.gradient,
             flexShrink: 0
           }}>
             <div style={{ marginBottom: '16px' }}>
               <h2 style={{ 
                 fontSize: '20px',
                 fontWeight: 'bold',
-                color: '#fff',
+                color: COLORS.white,
                 margin: 0,
                 display: 'flex',
                 alignItems: 'center',
@@ -173,7 +174,7 @@ function ChatPageContent() {
               <div style={{ padding: '40px 20px', textAlign: 'center' }}>
                 <Empty
                   description={
-                    <span style={{ color: '#9ca3af' }}>
+                    <span style={{ color: COLORS.grayText }}>
                       {user?.userType === 'hr'
                         ? 'Chưa có cuộc trò chuyện nào'
                         : 'Chưa có tin nhắn nào'}
@@ -194,8 +195,8 @@ function ChatPageContent() {
                       gap: '12px',
                       padding: '16px 20px',
                       cursor: 'pointer',
-                      backgroundColor: isSelected ? '#f3f4f6' : 'transparent',
-                      borderLeft: isSelected ? '4px solid #667eea' : '4px solid transparent',
+                      backgroundColor: isSelected ? COLORS.hoverBg : 'transparent',
+                      borderLeft: isSelected ? `4px solid ${COLORS.primary}` : '4px solid transparent',
                       transition: 'all 0.2s'
                     }}
                     onClick={(e) => handleSelectConversation(conv, e)}
@@ -215,7 +216,7 @@ function ChatPageContent() {
                         icon={<UserOutlined />}
                         size={48}
                         style={{ 
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                          background: 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #14b8a6 100%)'
                         }}
                       />
                     </Badge>
@@ -289,7 +290,7 @@ function ChatPageContent() {
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}>
-                  <MessageOutlined style={{ fontSize: '56px', color: '#667eea' }} />
+                  <MessageOutlined style={{ fontSize: '56px', color: '#3b82f6' }} />
                 </div>
                 <h3 style={{ 
                   fontSize: '24px',
@@ -324,7 +325,7 @@ function ChatPageContent() {
                       icon={<UserOutlined />}
                       size={44}
                       style={{ 
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                        background: 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #14b8a6 100%)'
                       }}
                     />
                     <div>
@@ -413,7 +414,7 @@ function ChatPageContent() {
                               padding: '12px 16px',
                               borderRadius: '16px',
                               background: isMe 
-                                ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                                ? 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #14b8a6 100%)'
                                 : '#fff',
                               color: isMe ? '#fff' : '#111827',
                               boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
@@ -485,7 +486,7 @@ function ChatPageContent() {
                       height: '48px',
                       padding: '0 24px',
                       borderRadius: '24px',
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      background: 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #14b8a6 100%)',
                       border: 'none',
                       fontWeight: 600
                     }}

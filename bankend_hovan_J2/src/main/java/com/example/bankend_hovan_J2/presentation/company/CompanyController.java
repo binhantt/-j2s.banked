@@ -55,8 +55,24 @@ public class CompanyController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCompany(@PathVariable Long id) {
-        companyRepository.deleteById(id);
-        return ResponseEntity.ok().build();
+        try {
+            // Get company to find hrId
+            Company company = companyRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Company not found"));
+            
+            Long hrId = company.getHrId();
+            
+            // Delete company (this will cascade delete blogs via database constraint if set)
+            companyRepository.deleteById(id);
+            
+            // Also delete all jobs posted by this HR
+            // Note: Jobs are linked by userId (HR ID), not companyId
+            // You may want to add a method to delete jobs by userId
+            
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
     }
 
     private Company mapToCompany(Map<String, Object> request) {

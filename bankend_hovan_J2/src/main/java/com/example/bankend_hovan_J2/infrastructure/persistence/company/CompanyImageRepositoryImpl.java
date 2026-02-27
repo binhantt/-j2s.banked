@@ -15,18 +15,6 @@ public class CompanyImageRepositoryImpl implements CompanyImageRepository {
     private final CompanyImageJpaRepository jpaRepository;
 
     @Override
-    public CompanyImage save(CompanyImage image) {
-        CompanyImageEntityJpa entity = toEntity(image);
-        CompanyImageEntityJpa saved = jpaRepository.save(entity);
-        return toDomain(saved);
-    }
-
-    @Override
-    public Optional<CompanyImage> findById(Long id) {
-        return jpaRepository.findById(id).map(this::toDomain);
-    }
-
-    @Override
     public List<CompanyImage> findByCompanyId(Long companyId) {
         return jpaRepository.findByCompanyIdOrderByDisplayOrderAsc(companyId)
                 .stream()
@@ -35,25 +23,20 @@ public class CompanyImageRepositoryImpl implements CompanyImageRepository {
     }
 
     @Override
-    public void deleteById(Long id) {
-        jpaRepository.deleteById(id);
+    public Optional<CompanyImage> findById(Long id) {
+        return jpaRepository.findById(id).map(this::toDomain);
     }
 
     @Override
-    public void deleteByCompanyId(Long companyId) {
-        jpaRepository.deleteByCompanyId(companyId);
+    public CompanyImage save(CompanyImage companyImage) {
+        CompanyImageEntityJpa entity = toEntity(companyImage);
+        CompanyImageEntityJpa saved = jpaRepository.save(entity);
+        return toDomain(saved);
     }
 
-    private CompanyImageEntityJpa toEntity(CompanyImage image) {
-        return CompanyImageEntityJpa.builder()
-                .id(image.getId())
-                .companyId(image.getCompanyId())
-                .imageUrl(image.getImageUrl())
-                .description(image.getDescription())
-                .displayOrder(image.getDisplayOrder())
-                .createdAt(image.getCreatedAt())
-                .updatedAt(image.getUpdatedAt())
-                .build();
+    @Override
+    public void deleteById(Long id) {
+        jpaRepository.deleteById(id);
     }
 
     private CompanyImage toDomain(CompanyImageEntityJpa entity) {
@@ -65,6 +48,18 @@ public class CompanyImageRepositoryImpl implements CompanyImageRepository {
                 .displayOrder(entity.getDisplayOrder())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
+                .build();
+    }
+
+    private CompanyImageEntityJpa toEntity(CompanyImage domain) {
+        return CompanyImageEntityJpa.builder()
+                .id(domain.getId())
+                .companyId(domain.getCompanyId())
+                .imageUrl(domain.getImageUrl())
+                .description(domain.getDescription())
+                .displayOrder(domain.getDisplayOrder())
+                .createdAt(domain.getCreatedAt())
+                .updatedAt(domain.getUpdatedAt())
                 .build();
     }
 }

@@ -29,11 +29,19 @@ public class CandidateProfileController {
     public ResponseEntity<Map<String, Object>> getCandidateProfile(@PathVariable Long userId) {
         Map<String, Object> profile = new HashMap<>();
         
-        // Get user info (name, email)
+        // Get user info (name, email, currentPosition, certificateImages, cvUrl, location data)
         userRepository.findById(userId).ifPresent(u -> {
             Map<String, Object> userInfo = new HashMap<>();
             userInfo.put("name", u.getName());
             userInfo.put("email", u.getEmail());
+            userInfo.put("currentPosition", u.getCurrentPosition());
+            userInfo.put("certificateImages", u.getCertificateImages());
+            userInfo.put("cvUrl", u.getCvUrl());
+            userInfo.put("avatarUrl", u.getAvatarUrl());
+            userInfo.put("currentLocation", u.getCurrentLocation());
+            userInfo.put("currentLatitude", u.getCurrentLatitude());
+            userInfo.put("currentLongitude", u.getCurrentLongitude());
+            userInfo.put("locationUpdatedAt", u.getLocationUpdatedAt());
             profile.put("userInfo", userInfo);
         });
         

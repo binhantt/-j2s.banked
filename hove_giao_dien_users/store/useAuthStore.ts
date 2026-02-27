@@ -18,6 +18,7 @@ interface AuthStore {
   login: (user: User, token: string, refreshToken?: string) => void;
   logout: () => void;
   updateUser: (user: User) => void;
+  updateUserAvatar: (avatarUrl: string | null) => void;
   googleLogin: (idToken: string, userType?: 'job_seeker' | 'freelancer' | 'hr') => Promise<void>;
   githubLogin: (code: string, userType?: 'job_seeker' | 'freelancer' | 'hr') => Promise<void>;
   facebookLogin: (accessToken: string, userType?: 'job_seeker' | 'freelancer' | 'hr') => Promise<void>;
@@ -67,6 +68,15 @@ export const useAuthStore = create<AuthStore>()(
         set({ user });
       },
 
+      updateUserAvatar: (avatarUrl: string | null) => {
+        const currentUser = get().user;
+        if (currentUser) {
+          const updatedUser = { ...currentUser, avatarUrl: avatarUrl || undefined };
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          set({ user: updatedUser });
+        }
+      },
+
       googleLogin: async (idToken: string, userType?: 'job_seeker' | 'freelancer' | 'hr') => {
         set({ isLoading: true, error: null });
         try {
@@ -75,7 +85,7 @@ export const useAuthStore = create<AuthStore>()(
             id: response.userId,
             name: response.name,
             email: response.email,
-            avatar: response.avatarUrl,
+            avatarUrl: response.avatarUrl,
             userType: response.userType,
           };
           get().login(user, response.token, response.refreshToken);

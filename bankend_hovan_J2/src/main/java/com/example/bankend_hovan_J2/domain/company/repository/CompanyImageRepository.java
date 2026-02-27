@@ -6,9 +6,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CompanyImageRepository {
-    CompanyImage save(CompanyImage image);
-    Optional<CompanyImage> findById(Long id);
     List<CompanyImage> findByCompanyId(Long companyId);
+    Optional<CompanyImage> findById(Long id);
+    CompanyImage save(CompanyImage companyImage);
     void deleteById(Long id);
-    void deleteByCompanyId(Long companyId);
 }

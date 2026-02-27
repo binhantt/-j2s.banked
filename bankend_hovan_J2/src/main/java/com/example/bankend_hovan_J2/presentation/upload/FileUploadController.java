@@ -36,19 +36,58 @@ public class FileUploadController {
             @RequestParam("userId") Long userId,
             @RequestParam(value = "title", required = false) String title) {
         try {
+            log.info("=== Upload CV Request ===");
+            log.info("File name: {}", file.getOriginalFilename());
+            log.info("File type: {}", file.getContentType());
+            log.info("File size: {} bytes", file.getSize());
+            log.info("User ID: {}", userId);
+            log.info("Title: {}", title);
+            
             // Validate
             if (file.isEmpty()) {
+                log.error("File is empty");
                 return ResponseEntity.badRequest().body(Map.of("error", "File trống"));
             }
 
             if (file.getSize() > MAX_FILE_SIZE) {
+                log.error("File too large: {} bytes", file.getSize());
                 return ResponseEntity.badRequest().body(Map.of("error", "File quá lớn (max 10MB)"));
             }
 
             String contentType = file.getContentType();
-            if (contentType == null || !contentType.equals("application/pdf")) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Chỉ chấp nhận file PDF"));
+            String originalFilename = file.getOriginalFilename();
+            
+            log.info("Validating file type...");
+            log.info("Content-Type: {}", contentType);
+            log.info("Original filename: {}", originalFilename);
+            
+            // Accept PDF, DOC, and DOCX files
+            boolean isValidType = false;
+            if (contentType != null) {
+                isValidType = contentType.equals("application/pdf") ||
+                             contentType.equals("application/msword") ||  // .doc
+                             contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document"); // .docx
             }
+            
+            // Also check by file extension as fallback
+            if (!isValidType && originalFilename != null) {
+                String lowerFilename = originalFilename.toLowerCase();
+                isValidType = lowerFilename.endsWith(".pdf") || 
+                             lowerFilename.endsWith(".doc") || 
+                             lowerFilename.endsWith(".docx");
+                log.info("Validation by extension: {}", isValidType);
+            }
+            
+            if (!isValidType) {
+                log.error("Invalid file type. Content-Type: {}, Filename: {}", contentType, originalFilename);
+                return ResponseEntity.badRequest().body(Map.of(
+                    "error", "Chỉ chấp nhận file PDF, DOC, hoặc DOCX",
+                    "contentType", contentType != null ? contentType : "null",
+                    "filename", originalFilename != null ? originalFilename : "null"
+                ));
+            }
+            
+            log.info("File type validation passed");
 
             // Create folder
             Path uploadPath = Paths.get(UPLOAD_DIR);
@@ -57,10 +96,10 @@ public class FileUploadController {
             }
 
             // Generate filename
-            String originalFilename = file.getOriginalFilename();
-            String extension = originalFilename != null && originalFilename.contains(".") 
-                ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
-                : ".pdf";
+            String extension = ".pdf"; // default
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
             String filename = UUID.randomUUID().toString() + extension;
 
             // Save file
@@ -141,8 +180,19 @@ public class FileUploadController {
             
             byte[] fileContent = Files.readAllBytes(filePath);
             
+            // Determine content type based on file extension
+            String contentType = "application/octet-stream"; // default
+            String lowerFilename = filename.toLowerCase();
+            if (lowerFilename.endsWith(".pdf")) {
+                contentType = "application/pdf";
+            } else if (lowerFilename.endsWith(".doc")) {
+                contentType = "application/msword";
+            } else if (lowerFilename.endsWith(".docx")) {
+                contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            }
+            
             return ResponseEntity.ok()
-                .header("Content-Type", "application/pdf")
+                .header("Content-Type", contentType)
                 .header("Content-Disposition", "inline; filename=\"" + filename + "\"")
                 .body(fileContent);
         } catch (IOException e) {

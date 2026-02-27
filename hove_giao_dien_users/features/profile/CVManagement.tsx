@@ -49,8 +49,21 @@ export const CVManagement = () => {
   };
 
   const handleUpload = async (file: File) => {
-    if (file.type !== 'application/pdf') {
-      message.error('Chỉ chấp nhận file PDF');
+    // Accept PDF, DOC, and DOCX files
+    const validTypes = [
+      'application/pdf',
+      'application/msword', // .doc
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document' // .docx
+    ];
+    
+    const fileName = file.name.toLowerCase();
+    const isValidType = validTypes.includes(file.type) || 
+                       fileName.endsWith('.pdf') || 
+                       fileName.endsWith('.doc') || 
+                       fileName.endsWith('.docx');
+
+    if (!isValidType) {
+      message.error('Chỉ chấp nhận file PDF, DOC, hoặc DOCX');
       return false;
     }
 
@@ -435,13 +448,13 @@ export const CVManagement = () => {
               </Form.Item>
               
               <Form.Item label="Upload CV" required>
-                <Upload accept=".pdf" beforeUpload={handleUpload} showUploadList={false}>
+                <Upload accept=".pdf,.doc,.docx" beforeUpload={handleUpload} showUploadList={false}>
                   <Button icon={<UploadOutlined />} loading={uploading} size="large" block>
-                    {uploading ? 'Đang upload...' : 'Chọn file PDF'}
+                    {uploading ? 'Đang upload...' : 'Chọn file (PDF, DOC, DOCX)'}
                   </Button>
                 </Upload>
                 <div style={{ marginTop: 8, fontSize: 12, color: '#999' }}>
-                  Chấp nhận file PDF, tối đa 10MB. Nhập tên CV trước, sau đó chọn file để upload.
+                  Chấp nhận file PDF, DOC, DOCX - tối đa 10MB. Nhập tên CV trước, sau đó chọn file để upload.
                 </div>
               </Form.Item>
             </>

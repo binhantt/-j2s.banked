@@ -38,8 +38,16 @@ export const companyApi = {
 
   // Get company by HR ID
   getCompanyByHrId: async (hrId: number) => {
-    const response = await api.get(`/api/companies/hr/${hrId}`);
-    return response.data;
+    try {
+      const response = await api.get(`/api/companies/hr/${hrId}`);
+      return response.data;
+    } catch (error: any) {
+      // If 404, return null instead of throwing - company doesn't exist yet
+      if (error.response?.status === 404) {
+        return null;
+      }
+      throw error;
+    }
   },
 
   // Create company

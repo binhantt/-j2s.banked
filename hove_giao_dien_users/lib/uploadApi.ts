@@ -41,6 +41,25 @@ export const uploadApi = {
     });
   },
 
+  // Upload image (for gallery, avatar, etc.)
+  uploadImage: async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    console.log('=== Uploading Image ===');
+    console.log('File:', file.name, file.type, file.size);
+
+    const response = await api.post('/api/upload/image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      timeout: 30000,
+    });
+    
+    console.log('Upload image response:', response.data);
+    return response.data.url || response.data;
+  },
+
   // Get full URL for uploaded file
   getFileUrl: (path: string): string => {
     if (path.startsWith('http')) {

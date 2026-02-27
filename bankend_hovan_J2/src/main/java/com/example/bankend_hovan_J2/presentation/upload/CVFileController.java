@@ -2,6 +2,7 @@ package com.example.bankend_hovan_J2.presentation.upload;
 
 import com.example.bankend_hovan_J2.domain.cv.entity.UserCV;
 import com.example.bankend_hovan_J2.domain.cv.repository.UserCVRepository;
+import com.example.bankend_hovan_J2.infrastructure.service.ImageUploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -11,10 +12,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.Optional; 
 
 @Slf4j
@@ -27,6 +30,39 @@ public class CVFileController {
     private final UserCVRepository cvRepository;
     private final com.example.bankend_hovan_J2.domain.application.repository.JobApplicationRepository applicationRepository;
     private final com.example.bankend_hovan_J2.domain.job.repository.JobPostingRepository jobRepository;
+    private final ImageUploadService imageUploadService;
+
+    // Upload image endpoint
+    @PostMapping("/api/upload/image")
+    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
+        try {
+            log.info("=== Upload Image Request ===");
+            log.info("File: {}, Size: {}", file.getOriginalFilename(), file.getSize());
+
+            // Validate file
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "File is empty"));
+            }
+
+            // Check file type
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "File must be an image"));
+            }
+
+            // Upload image
+            String imageUrl = imageUploadService.uploadImage(file);
+            log.info("Image uploaded successfully: {}", imageUrl);
+
+            return ResponseEntity.ok(Map.of("url", imageUrl));
+        } catch (Exception e) {
+            log.error("Error uploading image: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("error", "Failed to upload image: " + e.getMessage()));
+        }
+    }
 
     @GetMapping("/uploads/cv/{filename:.+}")
     public ResponseEntity<?> serveFile(

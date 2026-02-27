@@ -24,3 +24,146 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Modal với background trắng rõ ràng */
+.ant-modal-content {
+  background: #ffffff !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 12px !important;
+}
+
+.ant-modal-header {
+  background: #ffffff !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 12px 12px 0 0 !important;
+  padding: 20px 24px !important;
+}
+
+.ant-modal-body {
+  background: #ffffff !important;
+  padding: 24px !important;
+}
+
+.ant-modal-footer {
+  background: #ffffff !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 0 0 12px 12px !important;
+  padding: 16px 24px !important;
+}
+
+.ant-modal-mask {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Message notification với background trắng đậm và rõ ràng */
+.ant-message {
+  z-index: 9999 !important;
+}
+
+.ant-message-notice {
+  padding: 0 !important;
+}
+
+.ant-message-notice-content {
+  background: #ffffff !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 10px !important;
+  padding: 14px 20px !important;
+  min-width: 300px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ant-message-success .anticon {
+  color: #52c41a !important;
+  font-size: 18px;
+}
+
+.ant-message-error .anticon {
+  color: #ff4d4f !important;
+  font-size: 18px;
+}
+
+.ant-message-warning .anticon {
+  color: #faad14 !important;
+  font-size: 18px;
+}
+
+.ant-message-info .anticon {
+  color: #1890ff !important;
+  font-size: 18px;
+}
+
+.ant-message-notice-content > span {
+  color: #1f2937 !important;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Popconfirm với background trắng rõ ràng */
+.ant-popover-inner {
+  background: #ffffff !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 8px !important;
+}
+
+.ant-popover-inner-content {
+  padding: 16px !important;
+}
+
+.ant-popover-arrow::before,
+.ant-popover-arrow::after {
+  background: #ffffff !important;
+}
+
+/* Dropdown với background trắng rõ ràng */
+.ant-dropdown {
+  background: #ffffff !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 8px !important;
+}
+
+/* Select dropdown với background trắng rõ ràng */
+.ant-select-dropdown {
+  background: #ffffff !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 8px !important;
+}
+
+/* Tooltip với background trắng rõ ràng */
+.ant-tooltip-inner {
+  background: #ffffff !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #374151 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
+}
+
+.ant-tooltip-arrow::before {
+  background: #ffffff !important;
+}

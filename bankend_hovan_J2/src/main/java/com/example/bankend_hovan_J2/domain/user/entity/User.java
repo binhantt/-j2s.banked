@@ -11,6 +11,16 @@ public class User {
     private String provider; // google, github, facebook
     private String providerId;
     private String userType; // job_seeker, freelancer
+    private String currentPosition;
+    private String hometown;
+    private String currentLocation;
+    private Double currentLatitude;
+    private Double currentLongitude;
+    private LocalDateTime locationUpdatedAt;
+    private String cvUrl;
+    private String certificateImages;
+    private String phone;
+    private String bio;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -51,4 +61,34 @@ public class User {
     
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    
+    public String getCurrentPosition() { return currentPosition; }
+    public void setCurrentPosition(String currentPosition) { this.currentPosition = currentPosition; }
+    
+    public String getHometown() { return hometown; }
+    public void setHometown(String hometown) { this.hometown = hometown; }
+    
+    public String getCurrentLocation() { return currentLocation; }
+    public void setCurrentLocation(String currentLocation) { this.currentLocation = currentLocation; }
+    
+    public Double getCurrentLatitude() { return currentLatitude; }
+    public void setCurrentLatitude(Double currentLatitude) { this.currentLatitude = currentLatitude; }
+    
+    public Double getCurrentLongitude() { return currentLongitude; }
+    public void setCurrentLongitude(Double currentLongitude) { this.currentLongitude = currentLongitude; }
+    
+    public LocalDateTime getLocationUpdatedAt() { return locationUpdatedAt; }
+    public void setLocationUpdatedAt(LocalDateTime locationUpdatedAt) { this.locationUpdatedAt = locationUpdatedAt; }
+    
+    public String getCvUrl() { return cvUrl; }
+    public void setCvUrl(String cvUrl) { this.cvUrl = cvUrl; }
+    
+    public String getCertificateImages() { return certificateImages; }
+    public void setCertificateImages(String certificateImages) { this.certificateImages = certificateImages; }
+    
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+    
+    public String getBio() { return bio; }
+    public void setBio(String bio) { this.bio = bio; }
 }
