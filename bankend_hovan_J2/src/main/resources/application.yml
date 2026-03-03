@@ -66,16 +66,20 @@ google:
   client-id: 273697303002-9pbu7fmp2og73cvfoqes1buh1779eftu.apps.googleusercontent.com
 
 github:
-  client-id: Ov23lilqZFdq7a0Euerg 
+  client-id: Ov23lilqZFdq7a0Euerg
   client-secret: d7d2a239ed12224db1311e95395379627a122dc5
 
 facebook:
-  app-id: 
+  app-id:
   app-secret: ${FACEBOOK_APP_SECRET:your-facebook-app-secret}
 
 jwt:
   secret: hovan_google_login_system_super_secure_jwt_secret_key_2026_512bits_minimum_length_token_auth
   expiration: 86400000
+
+security:
+  aes:
+    key: MDEyMzQ1Njc4OUFCQ0RFRjAxMjM0NTY3ODlBQkNERUY=
 
 imgbb:
   api:

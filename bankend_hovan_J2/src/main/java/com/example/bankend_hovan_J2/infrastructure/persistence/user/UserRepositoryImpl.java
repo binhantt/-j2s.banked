@@ -50,6 +50,7 @@ public class UserRepositoryImpl implements UserRepository {
         entity.setUserType(user.getUserType());
         entity.setCreatedAt(user.getCreatedAt());
         entity.setUpdatedAt(user.getUpdatedAt());
+        entity.setEncryptedPassword(user.getEncryptedPassword());
         return entity;
     }
 
@@ -65,6 +66,7 @@ public class UserRepositoryImpl implements UserRepository {
         user.setAvatarUrl(entity.getAvatarUrl());
         user.setCreatedAt(entity.getCreatedAt());
         user.setUpdatedAt(entity.getUpdatedAt());
+        user.setEncryptedPassword(entity.getEncryptedPassword());
         return user;
     }
 }

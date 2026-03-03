@@ -21,6 +21,7 @@ public class User {
     private String certificateImages;
     private String phone;
     private String bio;
+    private String encryptedPassword;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -91,4 +92,7 @@ public class User {
     
     public String getBio() { return bio; }
     public void setBio(String bio) { this.bio = bio; }
+
+    public String getEncryptedPassword() { return encryptedPassword; }
+    public void setEncryptedPassword(String encryptedPassword) { this.encryptedPassword = encryptedPassword; }
 }

@@ -56,6 +56,9 @@ public class UserEntityJpa {
     @Column(columnDefinition = "TEXT")
     private String bio;
 
+    @Column(name = "encrypted_password", length = 1024)
+    private String encryptedPassword;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -116,4 +119,7 @@ public class UserEntityJpa {
     
     public String getBio() { return bio; }
     public void setBio(String bio) { this.bio = bio; }
+
+    public String getEncryptedPassword() { return encryptedPassword; }
+    public void setEncryptedPassword(String encryptedPassword) { this.encryptedPassword = encryptedPassword; }
 }
