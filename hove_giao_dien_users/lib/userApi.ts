@@ -1,15 +1,32 @@
 import { api } from './api';
 
+const withUsersPathFallback = async <T>(requestWithApiPrefix: () => Promise<T>, requestWithoutApiPrefix: () => Promise<T>) => {
+  try {
+    return await requestWithApiPrefix();
+  } catch (error: any) {
+    if (error?.response?.status === 404) {
+      return requestWithoutApiPrefix();
+    }
+    throw error;
+  }
+};
+
 export const userApi = {
   // Get user by ID
   getUser: async (id: number) => {
-    const response = await api.get(`/api/users/${id}`);
+    const response = await withUsersPathFallback(
+      () => api.get(`/api/users/${id}`),
+      () => api.get(`/users/${id}`)
+    );
     return response.data;
   },
 
   // Update user profile
   updateUser: async (id: number, data: any) => {
-    const response = await api.put(`/api/users/${id}`, data);
+    const response = await withUsersPathFallback(
+      () => api.put(`/api/users/${id}`, data),
+      () => api.put(`/users/${id}`, data)
+    );
     return response.data;
   },
 

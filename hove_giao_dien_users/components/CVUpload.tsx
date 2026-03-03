@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Upload, Button, Input, message, Select, Flex, Card } from 'antd';
+import { Upload, Button, Input, message, Select, Card } from 'antd';
 import { UploadOutlined, FilePdfOutlined, DeleteOutlined, FileWordOutlined, FileTextOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { uploadApi } from '@/lib/uploadApi';
 import { cvApi, CV } from '@/lib/cvApi';
@@ -32,7 +32,6 @@ export const CVUpload = ({ value, onChange }: CVUploadProps) => {
       const cvs = await cvApi.getUserCVs(user.id);
       setSavedCVs(cvs);
       
-      // Auto-select default CV
       const defaultCV = cvs.find(cv => cv.isDefault);
       if (defaultCV && !value) {
         setSelectedCVId(defaultCV.id!);
@@ -45,17 +44,10 @@ export const CVUpload = ({ value, onChange }: CVUploadProps) => {
   };
 
   const handleUpload = async (file: File) => {
-    console.log('=== handleUpload called ===');
-    console.log('File:', file);
-    console.log('File type:', file.type);
-    console.log('File size:', file.size);
-    console.log('User ID:', user?.id);
-
-    // Accept PDF, DOC, and DOCX files
     const validTypes = [
       'application/pdf',
-      'application/msword', // .doc
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document' // .docx
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     ];
     
     const fileName = file.name.toLowerCase();
@@ -81,11 +73,8 @@ export const CVUpload = ({ value, onChange }: CVUploadProps) => {
 
     setUploading(true);
     try {
-      console.log('Starting upload...');
-      // Upload và TỰ ĐỘNG lưu vào database với title là tên file (không có extension)
-      const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, ''); // Remove extension
+      const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
       const result = await uploadApi.uploadCV(file, user.id, fileNameWithoutExt);
-      console.log('Upload result:', result);
       
       const fullUrl = uploadApi.getFileUrl(result.url);
       setUploadedCV({ url: result.url, filename: result.filename });
@@ -93,13 +82,9 @@ export const CVUpload = ({ value, onChange }: CVUploadProps) => {
       setSelectedCVId(result.id);
       onChange?.(fullUrl);
       
-      // Reload danh sách CV
       await loadSavedCVs();
-      
       message.success('Upload CV thành công và đã lưu vào danh sách!');
     } catch (error: any) {
-      console.error('Upload error:', error);
-      console.error('Error response:', error.response);
       message.error(error.response?.data?.error || error.message || 'Upload thất bại');
     } finally {
       setUploading(false);
@@ -137,123 +122,89 @@ export const CVUpload = ({ value, onChange }: CVUploadProps) => {
   const getFileIcon = (filename: string) => {
     const lower = filename.toLowerCase();
     if (lower.endsWith('.pdf')) {
-      return <FilePdfOutlined style={{ fontSize: 32, color: '#ff4d4f' }} />;
+      return <FilePdfOutlined style={{ fontSize: 28, color: '#ef4444' }} />;
     } else if (lower.endsWith('.doc') || lower.endsWith('.docx')) {
-      return <FileWordOutlined style={{ fontSize: 32, color: '#2b579a' }} />;
+      return <FileWordOutlined style={{ fontSize: 28, color: '#2563eb' }} />;
     }
-    return <FileTextOutlined style={{ fontSize: 32, color: '#1890ff' }} />;
+    return <FileTextOutlined style={{ fontSize: 28, color: '#1890ff' }} />;
   };
 
   return (
     <div style={{ width: '100%' }}>
-      {/* Mode selector */}
       {isAuthenticated && savedCVs.length > 0 && (
-        <div style={{ 
+        <div
+          style={{
           display: 'grid', 
-          gridTemplateColumns: 'repeat(3, 1fr)', 
-          gap: '12px', 
-          marginBottom: '20px' 
-        }}>
-          <button
+            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+            gap: 8,
+            padding: 6,
+            background: '#f5f7fa',
+            border: '1px solid #e5e7eb',
+            borderRadius: 12,
+            marginBottom: 14,
+          }}
+        >
+          <Button
+            type={mode === 'saved' ? 'primary' : 'default'}
+            icon={<CheckCircleOutlined />}
             onClick={() => setMode('saved')}
-            style={{
-              padding: '12px 16px',
-              border: mode === 'saved' ? '2px solid #1890ff' : '2px solid #e8e8e8',
-              borderRadius: '10px',
-              background: mode === 'saved' ? '#e6f7ff' : '#ffffff',
-              cursor: 'pointer',
-              transition: 'all 0.3s',
-              fontSize: '14px',
-              fontWeight: mode === 'saved' ? 600 : 400,
-              color: mode === 'saved' ? '#1890ff' : '#595959',
-            }}
+            style={{ height: 40, borderRadius: 8, fontWeight: 500 }}
           >
-            📁 CV đã lưu
-          </button>
-          <button
+            CV đã lưu
+          </Button>
+          <Button
+            type={mode === 'upload' ? 'primary' : 'default'}
+            icon={<UploadOutlined />}
             onClick={() => setMode('upload')}
-            style={{
-              padding: '12px 16px',
-              border: mode === 'upload' ? '2px solid #52c41a' : '2px solid #e8e8e8',
-              borderRadius: '10px',
-              background: mode === 'upload' ? '#f6ffed' : '#ffffff',
-              cursor: 'pointer',
-              transition: 'all 0.3s',
-              fontSize: '14px',
-              fontWeight: mode === 'upload' ? 600 : 400,
-              color: mode === 'upload' ? '#52c41a' : '#595959',
-            }}
+            style={{ height: 40, borderRadius: 8, fontWeight: 500 }}
           >
-            ⬆️ Upload mới
-          </button>
-          <button
+            Upload mới
+          </Button>
+          <Button
+            type={mode === 'manual' ? 'primary' : 'default'}
+            icon={<FileTextOutlined />}
             onClick={() => setMode('manual')}
-            style={{
-              padding: '12px 16px',
-              border: mode === 'manual' ? '2px solid #722ed1' : '2px solid #e8e8e8',
-              borderRadius: '10px',
-              background: mode === 'manual' ? '#f9f0ff' : '#ffffff',
-              cursor: 'pointer',
-              transition: 'all 0.3s',
-              fontSize: '14px',
-              fontWeight: mode === 'manual' ? 600 : 400,
-              color: mode === 'manual' ? '#722ed1' : '#595959',
-            }}
+            style={{ height: 40, borderRadius: 8, fontWeight: 500 }}
           >
-            🔗 Nhập link
-          </button>
+            Nhập link
+          </Button>
         </div>
       )}
 
-      {/* Saved CVs selector */}
       {mode === 'saved' && savedCVs.length > 0 && (
-        <div style={{ 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          borderRadius: '12px',
-          padding: '20px',
-          marginBottom: '12px'
-        }}>
-          <div style={{ 
-            color: 'white', 
-            fontSize: '16px', 
-            fontWeight: 600, 
-            marginBottom: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            <CheckCircleOutlined /> Chọn CV từ danh sách
+        <Card
+          style={{ marginBottom: 12, borderRadius: 12, border: '1px solid #e5e7eb', boxShadow: 'none' }}
+          styles={{ body: { padding: 14 } }}
+        >
+          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: '#111827' }}>
+            Chọn CV từ danh sách đã lưu
           </div>
           <Select
             size="large"
             style={{ width: '100%' }}
-            placeholder="Chọn CV đã lưu..."
+            placeholder="Chọn CV đã lưu"
             value={selectedCVId}
             onChange={handleSelectSavedCV}
-            dropdownStyle={{ borderRadius: '10px' }}
             options={savedCVs.map(cv => ({
               label: (
-                <div style={{ padding: '4px 0' }}>
-                  <div style={{ fontWeight: 600, fontSize: '14px', color: '#262626' }}>{cv.title}</div>
-                  <div style={{ fontSize: 12, color: '#8c8c8c', marginTop: '2px' }}>
-                    {cv.fileName} • {cv.isDefault && '⭐ Mặc định'}
+                <div style={{ padding: '2px 0' }}>
+                  <div style={{ fontWeight: 600, fontSize: 14, color: '#111827' }}>{cv.title}</div>
+                  <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>
+                    {cv.fileName}{cv.isDefault ? ' • Mặc định' : ''}
                   </div>
                 </div>
               ),
               value: cv.id!,
             }))}
           />
-        </div>
+        </Card>
       )}
 
-      {/* Upload mode */}
       {mode === 'upload' && (
-        <div style={{
-          background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-          borderRadius: '12px',
-          padding: '20px',
-          marginBottom: '12px'
-        }}>
+        <Card
+          style={{ marginBottom: 12, borderRadius: 12, border: '1px solid #e5e7eb', boxShadow: 'none' }}
+          styles={{ body: { padding: 14 } }}
+        >
           {!uploadedCV ? (
             <Upload 
               accept=".pdf,.doc,.docx" 
@@ -261,109 +212,76 @@ export const CVUpload = ({ value, onChange }: CVUploadProps) => {
               showUploadList={false} 
               disabled={uploading}
             >
-              <div style={{
-                background: 'white',
-                borderRadius: '10px',
-                padding: '24px',
+              <div
+                style={{
+                  border: '1.5px dashed #cbd5e1',
+                  borderRadius: 10,
+                  padding: '22px 16px',
                 textAlign: 'center',
+                  background: '#f8fafc',
                 cursor: uploading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.3s',
-                border: '2px dashed rgba(255,255,255,0.5)',
-              }}
-              onMouseEnter={(e) => {
-                if (!uploading) e.currentTarget.style.transform = 'scale(1.02)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-              }}
+                }}
               >
-                <UploadOutlined style={{ fontSize: 48, color: '#f5576c', marginBottom: 12 }} />
-                <div style={{ fontSize: 16, fontWeight: 600, color: '#262626', marginBottom: 8 }}>
-                  {uploading ? 'Đang upload...' : 'Click để chọn file CV'}
+                <UploadOutlined style={{ fontSize: 34, color: '#2563eb', marginBottom: 8 }} />
+                <div style={{ fontSize: 15, fontWeight: 600, color: '#111827', marginBottom: 4 }}>
+                  {uploading ? 'Đang upload CV...' : 'Chọn file CV để upload'}
                 </div>
-                <div style={{ fontSize: 13, color: '#8c8c8c' }}>
-                  Hỗ trợ: PDF, DOC, DOCX (tối đa 10MB)
+                <div style={{ fontSize: 12, color: '#6b7280' }}>
+                  Hỗ trợ PDF/DOC/DOCX • Tối đa 10MB
                 </div>
               </div>
             </Upload>
           ) : (
-            <Card
-              style={{
-                borderRadius: '10px',
-                border: 'none',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
                   {getFileIcon(uploadedCV.filename)}
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: 15, color: '#262626' }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {uploadedCV.filename}
                     </div>
-                    <div style={{ fontSize: 12, color: '#52c41a', marginTop: 4 }}>
-                      ✓ Upload thành công
+                  <div style={{ fontSize: 12, color: '#16a34a' }}>Upload thành công</div>
                     </div>
                   </div>
-                </div>
-                <Button 
-                  type="text" 
-                  danger 
-                  icon={<DeleteOutlined />} 
-                  onClick={handleRemove}
-                  style={{ borderRadius: '8px' }}
-                >
+              <Button type="text" danger icon={<DeleteOutlined />} onClick={handleRemove}>
                   Xóa
                 </Button>
               </div>
-            </Card>
           )}
-        </div>
+            </Card>
       )}
 
-      {/* Manual URL mode */}
       {mode === 'manual' && (
-        <div style={{
-          background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-          borderRadius: '12px',
-          padding: '20px',
-          marginBottom: '12px'
-        }}>
-          <div style={{ 
-            color: '#262626', 
-            fontSize: '14px', 
-            fontWeight: 600, 
-            marginBottom: '12px' 
-          }}>
-            🔗 Nhập link CV của bạn
+        <Card
+          style={{ marginBottom: 12, borderRadius: 12, border: '1px solid #e5e7eb', boxShadow: 'none' }}
+          styles={{ body: { padding: 14 } }}
+        >
+          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: '#111827' }}>
+            Dán link CV của bạn
           </div>
           <Input
-            placeholder="https://drive.google.com/... hoặc https://dropbox.com/..."
+            placeholder="https://drive.google.com/..."
             size="large"
             value={manualUrl}
             onChange={handleManualUrlChange}
-            style={{ 
-              borderRadius: '10px',
-              border: '2px solid white',
-              fontSize: '14px'
-            }}
+            style={{ borderRadius: 10 }}
           />
-        </div>
+        </Card>
       )}
 
-      {/* Helper text */}
-      <div style={{ 
-        marginTop: 12, 
-        fontSize: 13, 
-        color: '#8c8c8c',
-        padding: '12px 16px',
-        background: '#fafafa',
-        borderRadius: '8px',
-        border: '1px solid #f0f0f0'
-      }}>
-        {mode === 'upload' && '💡 File sẽ được lưu tự động vào danh sách CV của bạn'}
-        {mode === 'manual' && '💡 Hỗ trợ link từ Google Drive, Dropbox, OneDrive...'}
-        {mode === 'saved' && savedCVs.length > 0 && `📊 Bạn có ${savedCVs.length} CV đã lưu`}
+      <div
+        style={{
+          marginTop: 10,
+          fontSize: 12,
+          color: '#6b7280',
+          padding: '10px 12px',
+          background: '#f9fafb',
+          borderRadius: 10,
+          border: '1px solid #eceff3',
+        }}
+      >
+        {mode === 'upload' && 'CV upload mới sẽ được lưu tự động vào hồ sơ của bạn.'}
+        {mode === 'manual' && 'Bạn có thể dùng link từ Google Drive, Dropbox hoặc OneDrive.'}
+        {mode === 'saved' && savedCVs.length > 0 && `Bạn đang có ${savedCVs.length} CV đã lưu.`}
       </div>
     </div>
   );

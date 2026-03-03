@@ -15,8 +15,6 @@ import { useRouter } from 'next/router';
 import { JobComments } from './components/JobComments';
 import { CVUpload } from '@/components/CVUpload';
 import { CandidateProfileView } from '@/features/applications/CandidateProfileView';
-import form from 'antd/es/form';
-
 
 interface JobDetailFeatureProps {
   jobId: string;
@@ -393,29 +391,54 @@ export const JobDetailFeature = ({ jobId }: JobDetailFeatureProps) => {
 
     {/* Apply Modal */}
     <Modal
-      title="Ứng tuyển công việc"
+      title={
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <span style={{ fontSize: 20, fontWeight: 700 }}>Ứng tuyển công việc</span>
+          <span style={{ fontSize: 13, color: '#8c8c8c', fontWeight: 400 }}>
+            Hoàn thiện hồ sơ để gửi đến nhà tuyển dụng
+          </span>
+        </div>
+      }
       open={applyModalOpen}
       onCancel={() => {
         setApplyModalOpen(false);
         form.resetFields();
       }}
       footer={null}
-      width={600}
+      width={680}
+      centered
+      styles={{
+        body: { paddingTop: 8 },
+        content: { borderRadius: 16, overflow: 'hidden' },
+      }}
     >
       <Form
         form={form}
         layout="vertical"
         onFinish={handleApplySubmit}
       >
-        <div style={{ marginBottom: 16, padding: 12, background: '#f5f5f5', borderRadius: 8 }}>
-          <strong>{job?.title}</strong>
-          <div style={{ fontSize: 13, color: '#666', marginTop: 4 }}>
+        <div
+          style={{
+            marginBottom: 20,
+            padding: 16,
+            borderRadius: 12,
+            background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdfa 100%)',
+            border: '1px solid #dbeafe',
+          }}
+        >
+          <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 8, color: '#1f2937' }}>
+            {job?.title}
+          </div>
+          <div style={{ fontSize: 14, color: '#4b5563', marginBottom: 6 }}>
+            {job?.companyName || 'Công ty tuyển dụng'}
+          </div>
+          <div style={{ fontSize: 13, color: '#6b7280' }}>
             {job?.location} • {job?.salaryMin} - {job?.salaryMax}
           </div>
         </div>
 
         <Form.Item
-          label="CV của bạn"
+          label={<span style={{ fontWeight: 600 }}>CV của bạn</span>}
           name="cvUrl"
           rules={[{ required: true, message: 'Vui lòng upload CV hoặc nhập link CV' }]}
         >
@@ -423,29 +446,41 @@ export const JobDetailFeature = ({ jobId }: JobDetailFeatureProps) => {
         </Form.Item>
 
         <Form.Item
-          label="Thư xin việc"
+          label={<span style={{ fontWeight: 600 }}>Thư xin việc</span>}
           name="coverLetter"
           rules={[{ required: true, message: 'Vui lòng nhập thư xin việc' }]}
         >
           <Input.TextArea
-            rows={6}
-            placeholder="Giới thiệu bản thân và lý do bạn phù hợp với vị trí này..."
+            rows={7}
+            showCount
+            maxLength={2000}
+            placeholder="Giới thiệu điểm mạnh, kinh nghiệm liên quan và lý do bạn phù hợp với vị trí này..."
+            style={{ borderRadius: 10 }}
           />
         </Form.Item>
 
-        <Form.Item>
-          <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
-            <Button onClick={() => {
-              setApplyModalOpen(false);
-              form.resetFields();
-            }}>
+        <Form.Item style={{ marginBottom: 4 }}>
+          <Space style={{ width: '100%', justifyContent: 'flex-end', gap: 10 }}>
+            <Button
+              size="large"
+              onClick={() => {
+                setApplyModalOpen(false);
+                form.resetFields();
+              }}
+            >
               Hủy
             </Button>
-            <Button 
-              type="primary" 
+            <Button
+              type="primary"
               htmlType="submit"
               loading={applyLoading}
               size="large"
+              style={{
+                border: 'none',
+                paddingInline: 22,
+                fontWeight: 600,
+                background: 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #14b8a6 100%)',
+              }}
             >
               Xem trước và gửi
             </Button>
@@ -453,18 +488,33 @@ export const JobDetailFeature = ({ jobId }: JobDetailFeatureProps) => {
         </Form.Item>
       </Form>
     </Modal>
-    
+
     {/* Preview Profile Modal */}
     <Modal
-      title="Xác nhận thông tin ứng tuyển"
+      title={
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <span style={{ fontSize: 20, fontWeight: 700 }}>Xác nhận thông tin ứng tuyển</span>
+          <span style={{ fontSize: 13, color: '#8c8c8c', fontWeight: 400 }}>
+            Kiểm tra kỹ trước khi gửi hồ sơ
+          </span>
+        </div>
+      }
       open={previewModalOpen}
       onCancel={() => setPreviewModalOpen(false)}
-      width={800}
+      width={880}
+      centered
+      styles={{
+        content: { borderRadius: 16, overflow: 'hidden' },
+      }}
       footer={[
-        <Button key="back" onClick={() => {
-          setPreviewModalOpen(false);
-          setApplyModalOpen(true);
-        }}>
+        <Button
+          key="back"
+          size="large"
+          onClick={() => {
+            setPreviewModalOpen(false);
+            setApplyModalOpen(true);
+          }}
+        >
           Quay lại chỉnh sửa
         </Button>,
         <Button
@@ -473,29 +523,42 @@ export const JobDetailFeature = ({ jobId }: JobDetailFeatureProps) => {
           loading={applyLoading}
           onClick={handleConfirmApply}
           size="large"
+          style={{
+            border: 'none',
+            fontWeight: 600,
+            background: 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #14b8a6 100%)',
+          }}
         >
           Xác nhận ứng tuyển
         </Button>,
       ]}
     >
-      <div style={{ marginBottom: 16, padding: 12, background: '#e6f7ff', borderRadius: 8 }}>
-        <div style={{ fontWeight: 600, marginBottom: 4 }}>
-          Thông tin này sẽ được gửi cho nhà tuyển dụng:
+      <div
+        style={{
+          marginBottom: 16,
+          padding: 14,
+          background: '#f0f9ff',
+          border: '1px solid #bae6fd',
+          borderRadius: 10,
+        }}
+      >
+        <div style={{ fontWeight: 600, marginBottom: 4, color: '#0f172a' }}>
+          Thông tin này sẽ được gửi cho nhà tuyển dụng
         </div>
-        <div style={{ fontSize: 13, color: '#666' }}>
-          Vui lòng kiểm tra kỹ trước khi xác nhận
+        <div style={{ fontSize: 13, color: '#475569' }}>
+          Hãy đảm bảo CV và thư xin việc thể hiện đúng năng lực của bạn.
         </div>
       </div>
-      
+
       {user?.id && (
-        <CandidateProfileView 
-          userId={user.id} 
+        <CandidateProfileView
+          userId={user.id}
           cvUrl={form.getFieldValue('cvUrl')}
         />
       )}
-      
-      <Card style={{ marginTop: 16 }} title="Thư xin việc">
-        <div style={{ whiteSpace: 'pre-wrap' }}>
+
+      <Card style={{ marginTop: 16, borderRadius: 12 }} title="Thư xin việc">
+        <div style={{ whiteSpace: 'pre-wrap', color: '#374151', lineHeight: 1.7 }}>
           {form.getFieldValue('coverLetter')}
         </div>
       </Card>

@@ -127,17 +127,15 @@ export default function JobsListPage() {
   };
 
   return (
-    <div style={{ background: '#f5f7fa', minHeight: 'calc(100vh - 64px)', paddingTop: 40, paddingBottom: 60 }}>
-      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 20px' }}>
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <h1 style={{ fontSize: 42, fontWeight: 700, marginBottom: 12, color: '#1e293b' }}>
-            Tìm Công Việc Mơ Ước
-          </h1>
-          <p style={{ fontSize: 16, color: '#666' }}>
-            Khám phá hàng nghìn cơ hội việc làm hấp dẫn
-          </p>
-        </div>
+    <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="text-center mb-10">
+        <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 mb-3">
+          Tìm công việc mơ ước
+        </h1>
+        <p className="text-lg text-gray-600">
+          Khám phá hàng nghìn cơ hội việc làm hấp dẫn
+        </p>
+      </div>
 
         {/* Search Bar */}
         <Card style={{ marginBottom: 40, borderRadius: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
@@ -347,6 +345,5 @@ export default function JobsListPage() {
           </Card>
         )}
       </div>
-    </div>
   );
 }

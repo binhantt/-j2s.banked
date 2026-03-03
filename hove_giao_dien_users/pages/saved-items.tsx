@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Card, Tabs, Row, Col, Button, message, Empty, Spin, Avatar, Tag, Modal } from 'antd';
-import { 
-  HeartFilled, 
-  EyeOutlined, 
-  EnvironmentOutlined, 
+import { Card, Tabs, Row, Col, Button, message, Empty, Spin, Avatar, Tag, Modal, Space, Typography } from 'antd';
+import {
+  HeartFilled,
+  EyeOutlined,
+  EnvironmentOutlined,
   TeamOutlined,
-  GlobalOutlined,
   DeleteOutlined,
   DollarOutlined,
   ClockCircleOutlined,
@@ -18,6 +17,8 @@ import { savedJobApi } from '@/lib/savedJobApi';
 import { companyApi } from '@/lib/companyApi';
 import { useAuthStore } from '@/store/useAuthStore';
 import dayjs from 'dayjs';
+
+const { Title, Text } = Typography;
 
 interface SavedCompanyWithDetails {
   id: number;
@@ -61,7 +62,7 @@ export default function SavedItemsPage() {
     setLoadingCompanies(true);
     try {
       const saved = await savedCompanyApi.getUserSavedCompanies(user.id);
-      
+
       const companiesWithDetails = await Promise.all(
         saved.map(async (item: any) => {
           try {
@@ -89,7 +90,7 @@ export default function SavedItemsPage() {
     setLoadingJobs(true);
     try {
       const saved = await savedJobApi.getUserSavedJobs(user.id);
-      
+
       const jobsWithDetails = await Promise.all(
         saved.map(async (item: any) => {
           try {
@@ -109,6 +110,7 @@ export default function SavedItemsPage() {
       setSavedJobs(jobsWithDetails);
     } catch (error) {
       console.error('Error loading saved jobs:', error);
+      message.error('Không thể tải danh sách việc làm đã lưu');
     } finally {
       setLoadingJobs(false);
     }
@@ -158,71 +160,101 @@ export default function SavedItemsPage() {
     });
   };
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
+
+  const loadingBlock = (
+    <div className="text-center py-16">
+      <Spin size="large" />
+      <p className="text-gray-500 mt-4">Đang tải dữ liệu...</p>
+    </div>
+  );
+
+  const emptyJobs = (
+    <Empty
+      image={Empty.PRESENTED_IMAGE_SIMPLE}
+      description={
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Text strong style={{ fontSize: 18 }}>Bạn chưa lưu việc làm nào</Text>
+          <Text type="secondary">Khám phá và lưu các việc làm phù hợp với bạn</Text>
+        </div>
+      }
+    >
+      <Button type="primary" size="large" onClick={() => router.push('/jobs')}>
+        Tìm việc làm
+      </Button>
+    </Empty>
+  );
+
+  const emptyCompanies = (
+    <Empty
+      image={Empty.PRESENTED_IMAGE_SIMPLE}
+      description={
+        <Space direction="vertical" size={2}>
+          <Text strong style={{ fontSize: 18 }}>Bạn chưa lưu công ty nào</Text>
+          <Text type="secondary">Khám phá và lưu các công ty yêu thích của bạn</Text>
+        </Space>
+      }
+    >
+      <Button type="primary" size="large" onClick={() => router.push('/companies')}>
+        Khám phá công ty
+      </Button>
+    </Empty>
+  );
 
   const tabItems = [
     {
       key: 'jobs',
       label: `Việc làm (${savedJobs.length})`,
       children: loadingJobs ? (
-        <div className="text-center py-12">
-          <Spin size="large" />
-          <p className="text-gray-500 mt-4">Đang tải...</p>
-        </div>
+        loadingBlock
       ) : savedJobs.length === 0 ? (
-        <Empty
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description={
-            <div>
-              <p className="text-lg font-semibold mb-2">Bạn chưa lưu việc làm nào</p>
-              <p className="text-gray-500">Khám phá và lưu các việc làm phù hợp với bạn</p>
-            </div>
-          }
-        >
-          <Button type="primary" size="large" onClick={() => router.push('/jobs')}>
-            Tìm việc làm
-          </Button>
-        </Empty>
+        emptyJobs
       ) : (
-        <Row gutter={[24, 24]}>
+        <Row gutter={[20, 20]}>
           {savedJobs.map((item) => {
             const job = item.job;
             if (!job) return null;
 
             return (
-              <Col key={item.id} xs={24} sm={12} lg={8}>
+              <Col key={item.id} xs={24} md={12} xl={8}>
                 <Card
                   hoverable
-                  className="h-full"
-                  actions={[
-                    <Button
-                      key="view"
-                      type="link"
-                      icon={<EyeOutlined />}
-                      onClick={() => router.push(`/jobs/${job.id}`)}
-                    >
-                      Xem chi tiết
-                    </Button>,
-                    <Button
-                      key="unsave"
-                      type="link"
-                      danger
-                      icon={<DeleteOutlined />}
-                      onClick={() => handleUnsaveJob(job.id, job.title)}
-                    >
-                      Bỏ lưu
-                    </Button>,
-                  ]}
+                  style={{
+                    borderRadius: 16,
+                    height: '100%',
+                    border: '1px solid #e8eef5',
+                    boxShadow: '0 6px 16px rgba(15, 23, 42, 0.05)',
+                  }}
+                  styles={{ body: { padding: 18 } }}
                 >
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 
-                      className="text-lg font-bold cursor-pointer hover:text-blue-600 flex-1"
-                      onClick={() => router.push(`/jobs/${job.id}`)}
-                    >
-                      {job.title}
-                    </h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+                      <Avatar
+                        size={54}
+                        shape="square"
+                        src={job.companyLogoUrl}
+                        style={{
+                          border: '1px solid #e6edf5',
+                          background: job.companyLogoUrl ? '#fff' : 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)',
+                          color: '#fff',
+                          fontWeight: 700,
+                        }}
+                      >
+                        {!job.companyLogoUrl && (job.companyName?.charAt(0) || 'C')}
+                      </Avatar>
+                      <div style={{ minWidth: 0 }}>
+                        <Title
+                          level={5}
+                          style={{ margin: 0, cursor: 'pointer', lineHeight: 1.35 }}
+                          onClick={() => router.push(`/jobs/${job.id}`)}
+                        >
+                          {job.title}
+                        </Title>
+                        <Text type="secondary" style={{ fontSize: 13 }}>
+                          {job.companyName || 'Công ty tuyển dụng'}
+                        </Text>
+                      </div>
+                    </div>
                     <Button
                       type="text"
                       danger
@@ -232,32 +264,46 @@ export default function SavedItemsPage() {
                     />
                   </div>
 
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center gap-2 text-gray-600 text-sm">
-                      <ShopOutlined className="text-blue-600" />
-                      <span>{job.companyName || 'Công ty'}</span>
-                    </div>
+                  <Space size={[6, 6]} wrap style={{ marginBottom: 12 }}>
+                    {job.jobType && <Tag color="blue">{job.jobType}</Tag>}
+                    {job.experienceLevel && <Tag color="green">{job.experienceLevel}</Tag>}
+                  </Space>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
                     <div className="flex items-center gap-2 text-gray-600 text-sm">
                       <EnvironmentOutlined className="text-green-600" />
-                      <span>{job.location}</span>
+                      <span>{job.location || 'Đang cập nhật'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-700 text-sm">
+                      <DollarOutlined className="text-red-500" />
+                      <span style={{ fontWeight: 600 }}>{job.salary || `${job.salaryMin || ''} - ${job.salaryMax || ''}` || 'Thỏa thuận'}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600 text-sm">
-                      <DollarOutlined className="text-red-600" />
-                      <span className="font-semibold text-red-600">{job.salary}</span>
+                      <ClockCircleOutlined className="text-orange-500" />
+                      <span>Hạn nộp: {job.applicationDeadline ? dayjs(job.applicationDeadline).format('DD/MM/YYYY') : 'Không giới hạn'}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-gray-600 text-sm">
-                      <ClockCircleOutlined className="text-orange-600" />
-                      <span>Hạn nộp: {dayjs(job.applicationDeadline).format('DD/MM/YYYY')}</span>
+                    <div className="flex items-center gap-2 text-gray-500 text-xs">
+                      <ShopOutlined className="text-blue-500" />
+                      <span>Đã lưu: {dayjs(item.createdAt).format('DD/MM/YYYY HH:mm')}</span>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    <Tag color="blue">{job.jobType}</Tag>
-                    <Tag color="green">{job.experienceLevel}</Tag>
-                  </div>
-
-                  <div className="text-gray-400 text-xs pt-3 border-t">
-                    Đã lưu: {dayjs(item.createdAt).format('DD/MM/YYYY HH:mm')}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                    <Button
+                      type="default"
+                      icon={<EyeOutlined />}
+                      onClick={() => router.push(`/jobs/${job.id}`)}
+                    >
+                      Chi tiết
+                    </Button>
+                    <Button
+                      type="primary"
+                      danger
+                      icon={<DeleteOutlined />}
+                      onClick={() => handleUnsaveJob(job.id, job.title)}
+                    >
+                      Bỏ lưu
+                    </Button>
                   </div>
                 </Card>
               </Col>
@@ -270,61 +316,47 @@ export default function SavedItemsPage() {
       key: 'companies',
       label: `Công ty (${savedCompanies.length})`,
       children: loadingCompanies ? (
-        <div className="text-center py-12">
-          <Spin size="large" />
-          <p className="text-gray-500 mt-4">Đang tải...</p>
-        </div>
+        loadingBlock
       ) : savedCompanies.length === 0 ? (
-        <Empty
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description={
-            <div>
-              <p className="text-lg font-semibold mb-2">Bạn chưa lưu công ty nào</p>
-              <p className="text-gray-500">Khám phá và lưu các công ty yêu thích của bạn</p>
-            </div>
-          }
-        >
-          <Button type="primary" size="large" onClick={() => router.push('/companies')}>
-            Khám phá công ty
-          </Button>
-        </Empty>
+        emptyCompanies
       ) : (
-        <Row gutter={[24, 24]}>
+        <Row gutter={[20, 20]}>
           {savedCompanies.map((item) => {
             const company = item.company;
             if (!company) return null;
 
             return (
-              <Col key={item.id} xs={24} sm={12} lg={8}>
+              <Col key={item.id} xs={24} md={12} xl={8}>
                 <Card
                   hoverable
-                  className="h-full"
+                  style={{ borderRadius: 14, overflow: 'hidden', height: '100%', border: '1px solid #eef2f7' }}
                   cover={
-                    <div 
-                      className="h-48 bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center relative"
+                    <div
+                      className="h-40 flex items-center justify-center relative"
                       style={{
-                        backgroundImage: company.logoUrl ? `url(${company.logoUrl})` : undefined,
+                        backgroundImage: company.logoUrl
+                          ? `linear-gradient(rgba(9, 30, 66, 0.12), rgba(9, 30, 66, 0.12)), url(${company.logoUrl})`
+                          : 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)',
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                       }}
                     >
                       {!company.logoUrl && (
-                        <Avatar size={80} className="bg-white text-blue-600 text-3xl font-bold">
+                        <Avatar size={74} style={{ background: '#fff', color: '#2563eb', fontSize: 30, fontWeight: 700 }}>
                           {company.name?.charAt(0)}
                         </Avatar>
                       )}
-                      <div className="absolute top-2 right-2">
-                        <Button
-                          type="primary"
-                          danger
-                          shape="circle"
-                          icon={<HeartFilled />}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleUnsaveCompany(company.id, company.name);
-                          }}
-                        />
-                      </div>
+                      <Button
+                        type="primary"
+                        danger
+                        shape="circle"
+                        icon={<HeartFilled />}
+                        style={{ position: 'absolute', top: 10, right: 10 }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUnsaveCompany(company.id, company.name);
+                        }}
+                      />
                     </div>
                   }
                   actions={[
@@ -346,39 +378,38 @@ export default function SavedItemsPage() {
                       Bỏ lưu
                     </Button>,
                   ]}
+                  styles={{ body: { padding: 16 } }}
                 >
-                  <Card.Meta
-                    title={
-                      <div 
-                        className="text-lg font-bold cursor-pointer hover:text-blue-600"
-                        onClick={() => router.push(`/companies/${company.id}`)}
-                      >
-                        {company.name}
+                  <Title
+                    level={5}
+                    style={{ marginTop: 0, marginBottom: 10, cursor: 'pointer' }}
+                    onClick={() => router.push(`/companies/${company.id}`)}
+                  >
+                    {company.name}
+                  </Title>
+
+                  <Space size={[6, 6]} wrap style={{ marginBottom: 10 }}>
+                    {company.industry && <Tag color="blue">{company.industry}</Tag>}
+                  </Space>
+
+                  <Space direction="vertical" size={10} style={{ width: '100%' }}>
+                    {company.address && (
+                      <div className="flex items-start gap-2 text-gray-600 text-sm">
+                        <EnvironmentOutlined style={{ marginTop: 2 }} />
+                        <span className="line-clamp-2">{company.address}</span>
                       </div>
-                    }
-                    description={
-                      <div className="space-y-2">
-                        {company.industry && (
-                          <Tag color="blue">{company.industry}</Tag>
-                        )}
-                        {company.address && (
-                          <div className="flex items-start gap-2 text-gray-600 text-sm">
-                            <EnvironmentOutlined className="mt-1" />
-                            <span className="line-clamp-1">{company.address}</span>
-                          </div>
-                        )}
-                        {company.companySize && (
-                          <div className="flex items-center gap-2 text-gray-600 text-sm">
-                            <TeamOutlined />
-                            <span>{company.companySize}</span>
-                          </div>
-                        )}
-                        <div className="text-gray-400 text-xs mt-3 pt-3 border-t">
-                          Đã lưu: {dayjs(item.createdAt).format('DD/MM/YYYY HH:mm')}
-                        </div>
+                    )}
+                    {company.companySize && (
+                      <div className="flex items-center gap-2 text-gray-600 text-sm">
+                        <TeamOutlined />
+                        <span>{company.companySize}</span>
                       </div>
-                    }
-                  />
+                    )}
+                  </Space>
+
+                  <div className="text-gray-400 text-xs pt-3 mt-3 border-t">
+                    Đã lưu: {dayjs(item.createdAt).format('DD/MM/YYYY HH:mm')}
+                  </div>
                 </Card>
               </Col>
             );
@@ -390,24 +421,49 @@ export default function SavedItemsPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <Card 
-          title={
-            <div className="flex items-center gap-3">
-              <HeartFilled className="text-red-500 text-2xl" />
-              <div>
-                <h1 className="text-2xl font-bold m-0">Thư mục lưu</h1>
-                <p className="text-gray-500 text-sm m-0 font-normal">
-                  Quản lý công ty và việc làm đã lưu
-                </p>
-              </div>
+      <Card
+        style={{
+          borderRadius: 16,
+          border: '1px solid #eaf0f6',
+          boxShadow: '0 8px 24px rgba(2, 12, 27, 0.05)',
+          overflow: 'hidden',
+        }}
+        styles={{
+          body: { padding: 24 },
+        }}
+        title={
+          <div
+            style={{
+              padding: '8px 0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 14,
+            }}
+          >
+            <div
+              style={{
+                width: 42,
+                height: 42,
+                borderRadius: 12,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'linear-gradient(135deg, #ef4444 0%, #f97316 100%)',
+                color: '#fff',
+                fontSize: 20,
+              }}
+            >
+              <HeartFilled />
             </div>
-          }
-          className="shadow-sm"
-        >
-          <Tabs defaultActiveKey="jobs" items={tabItems} size="large" />
-        </Card>
-      </div>
+            <div>
+              <Title level={3} style={{ margin: 0 }}>Thư mục đã lưu</Title>
+              <Text type="secondary">Quản lý việc làm và công ty bạn quan tâm</Text>
+            </div>
+          </div>
+        }
+      >
+        <Tabs defaultActiveKey="jobs" items={tabItems} size="large" />
+      </Card>
     </MainLayout>
   );
 }

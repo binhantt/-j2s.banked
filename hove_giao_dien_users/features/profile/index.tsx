@@ -8,7 +8,7 @@ import { jobApi } from '@/lib/jobApi';
 import { companyBlogApi, CompanyBlog } from '@/lib/companyBlogApi';
 import { companyApi } from '@/lib/companyApi';
 import { uploadApi } from '@/lib/uploadApi';
-import { api } from '@/lib/api';
+import { userApi } from '@/lib/userApi';
 import { locationApi } from '@/lib/locationApi';
 import { CVManagement } from './CVManagement';
 import { ExperienceManagement } from './ExperienceManagement';
@@ -89,7 +89,7 @@ export const ProfileFeature = () => {
         }
 
         // Also update user entity with currentPosition, hometown, currentLocation, certificateImages
-        await api.put(`/api/users/${user.id}`, {
+        await userApi.updateUser(user.id, {
           name: values.name,
           currentPosition: values.currentPosition,
           hometown: values.hometown,
@@ -337,7 +337,7 @@ const PersonalInfoSection = ({
       const profile = await jobSeekerProfileApi.getProfile(user.id);
       
       // Also load user data to get currentPosition, hometown, currentLocation, certificateImages
-      const userData = await api.get(`/api/users/${user.id}`);
+      const userData = await userApi.getUser(user.id);
       
       form.setFieldsValue({
         name: user.name,
@@ -345,12 +345,12 @@ const PersonalInfoSection = ({
         phone: profile.phone,
         location: profile.location,
         bio: profile.bio,
-        currentPosition: userData.data.currentPosition || '',
-        hometown: userData.data.hometown || '',
-        currentLocation: userData.data.currentLocation || '',
+        currentPosition: userData.currentPosition || '',
+        hometown: userData.hometown || '',
+        currentLocation: userData.currentLocation || '',
       });
       
-      setCertificateImages(userData.data.certificateImages || '');
+      setCertificateImages(userData.certificateImages || '');
     } catch (error) {
       console.error('Load profile error:', error);
       // Profile doesn't exist yet, set defaults
