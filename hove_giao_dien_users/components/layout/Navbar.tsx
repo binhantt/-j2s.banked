@@ -238,9 +238,10 @@ export const Navbar = () => {
       label: 'Việc đã lưu',
     },
     {
-      key: '/resume',
+      key: '/blog',
       icon: <FileTextOutlined />,
-      label: 'Hồ sơ',
+      label: 'Blog',
+      onClick: () => router.push('/blog'),
     },
   ];
 
@@ -263,8 +264,8 @@ export const Navbar = () => {
               href="/"
               className={`text-base font-medium transition-colors ${
                 router.pathname === '/'
-                  ? 'text-blue-600'
-                  : 'text-gray-900 hover:text-blue-600'
+                  ? 'text-black'
+                  : 'text-black'
               }`}
             >
               Trang chủ
@@ -273,8 +274,8 @@ export const Navbar = () => {
               href="/jobs"
               className={`text-base font-medium transition-colors ${
                 router.pathname === '/jobs'
-                  ? 'text-blue-600'
-                  : 'text-gray-900 hover:text-blue-600'
+                  ? 'text-black'
+                  : 'text-black'
               }`}
             >
               Tìm việc làm
@@ -283,15 +284,15 @@ export const Navbar = () => {
               href="/freelance"
               className={`text-base font-medium transition-colors ${
                 router.pathname === '/freelance'
-                  ? 'text-blue-600'
-                  : 'text-gray-900 hover:text-blue-600'
+                  ? 'text-black'
+                  : 'text-black'
               }`}
             >
               Freelance
             </Link>
             <Link
               href="/companies"
-              className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors"
+              className="text-base font-medium text-black transition-colors"
             >
               Công ty
             </Link>
@@ -300,8 +301,8 @@ export const Navbar = () => {
                 href="/saved-items"
                 className={`text-base font-medium transition-colors flex items-center gap-1 ${
                   router.pathname === '/saved-items'
-                    ? 'text-blue-600'
-                    : 'text-gray-900 hover:text-blue-600'
+                    ? 'text-black'
+                    : 'text-black'
                 }`}
               >
                 Thư mục lưu
@@ -314,7 +315,7 @@ export const Navbar = () => {
             )}
             <Link
               href="/blog"
-              className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors"
+              className="text-base font-medium text-black transition-colors"
             >
               Blog
             </Link>
@@ -324,7 +325,7 @@ export const Navbar = () => {
                 className={`text-base font-medium transition-colors ${
                   router.pathname === '/chat'
                     ? ''
-                    : 'text-gray-900 hover:text-blue-600'
+                    : 'text-black'
                 }`}
               >
                 Tin nhắn

@@ -1,12 +1,10 @@
-import { BlogFeature } from '@/features/blog';
 import { MainLayout } from '@/components/layout/MainLayout';
+import BlogListPage from '@/features/blog/BlogListPage';
 
-const BlogPage = () => {
+export default function BlogPage() {
   return (
     <MainLayout>
-      <BlogFeature />
+      <BlogListPage />
     </MainLayout>
   );
-};
-
-export default BlogPage;
+}

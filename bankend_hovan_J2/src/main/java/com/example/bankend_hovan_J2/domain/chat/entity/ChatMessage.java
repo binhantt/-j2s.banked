@@ -18,5 +18,7 @@ public class ChatMessage {
     private String senderType; // 'hr' or 'job_seeker'
     private String message;
     private Boolean isRead;
+    private Long replyToMessageId;
+    private String replyToMessage;
     private LocalDateTime createdAt;
 }

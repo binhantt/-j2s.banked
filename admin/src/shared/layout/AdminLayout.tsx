@@ -11,22 +11,37 @@ import {
   UserOutlined,
   SearchOutlined,
   PlusOutlined,
+  LogoutOutlined,
+  FileTextOutlined,
+  MessageOutlined,
 } from '@ant-design/icons';
+
+type HeaderCreateTarget = 'none' | 'blogCreate';
 
 interface AdminLayoutProps {
   children: ReactNode;
   currentView: string;
   onChangeView: (view: string) => void;
+  onLogout: () => void;
+  onCreateClick?: (target: HeaderCreateTarget) => void;
 }
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
 
-export function AdminLayout({ children, currentView, onChangeView }: AdminLayoutProps) {
+export function AdminLayout({
+  children,
+  currentView,
+  onChangeView,
+  onLogout,
+  onCreateClick,
+}: Readonly<AdminLayoutProps>) {
   const menuItems: MenuProps['items'] = useMemo(
     () => [
       { key: 'dashboard', icon: <AppstoreOutlined />, label: 'Bảng điều khiển' },
       { key: 'users', icon: <TeamOutlined />, label: 'Người dùng' },
+      { key: 'blog', icon: <FileTextOutlined />, label: 'Blog' },
+      { key: 'chat', icon: <MessageOutlined />, label: 'Chat' },
       { key: 'analytics', icon: <LineChartOutlined />, label: 'Phân tích' },
       { key: 'settings', icon: <SettingOutlined />, label: 'Cài đặt' },
     ],
@@ -41,82 +56,94 @@ export function AdminLayout({ children, currentView, onChangeView }: AdminLayout
         style={{
           background: 'linear-gradient(180deg, #0b1220 0%, #0a1530 100%)',
           borderRight: '1px solid rgba(148,163,184,0.2)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
+          position: 'sticky',
+          top: 0,
+          left: 0,
+          height: '100vh',
+          overflow: 'hidden',
         }}
       >
-        <div>
-          <div
-            style={{
-              height: 84,
-              display: 'flex',
-              alignItems: 'center',
-              padding: '0 22px',
-              color: '#ffffff',
-              fontWeight: 700,
-              fontSize: 40,
-              gap: 12,
-            }}
-          >
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden' }}>
             <div
               style={{
-                width: 34,
-                height: 34,
-                borderRadius: 8,
-                background: '#16a34a',
-                display: 'grid',
-                placeItems: 'center',
+                height: 84,
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0 22px',
+                color: '#ffffff',
+                fontWeight: 700,
+                fontSize: 40,
+                gap: 12,
+                flexShrink: 0,
               }}
             >
-              <AppstoreOutlined style={{ color: '#fff', fontSize: 18 }} />
+              <div
+                style={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: 8,
+                  background: '#16a34a',
+                  display: 'grid',
+                  placeItems: 'center',
+                }}
+              >
+                <AppstoreOutlined style={{ color: '#fff', fontSize: 18 }} />
+              </div>
+              <span style={{ fontSize: 38 }}>AdminPro</span>
             </div>
-            <span style={{ fontSize: 38 }}>AdminPro</span>
+
+            <ConfigProvider
+              theme={{
+                components: {
+                  Menu: {
+                    darkItemBg: 'transparent',
+                    darkItemColor: '#9fb2cf',
+                    darkItemHoverBg: 'rgba(22,163,74,0.14)',
+                    darkItemSelectedBg: '#16a34a',
+                    darkItemSelectedColor: '#ffffff',
+                  },
+                },
+              }}
+            >
+              <Menu
+                mode="inline"
+                theme="dark"
+                selectedKeys={[currentView]}
+                items={menuItems}
+                onClick={({ key }: { key: string }) => onChangeView(key)}
+                style={{
+                  borderInlineEnd: 'none',
+                  marginTop: 8,
+                  background: 'transparent',
+                  paddingInline: 12,
+                }}
+              />
+            </ConfigProvider>
           </div>
 
-          <ConfigProvider
-            theme={{
-              components: {
-                Menu: {
-                  darkItemBg: 'transparent',
-                  darkItemColor: '#9fb2cf',
-                  darkItemHoverBg: 'rgba(22,163,74,0.14)',
-                  darkItemSelectedBg: '#16a34a',
-                  darkItemSelectedColor: '#ffffff',
-                },
-              },
+          <div
+            style={{
+              borderTop: '1px solid rgba(148,163,184,0.22)',
+              padding: '18px 20px',
+              marginTop: 20,
+              flexShrink: 0,
             }}
           >
-            <Menu
-              mode="inline"
-              theme="dark"
-              selectedKeys={[currentView]}
-              items={menuItems}
-              onClick={({ key }: { key: string }) => onChangeView(key)}
-              style={{
-                borderInlineEnd: 'none',
-                marginTop: 8,
-                background: 'transparent',
-                paddingInline: 12,
-              }}
-            />
-          </ConfigProvider>
-        </div>
+            <Space direction="vertical" style={{ width: '100%' }} size={12}>
+              <Space>
+                <Avatar size={48} icon={<UserOutlined />} style={{ backgroundColor: '#16a34a' }} />
+                <Space direction="vertical" size={0}>
+                  <Text style={{ color: '#f8fafc', fontWeight: 700 }}>Quản trị viên</Text>
+                  <Text style={{ color: '#8ea4c8', fontSize: 14 }}>admin@company.vn</Text>
+                </Space>
+              </Space>
 
-        <div
-          style={{
-            borderTop: '1px solid rgba(148,163,184,0.22)',
-            padding: '18px 20px',
-            marginTop: 20,
-          }}
-        >
-          <Space>
-            <Avatar size={48} icon={<UserOutlined />} style={{ backgroundColor: '#16a34a' }} />
-            <Space direction="vertical" size={0}>
-              <Text style={{ color: '#f8fafc', fontWeight: 700 }}>Quản trị viên</Text>
-              <Text style={{ color: '#8ea4c8', fontSize: 14 }}>admin@company.vn</Text>
+              <Button block icon={<LogoutOutlined />} onClick={onLogout}>
+                Thoát
+              </Button>
             </Space>
-          </Space>
+          </div>
         </div>
       </Sider>
 
@@ -130,6 +157,9 @@ export function AdminLayout({ children, currentView, onChangeView }: AdminLayout
             background: '#f3f6fb',
             borderBottom: '1px solid #dde5ef',
             padding: '0 24px',
+            position: 'sticky',
+            top: 0,
+            zIndex: 30,
           }}
         >
           <Input
@@ -143,18 +173,21 @@ export function AdminLayout({ children, currentView, onChangeView }: AdminLayout
             <Badge dot>
               <Button type="text" shape="circle" icon={<BellOutlined style={{ fontSize: 18 }} />} />
             </Badge>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              style={{
-                borderRadius: 12,
-                border: 'none',
-                fontWeight: 600,
-                background: '#16a34a',
-              }}
-            >
-              + Tạo mới
-            </Button>
+            {currentView === 'blog' && (
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                style={{
+                  borderRadius: 12,
+                  border: 'none',
+                  fontWeight: 600,
+                  background: '#16a34a',
+                }}
+                onClick={() => onCreateClick?.('blogCreate')}
+              >
+                + Bài viết mới
+              </Button>
+            )}
           </Space>
         </Header>
 

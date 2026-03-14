@@ -2,6 +2,7 @@ import { Input, Select } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { useBlogStore } from '@/store/useBlogStore';
 import { BlogList } from './components/BlogList';
+import { CompanyBlogSection } from './components/CompanyBlogSection';
 
 export const BlogFeature = () => {
   const { searchQuery, selectedCategory, setSearchQuery, setSelectedCategory } =
@@ -50,7 +51,11 @@ export const BlogFeature = () => {
         </div>
       </div>
 
+      {/* Blog nền tảng */}
       <BlogList />
+
+      {/* Blog nhà tuyển dụng */}
+      <CompanyBlogSection />
     </div>
   );
 };

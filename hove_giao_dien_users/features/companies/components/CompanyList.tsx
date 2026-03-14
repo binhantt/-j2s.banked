@@ -1,66 +1,70 @@
-import { useEffect, useState } from 'react';
-import { Row, Col, Empty, Spin } from 'antd';
-import { useCompanyStore } from '@/store/useCompanyStore';
+import { useEffect } from 'react';
+import { Row, Col, Spin } from 'antd';
+import { useCompanyStore } from '../store/useCompanyStore';
 import { CompanyCard } from './CompanyCard';
-import { companyApi } from '@/lib/companyApi';
 
 export const CompanyList = () => {
-  const { filteredCompanies, setCompanies } = useCompanyStore();
-  const [loading, setLoading] = useState(true);
+  const { companies, loading, filters, fetchCompanies } = useCompanyStore();
 
   useEffect(() => {
-    loadCompanies();
+    fetchCompanies();
   }, []);
 
-  const loadCompanies = async () => {
-    setLoading(true);
-    try {
-      const data = await companyApi.getAllCompanies();
-      // Transform API data to match store format
-      const companies = data.map((company: any) => ({
-        id: company.id?.toString() || '',
-        name: company.name || 'Chưa cập nhật',
-        logo: company.logoUrl || 'https://via.placeholder.com/100',
-        industry: company.industry || 'Chưa cập nhật',
-        location: company.address || 'Chưa cập nhật',
-        size: company.companySize || 'Chưa cập nhật',
-        description: company.description || 'Chưa có mô tả',
-        openJobs: 0, // TODO: Count from jobs API
-        rating: 4.5,
-        benefits: company.benefits ? company.benefits.split('\n').slice(0, 3) : [],
-      }));
-      setCompanies(companies);
-    } catch (error) {
-      console.error('Error loading companies:', error);
-      setCompanies([]);
-    } finally {
-      setLoading(false);
+  // Re-fetch when filters change
+  useEffect(() => {
+    if (Object.keys(filters).length > 0) {
+      fetchCompanies();
     }
-  };
+  }, [filters]);
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-16">
+      <div style={{ textAlign: 'center', padding: '80px 0' }}>
         <Spin size="large" />
       </div>
     );
   }
 
-  if (filteredCompanies.length === 0) {
+  if (companies.length === 0) {
     return (
-      <div className="flex justify-center items-center py-16">
-        <Empty description="Không tìm thấy công ty" />
+      <div 
+        style={{
+          background: '#fff',
+          borderRadius: 12,
+          padding: 60,
+          textAlign: 'center',
+          border: '1px solid #e5e7eb',
+        }}
+      >
+        <div style={{ fontSize: 56, marginBottom: 16 }}>🏢</div>
+        <h3 style={{ fontSize: 20, marginBottom: 8, fontWeight: 600, color: '#111827' }}>
+          Không tìm thấy công ty phù hợp
+        </h3>
+        <p style={{ color: '#6b7280' }}>
+          Thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh bộ lọc.
+        </p>
       </div>
     );
   }
 
   return (
-    <Row gutter={[24, 24]}>
-      {filteredCompanies.map((company) => (
-        <Col key={company.id} xs={24} sm={12} lg={8}>
-          <CompanyCard company={company} />
-        </Col>
-      ))}
-    </Row>
+    <div>
+      <div style={{ marginBottom: 20 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 600, color: '#111827', marginBottom: 4 }}>
+          Công ty nổi bật
+        </h2>
+        <p style={{ fontSize: 14, color: '#6b7280' }}>
+          Tìm thấy {companies.length} công ty phù hợp
+        </p>
+      </div>
+
+      <Row gutter={[20, 20]}>
+        {companies.map((company) => (
+          <Col key={company.id} xs={24} sm={12} lg={8}>
+            <CompanyCard company={company} />
+          </Col>
+        ))}
+      </Row>
+    </div>
   );
 };

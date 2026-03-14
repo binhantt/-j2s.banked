@@ -5,6 +5,7 @@ import {
   UserOutlined,
   SearchOutlined,
   ClockCircleOutlined,
+  CloseOutlined,
 } from '@ant-design/icons';
 import { useRouter } from 'next/router';
 import { chatApi } from '@/lib/chatApi';
@@ -13,13 +14,25 @@ import { MainLayout } from '@/components/layout/MainLayout';
 
 const { Text, Title } = Typography;
 
+interface Message {
+  id?: number;
+  conversationId: number;
+  senderId: number;
+  senderType: string;
+  message: string;
+  replyToMessageId?: number;
+  replyToMessage?: string;
+  createdAt: string;
+}
+
 function ChatPageContent() {
   const [conversations, setConversations] = useState<any[]>([]);
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedConversation, setSelectedConversation] = useState<any>(null);
   const [search, setSearch] = useState('');
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const router = useRouter();
   const { user } = useAuthStore();
   const { id } = router.query;
@@ -87,14 +100,21 @@ function ChatPageContent() {
 
     setLoading(true);
     try {
-      await chatApi.sendMessage({
+      const messageData: any = {
         conversationId: selectedConversation.id,
         senderId: user?.id,
         senderType: user?.userType,
         message: newMessage,
-      });
+      };
+
+      if (replyingTo) {
+        messageData.replyToMessageId = replyingTo.id;
+      }
+
+      await chatApi.sendMessage(messageData);
 
       setNewMessage('');
+      setReplyingTo(null);
       await loadMessages(selectedConversation.id, false);
     } catch {
       message.error('Không thể gửi tin nhắn');
@@ -225,7 +245,6 @@ function ChatPageContent() {
                           <div
                             style={{
                               maxWidth: '75%',
-                              padding: '10px 14px',
                               borderRadius: 14,
                               background: isMe
                                 ? 'linear-gradient(135deg, #3b82f6 0%, #14b8a6 100%)'
@@ -237,23 +256,66 @@ function ChatPageContent() {
                                 : '0 4px 10px rgba(15, 23, 42, 0.04)',
                             }}
                           >
-                            <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.45 }}>{msg.message}</div>
+                            {msg.replyToMessage && (
+                              <div
+                                style={{
+                                  padding: '8px 12px',
+                                  margin: '10px 10px 0',
+                                  borderRadius: 8,
+                                  background: isMe ? 'rgba(255,255,255,0.15)' : '#f8fafc',
+                                  borderLeft: `3px solid ${isMe ? '#fff' : '#3b82f6'}`,
+                                  fontSize: 12,
+                                  opacity: 0.9,
+                                }}
+                              >
+                                <div style={{ fontWeight: 600, marginBottom: 2 }}>Trả lời:</div>
+                                <div style={{ 
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap'
+                                }}>
+                                  {msg.replyToMessage}
+                                </div>
+                              </div>
+                            )}
+                            <div style={{ 
+                              padding: '10px 14px',
+                              whiteSpace: 'pre-wrap', 
+                              lineHeight: 1.45 
+                            }}>
+                              {msg.message}
+                            </div>
                             <div
                               style={{
-                                marginTop: 6,
+                                padding: '0 14px 10px',
                                 fontSize: 11,
                                 opacity: isMe ? 0.9 : 0.58,
                                 display: 'flex',
-                                gap: 4,
+                                gap: 8,
                                 alignItems: 'center',
-                                justifyContent: isMe ? 'flex-end' : 'flex-start',
+                                justifyContent: 'space-between',
                               }}
                             >
-                              <ClockCircleOutlined />
-                              {new Date(msg.createdAt).toLocaleTimeString('vi-VN', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
+                              <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                                <ClockCircleOutlined />
+                                {new Date(msg.createdAt).toLocaleTimeString('vi-VN', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </div>
+                              <Button
+                                type="text"
+                                size="small"
+                                onClick={() => setReplyingTo(msg)}
+                                style={{
+                                  color: isMe ? '#fff' : '#3b82f6',
+                                  padding: '0 4px',
+                                  height: 'auto',
+                                  fontSize: 11,
+                                }}
+                              >
+                                Trả lời
+                              </Button>
                             </div>
                           </div>
                         </div>
@@ -264,6 +326,44 @@ function ChatPageContent() {
                 </div>
 
                 <div className="border-t border-slate-100 bg-white p-3 md:p-4">
+                  {replyingTo && (
+                    <div
+                      style={{
+                        marginBottom: 12,
+                        padding: '10px 12px',
+                        background: '#f0f9ff',
+                        borderRadius: 8,
+                        borderLeft: '3px solid #3b82f6',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-start',
+                      }}
+                    >
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: '#3b82f6', marginBottom: 4 }}>
+                          Đang trả lời:
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 13,
+                            color: '#64748b',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {replyingTo.message}
+                        </div>
+                      </div>
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<CloseOutlined />}
+                        onClick={() => setReplyingTo(null)}
+                        style={{ flexShrink: 0 }}
+                      />
+                    </div>
+                  )}
                   <div className="flex items-end gap-2">
                     <Input.TextArea
                       value={newMessage}

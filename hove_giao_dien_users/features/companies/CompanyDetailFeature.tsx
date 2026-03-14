@@ -14,7 +14,7 @@ import { companyApi, Company } from '@/lib/companyApi';
 import { jobApi } from '@/lib/jobApi';
 import { companyBlogApi, CompanyBlog } from '@/lib/companyBlogApi';
 import { companyReviewApi, CompanyStats } from '@/lib/companyReviewApi';
-import { JobCard } from '../jobs/components/JobCard';
+import { JobCard } from '../jobs/components';
 import { CompanyReviewSection } from './CompanyReviewSection';
 import SaveCompanyButton from '@/components/SaveCompanyButton';
 import { useRouter } from 'next/router';

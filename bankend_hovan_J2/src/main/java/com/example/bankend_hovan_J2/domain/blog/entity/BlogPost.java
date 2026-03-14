@@ -36,6 +36,8 @@ public class BlogPost {
     @Column(nullable = false)
     private String category;
     
+    // Cho phép lưu URL ảnh dài hoặc dữ liệu base64 nếu cần
+    @Column(columnDefinition = "TEXT")
     private String image;
     
     @Column(nullable = false)

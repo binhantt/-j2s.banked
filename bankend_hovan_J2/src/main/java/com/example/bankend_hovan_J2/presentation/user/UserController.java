@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -23,6 +25,22 @@ public class UserController {
     public UserController(UserJpaRepository userRepository, ImageUploadService imageUploadService) {
         this.userRepository = userRepository;
         this.imageUploadService = imageUploadService;
+    }
+
+    /**
+     * API cho màn hình quản trị: lấy danh sách user để hiển thị ở trang
+     * "Quản lý tài khoản User & Backend" phía admin.
+     *
+     * Hiện tại backend mới quản lý nhóm user của hệ thống (job_seeker, freelancer,...),
+     * nên group được set cố định là "user". Các tài khoản backend (super_admin, moderator, support)
+     * sẽ vẫn dùng dữ liệu mock phía frontend.
+     */
+    @GetMapping
+    public List<UserAdminResponse> getAllUsersForAdmin() {
+        return userRepository.findAll()
+                .stream()
+                .map(UserAdminResponse::fromEntity)
+                .collect(Collectors.toList());
     }
 
     // Get user by ID
@@ -203,25 +221,92 @@ class UserUpdateRequest {
 
     public String getAvatarUrl() { return avatarUrl; }
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
-    
+
     public String getCurrentPosition() { return currentPosition; }
     public void setCurrentPosition(String currentPosition) { this.currentPosition = currentPosition; }
-    
+
     public String getHometown() { return hometown; }
     public void setHometown(String hometown) { this.hometown = hometown; }
-    
+
     public String getCurrentLocation() { return currentLocation; }
     public void setCurrentLocation(String currentLocation) { this.currentLocation = currentLocation; }
-    
+
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
-    
+
     public String getBio() { return bio; }
     public void setBio(String bio) { this.bio = bio; }
-    
+
     public String getCvUrl() { return cvUrl; }
     public void setCvUrl(String cvUrl) { this.cvUrl = cvUrl; }
-    
+
     public String getCertificateImages() { return certificateImages; }
     public void setCertificateImages(String certificateImages) { this.certificateImages = certificateImages; }
+}
+
+/**
+ * DTO trả dữ liệu danh sách user cho màn hình admin.
+ */
+class UserAdminResponse {
+    private Long id;
+    private String fullName;
+    private String email;
+    private String group;
+    private String role;
+    private boolean isActive;
+    private LocalDateTime createdAt;
+    private LocalDateTime lastLogin;
+
+    public static UserAdminResponse fromEntity(UserEntityJpa entity) {
+        UserAdminResponse dto = new UserAdminResponse();
+        dto.id = entity.getId();
+        dto.fullName = entity.getName();
+        dto.email = entity.getEmail();
+
+        // Hiện tại hệ thống chỉ lưu userType (job_seeker, freelancer,...)
+        // nên tạm coi đây là nhóm "user" trên admin.
+        dto.group = "user";
+
+        dto.role = entity.getUserType();
+
+        // Chưa có cột trạng thái kích hoạt nên tạm thời luôn là true
+        dto.isActive = true;
+
+        dto.createdAt = entity.getCreatedAt();
+        // Tạm dùng updatedAt làm thời gian đăng nhập lần cuối
+        dto.lastLogin = entity.getUpdatedAt();
+        return dto;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getLastLogin() {
+        return lastLogin;
+    }
 }

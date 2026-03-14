@@ -34,6 +34,12 @@ public class ChatMessageEntityJpa {
     @Column(name = "is_read")
     private Boolean isRead;
 
+    @Column(name = "reply_to_message_id")
+    private Long replyToMessageId;
+
+    @Column(name = "reply_to_message", columnDefinition = "TEXT")
+    private String replyToMessage;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

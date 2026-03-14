@@ -42,7 +42,10 @@ export const BlogDetailFeature = ({ postId }: BlogDetailFeatureProps) => {
 
   const loadRelatedPosts = async () => {
     try {
-      const response = await api.get('/api/blog/posts');
+      // Gợi ý bài viết liên quan chỉ lấy từ blog admin/platform
+      const response = await api.get('/api/blog/posts', {
+        params: { source: 'platform' },
+      });
       // Get 3 random posts excluding current post
       const filtered = response.data.filter((p: any) => p.id !== postId);
       const shuffled = filtered.sort(() => 0.5 - Math.random());

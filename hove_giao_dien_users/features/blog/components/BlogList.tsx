@@ -15,8 +15,11 @@ export const BlogList = () => {
   const loadPosts = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/api/blog/posts');
-      setPosts(response.data);
+      // Chỉ hiển thị các bài blog do admin/platform tạo
+      const response = await api.get('/api/blog/posts', {
+        params: { source: 'platform' },
+      });
+      setPosts(response.data || []);
     } catch (error) {
       console.error('Load blog posts error:', error);
       message.error('Không thể tải danh sách bài viết');

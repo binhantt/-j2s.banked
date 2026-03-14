@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Avatar,
   Button,
@@ -18,21 +18,8 @@ import { SearchOutlined, ReloadOutlined, UserOutlined, LockOutlined, UnlockOutli
 
 const { Title, Text } = Typography;
 
-type AccountGroup = 'user' | 'backend';
-type UserRole = 'job_seeker' | 'freelancer' | 'hr' | 'admin';
-type BackendRole = 'super_admin' | 'moderator' | 'support';
-type AccountRole = UserRole | BackendRole;
-
-interface UserRow {
-  id: number;
-  fullName: string;
-  email: string;
-  group: AccountGroup;
-  role: AccountRole;
-  isActive: boolean;
-  createdAt: string;
-  lastLogin: string;
-}
+import type { AccountGroup, AccountRole, UserAdminRow } from '../types/userTypes';
+import { useUsersStore } from '../store/useUsersStore';
 
 const roleLabel: Record<AccountRole, string> = {
   job_seeker: 'Ứng viên',
@@ -54,69 +41,6 @@ const roleColor: Record<AccountRole, string> = {
   support: 'blue',
 };
 
-const initialUsers: UserRow[] = [
-  {
-    id: 1,
-    fullName: 'Nguyễn Văn A',
-    email: 'nva@gmail.com',
-    group: 'user',
-    role: 'job_seeker',
-    isActive: true,
-    createdAt: '20/11/2026',
-    lastLogin: '08:21 22/11/2026',
-  },
-  {
-    id: 2,
-    fullName: 'Trần Thị B',
-    email: 'ttb@company.vn',
-    group: 'user',
-    role: 'hr',
-    isActive: true,
-    createdAt: '19/11/2026',
-    lastLogin: '09:05 22/11/2026',
-  },
-  {
-    id: 3,
-    fullName: 'Lê C',
-    email: 'lec@gmail.com',
-    group: 'user',
-    role: 'freelancer',
-    isActive: false,
-    createdAt: '18/11/2026',
-    lastLogin: '17:45 20/11/2026',
-  },
-  {
-    id: 4,
-    fullName: 'Admin Root',
-    email: 'admin@timviec24h.vn',
-    group: 'backend',
-    role: 'super_admin',
-    isActive: true,
-    createdAt: '01/01/2026',
-    lastLogin: '10:12 22/11/2026',
-  },
-  {
-    id: 5,
-    fullName: 'Ngô Kiểm Duyệt',
-    email: 'moderator@timviec24h.vn',
-    group: 'backend',
-    role: 'moderator',
-    isActive: true,
-    createdAt: '01/03/2026',
-    lastLogin: '09:37 22/11/2026',
-  },
-  {
-    id: 6,
-    fullName: 'Hỗ Trợ Khách Hàng',
-    email: 'support@timviec24h.vn',
-    group: 'backend',
-    role: 'support',
-    isActive: false,
-    createdAt: '15/04/2026',
-    lastLogin: '16:10 21/11/2026',
-  },
-];
-
 const userRoleOptions = [
   { value: 'all', label: 'Tất cả vai trò User' },
   { value: 'job_seeker', label: roleLabel.job_seeker },
@@ -136,7 +60,19 @@ export function UserManagementPage() {
   const [search, setSearch] = useState('');
   const [groupFilter, setGroupFilter] = useState<AccountGroup>('user');
   const [roleFilter, setRoleFilter] = useState<'all' | AccountRole>('all');
-  const [users, setUsers] = useState<UserRow[]>(initialUsers);
+  const { users, loading, error, fetchUsers, setUserActive } = useUsersStore();
+
+  useEffect(() => {
+    void fetchUsers().catch(() => {
+      message.error('Không tải được danh sách tài khoản');
+    });
+  }, [fetchUsers]);
+
+  useEffect(() => {
+    if (error) {
+      message.error(error);
+    }
+  }, [error]);
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
@@ -161,11 +97,11 @@ export function UserManagementPage() {
   }, [users]);
 
   const toggleActive = (id: number, checked: boolean) => {
-    setUsers((prev) => prev.map((item) => (item.id === id ? { ...item, isActive: checked } : item)));
+    setUserActive(id, checked);
     message.success(checked ? 'Đã mở tài khoản' : 'Đã khóa tài khoản');
   };
 
-  const resetPassword = (record: UserRow) => {
+  const resetPassword = (record: UserAdminRow) => {
     message.success(`Đã gửi yêu cầu đặt lại mật khẩu cho ${record.email}`);
   };
 
@@ -211,7 +147,7 @@ export function UserManagementPage() {
               options={groupFilter === 'user' ? userRoleOptions : backendRoleOptions}
             />
           </Space>
-          <Button icon={<ReloadOutlined />} onClick={() => setUsers(initialUsers)}>
+          <Button icon={<ReloadOutlined />} onClick={() => void fetchUsers()}>
             Làm mới
           </Button>
         </Space>
@@ -242,13 +178,17 @@ export function UserManagementPage() {
         <Table
           rowKey="id"
           dataSource={filteredUsers}
-          pagination={{ pageSize: 8 }}
+          loading={loading}
+          pagination={{
+            pageSize: 3,
+            showSizeChanger: false,
+          }}
           columns={[
             { title: 'ID', dataIndex: 'id', key: 'id', width: 70 },
             {
               title: 'Tài khoản',
               key: 'user',
-              render: (_: unknown, record: UserRow) => (
+              render: (_: unknown, record: UserAdminRow) => (
                 <Space>
                   <Avatar icon={<UserOutlined />} style={{ background: '#16a34a' }} />
                   <Space direction="vertical" size={0}>
@@ -279,7 +219,7 @@ export function UserManagementPage() {
               dataIndex: 'isActive',
               key: 'isActive',
               width: 130,
-              render: (_: boolean, record: UserRow) => (
+              render: (_: boolean, record: UserAdminRow) => (
                 <Switch checked={record.isActive} onChange={(checked) => toggleActive(record.id, checked)} />
               ),
             },
@@ -289,7 +229,7 @@ export function UserManagementPage() {
               title: 'Thao tác',
               key: 'actions',
               width: 180,
-              render: (_: unknown, record: UserRow) => (
+              render: (_: unknown, record: UserAdminRow) => (
                 <Space>
                   <Button size="small" onClick={() => resetPassword(record)}>
                     Reset pass

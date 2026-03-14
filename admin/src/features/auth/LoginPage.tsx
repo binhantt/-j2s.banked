@@ -1,22 +1,24 @@
-import { useState } from 'react';
-import { Button, Card, Checkbox, Form, Input, Typography } from 'antd';
+import { Alert, Button, Card, Checkbox, Form, Input, Typography, message } from 'antd';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
+import { useAuthStore } from './store/useAuthStore';
+import type { LoginPayload } from './types/authTypes';
 
 const { Title, Text } = Typography;
 
-interface LoginPageProps {
-  onLogin: () => void;
-}
+export function LoginPage() {
+  const login = useAuthStore((state) => state.login);
+  const loading = useAuthStore((state) => state.loading);
+  const error = useAuthStore((state) => state.error);
+  const clearError = useAuthStore((state) => state.clearError);
 
-export function LoginPage({ onLogin }: LoginPageProps) {
-  const [loading, setLoading] = useState(false);
-
-  const handleLogin = async () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      onLogin();
-    }, 600);
+  const handleLogin = async (values: LoginPayload) => {
+    clearError();
+    try {
+      await login(values);
+      message.success('Đăng nhập thành công');
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : 'Đăng nhập thất bại');
+    }
   };
 
   return (
@@ -62,13 +64,15 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           <Text type="secondary">Truy cập trang quản trị hệ thống</Text>
         </div>
 
-        <Form layout="vertical" onFinish={handleLogin} initialValues={{ remember: true }}>
+        {error && <Alert type="error" showIcon message={error} style={{ marginBottom: 16 }} />}
+
+        <Form<LoginPayload> layout="vertical" onFinish={handleLogin} initialValues={{ remember: true }}>
           <Form.Item
             label="Email"
             name="email"
             rules={[{ required: true, message: 'Vui lòng nhập email' }, { type: 'email', message: 'Email không hợp lệ' }]}
           >
-            <Input size="large" prefix={<MailOutlined />} placeholder="admin@company.vn" />
+            <Input size="large" prefix={<MailOutlined />} placeholder="doan44503@gmail.con" />
           </Form.Item>
 
           <Form.Item
@@ -107,5 +111,3 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     </div>
   );
 }
-
-

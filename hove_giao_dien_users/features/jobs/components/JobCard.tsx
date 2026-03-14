@@ -1,104 +1,129 @@
-import { Card, Tag, Button, Avatar } from 'antd';
+import { Card, Tag, Button } from 'antd';
 import {
   EnvironmentOutlined,
   DollarOutlined,
   ClockCircleOutlined,
   HeartOutlined,
+  HeartFilled,
 } from '@ant-design/icons';
-import Link from 'next/link';
-import type { Job } from '@/store/useJobStore';
+import { useRouter } from 'next/router';
+import { Job } from '../api/jobApi';
 
 interface JobCardProps {
   job: Job;
+  isSaved?: boolean;
+  onSaveToggle?: (jobId: number) => void;
 }
 
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffTime = Math.abs(now.getTime() - date.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
-  if (diffDays === 0) return 'Hôm nay';
-  if (diffDays === 1) return 'Hôm qua';
-  if (diffDays < 7) return `${diffDays} ngày trước`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} tuần trước`;
-  return date.toLocaleDateString('vi-VN');
+const jobTypeMap: Record<string, string> = {
+  'full-time': 'Toàn thời gian',
+  'part-time': 'Bán thời gian',
+  'contract': 'Hợp đồng',
+  'internship': 'Thực tập',
 };
 
-export const JobCard = ({ job }: JobCardProps) => {
+const getTimeAgo = (date: string) => {
+  const now = new Date();
+  const posted = new Date(date);
+  const days = Math.floor((now.getTime() - posted.getTime()) / (1000 * 60 * 60 * 24));
+  if (days === 0) return 'Hôm nay';
+  if (days === 1) return '1 ngày trước';
+  return `${days} ngày trước`;
+};
+
+export default function JobCard({ job, isSaved = false, onSaveToggle }: JobCardProps) {
+  const router = useRouter();
+
   return (
-    <Link href={`/jobs/${job.id}`}>
-      <Card
-        className="h-full border border-gray-200 rounded-2xl hover:shadow-xl transition-all duration-300 cursor-pointer bg-white overflow-hidden group"
-        bodyStyle={{ padding: '24px' }}
-      >
-        <div className="flex items-start gap-4 mb-4">
-          <Avatar
-            src={job.companyLogoUrl}
-            size={60}
-            shape="square"
-            className="border border-gray-200 flex-shrink-0"
-          >
-            {!job.companyLogoUrl && (job.companyName?.charAt(0) || 'C')}
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2">
-              {job.title}
-            </h3>
-            <p className="text-base text-gray-700 font-medium mb-2">
-              {job.companyName || 'Công ty tuyển dụng'}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <Tag color="blue" className="m-0 px-3 py-1">
-                {job.jobType}
-              </Tag>
-              <Tag color="purple" className="m-0 px-3 py-1">
-                {job.level}
-              </Tag>
-            </div>
-          </div>
-          <Button
-            type="text"
-            icon={<HeartOutlined className="text-xl" />}
-            className="text-gray-400 hover:text-red-500 flex-shrink-0"
-            onClick={(e) => {
-              e.preventDefault();
-            }}
-          />
+    <Card
+      hoverable
+      style={{ borderRadius: 16, border: '1px solid #e5e7eb' }}
+      styles={{ body: { padding: 20 } }}
+    >
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        {/* Company Logo */}
+        <div
+          style={{
+            width: 56,
+            height: 56,
+            borderRadius: 12,
+            background: job.companyLogoUrl
+              ? 'transparent'
+              : 'linear-gradient(135deg, #0ea5e9 0%, #22d3ee 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 22,
+            fontWeight: 600,
+            color: '#fff',
+            overflow: 'hidden',
+            border: '1px solid #e5e7eb',
+          }}
+        >
+          {job.companyLogoUrl ? (
+            <img
+              src={job.companyLogoUrl}
+              alt={job.companyName || 'Company'}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement!.style.background =
+                  'linear-gradient(135deg, #0ea5e9 0%, #22d3ee 100%)';
+                e.currentTarget.parentElement!.innerHTML =
+                  job.companyName?.charAt(0) || job.title.charAt(0);
+              }}
+            />
+          ) : (
+            job.companyName?.charAt(0) || job.title.charAt(0)
+          )}
         </div>
 
-        <div className="space-y-3 mb-4">
-          <div className="flex items-center text-gray-600">
-            <EnvironmentOutlined className="mr-2 text-indigo-600 text-lg" />
-            <span className="font-medium">{job.location}</span>
-          </div>
-          <div className="flex items-center text-gray-600">
-            <DollarOutlined className="mr-2 text-green-600 text-lg" />
-            <span className="font-semibold text-green-600">
-              {job.salaryMin} - {job.salaryMax}
+        {/* Job Info */}
+        <div className="flex-1 min-w-0">
+          <button
+            type="button"
+            onClick={() => router.push(`/jobs/${job.id}`)}
+            className="text-base sm:text-lg font-semibold text-gray-900 hover:text-blue-600"
+          >
+            {job.title}
+          </button>
+          <div className="text-sm text-gray-500">{job.companyName || 'Công ty tuyển dụng'}</div>
+
+          <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-500">
+            <span className="flex items-center gap-1">
+              <EnvironmentOutlined /> {job.location}
+            </span>
+            <span className="flex items-center gap-1 text-orange-500">
+              <DollarOutlined /> {job.salaryMin} - {job.salaryMax}
+            </span>
+            <span className="flex items-center gap-1">
+              <ClockCircleOutlined /> {getTimeAgo(job.createdAt)}
             </span>
           </div>
-          <div className="flex items-center text-gray-500 text-sm">
-            <ClockCircleOutlined className="mr-2" />
-            <span>Đăng {formatDate(job.createdAt)}</span>
-          </div>
         </div>
 
-        <p className="text-gray-600 mb-4 line-clamp-2 leading-relaxed">
-          {job.description}
-        </p>
-
-        <div className="flex gap-2 pt-4 border-t border-gray-100">
+        {/* Actions */}
+        <div className="flex flex-col items-end gap-2">
+          <Tag color="orange" className="rounded-full px-3 py-1">
+            {jobTypeMap[job.jobType]}
+          </Tag>
           <Button
             type="primary"
-            block
-            size="large"
-            className="rounded-xl font-medium"
+            className="!bg-orange-500"
+            onClick={() => router.push(`/jobs/${job.id}`)}
           >
-            Ứng tuyển ngay
+            Ứng tuyển
           </Button>
+          {onSaveToggle && (
+            <Button
+              type="default"
+              shape="circle"
+              icon={isSaved ? <HeartFilled /> : <HeartOutlined />}
+              onClick={() => onSaveToggle(job.id)}
+            />
+          )}
         </div>
-      </Card>
-    </Link>
+      </div>
+    </Card>
   );
-};
+}

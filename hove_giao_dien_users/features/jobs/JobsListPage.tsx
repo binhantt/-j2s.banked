@@ -1,72 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Tag, Button, Input, Select, message, Space, Divider } from 'antd';
-import { EnvironmentOutlined, DollarOutlined, ClockCircleOutlined, MessageOutlined, HeartOutlined, HeartFilled, SearchOutlined } from '@ant-design/icons';
-import { useRouter } from 'next/router';
-import { jobApi } from '@/lib/jobApi';
-import { chatApi } from '@/lib/chatApi';
+import { useEffect, useState } from 'react';
+import { Card, message } from 'antd';
+import { useJobStore } from './store/useJobStore';
 import { useAuthStore } from '@/store/useAuthStore';
-
-const { Option } = Select;
+import JobSearchBar from './components/JobSearchBar';
+import JobFilters from './components/JobFilters';
+import JobCard from './components/JobCard';
 
 export default function JobsListPage() {
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [searchText, setSearchText] = useState('');
-  const [filterType, setFilterType] = useState('all');
-  const [filterLocation, setFilterLocation] = useState('all');
-  const [savedJobs, setSavedJobs] = useState<number[]>([]);
-  const [savedJobsLoaded, setSavedJobsLoaded] = useState(false);
-  const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
+  const { jobs, loading, filters, fetchJobs, setFilters } = useJobStore();
+  const [savedJobs, setSavedJobs] = useState<number[]>([]);
 
   useEffect(() => {
-    loadJobs();
+    fetchJobs();
     if (isAuthenticated && user?.id) {
       loadSavedJobs();
     }
-  }, [isAuthenticated, user?.id]);
-
-  const loadJobs = async () => {
-    setLoading(true);
-    try {
-      const data = await jobApi.getActiveJobs();
-      setJobs(data);
-    } catch (error) {
-      message.error('Không thể tải danh sách công việc');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [isAuthenticated, user?.id, fetchJobs]);
 
   const loadSavedJobs = async () => {
     if (!user?.id) return;
-    
+
     try {
       const { savedJobApi } = await import('@/lib/savedJobApi');
       const saved = await savedJobApi.getUserSavedJobs(user.id);
       setSavedJobs(saved.map((s: any) => s.jobPostingId));
-      setSavedJobsLoaded(true);
     } catch (error) {
       console.error('Load saved jobs error:', error);
-    }
-  };
-
-  const handleStartChat = async (job: any) => {
-    if (!isAuthenticated) {
-      message.warning('Vui lòng đăng nhập để chat với HR');
-      router.push('/login');
-      return;
-    }
-
-    try {
-      const conversation = await chatApi.createConversation({
-        jobPostingId: job.id,
-        jobSeekerId: user?.id,
-        hrId: job.userId,
-      });
-      router.push(`/chat/${conversation.id}`);
-    } catch (error) {
-      message.error('Không thể bắt đầu chat');
     }
   };
 
@@ -78,7 +38,7 @@ export default function JobsListPage() {
 
     try {
       const { savedJobApi } = await import('@/lib/savedJobApi');
-      
+
       if (savedJobs.includes(jobId)) {
         await savedJobApi.unsaveJob(user.id, jobId);
         setSavedJobs(savedJobs.filter(id => id !== jobId));
@@ -89,261 +49,76 @@ export default function JobsListPage() {
         message.success('Đã lưu công việc');
       }
     } catch (error) {
+      console.error('Toggle save job error:', error);
       message.error('Có lỗi xảy ra');
     }
   };
 
-  const filteredJobs = jobs.filter((job: any) => {
-    const matchSearch = job.title.toLowerCase().includes(searchText.toLowerCase()) ||
-                       job.location.toLowerCase().includes(searchText.toLowerCase());
-    const matchType = filterType === 'all' || job.jobType === filterType;
-    const matchLocation = filterLocation === 'all' || job.location.includes(filterLocation);
-    return matchSearch && matchType && matchLocation;
-  });
-
-  const jobTypeMap: any = {
-    'full-time': 'Full-time',
-    'part-time': 'Part-time',
-    'contract': 'Contract',
-    'internship': 'Internship',
-  };
-
-  const levelMap: any = {
-    'intern': 'Intern',
-    'junior': 'Junior',
-    'middle': 'Middle',
-    'senior': 'Senior',
-    'lead': 'Lead',
-    'manager': 'Manager',
-  };
-
-  const getTimeAgo = (date: string) => {
-    const now = new Date();
-    const posted = new Date(date);
-    const days = Math.floor((now.getTime() - posted.getTime()) / (1000 * 60 * 60 * 24));
-    if (days === 0) return 'Hôm nay';
-    if (days === 1) return '1 ngày trước';
-    return `${days} ngày trước`;
+  const handleSearch = () => {
+    setFilters(filters);
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
-      <div className="text-center mb-10">
-        <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 mb-3">
-          Tìm công việc mơ ước
-        </h1>
-        <p className="text-lg text-gray-600">
-          Khám phá hàng nghìn cơ hội việc làm hấp dẫn
-        </p>
-      </div>
+    <div className="bg-[#f7f8fa]">
+      {/* Search Bar */}
+      <JobSearchBar
+        searchText={filters.searchText || ''}
+        location={filters.location || 'all'}
+        onSearchChange={(value) => setFilters({ searchText: value })}
+        onLocationChange={(value) => setFilters({ location: value })}
+        onSearch={handleSearch}
+      />
 
-        {/* Search Bar */}
-        <Card style={{ marginBottom: 40, borderRadius: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
-            <Input
-              size="large"
-              placeholder="Tìm theo vị trí, công ty, kỹ năng..."
-              prefix={<SearchOutlined style={{ color: '#999' }} />}
-              style={{ flex: 1, minWidth: 250, borderRadius: 8 }}
-              onChange={(e) => setSearchText(e.target.value)}
-              allowClear
-            />
-            <Select
-              size="large"
-              style={{ width: 180, borderRadius: 8 }}
-              value={filterLocation}
-              onChange={setFilterLocation}
-            >
-              <Option value="all">Tất cả địa điểm</Option>
-              <Option value="Hà Nội">Hà Nội</Option>
-              <Option value="Hồ Chí Minh">Hồ Chí Minh</Option>
-              <Option value="Đà Nẵng">Đà Nẵng</Option>
-            </Select>
-            <Select
-              size="large"
-              style={{ width: 180, borderRadius: 8 }}
-              value={filterType}
-              onChange={setFilterType}
-            >
-              <Option value="all">Tất cả loại hình</Option>
-              <Option value="full-time">Full-time</Option>
-              <Option value="part-time">Part-time</Option>
-              <Option value="contract">Contract</Option>
-              <Option value="internship">Internship</Option>
-            </Select>
-          </div>
-          
-          <Divider style={{ margin: '16px 0' }} />
-          
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: '#666' }}>
-              Tìm thấy <strong style={{ color: '#0ea5e9' }}>{filteredJobs.length}</strong> công việc
-            </span>
-            <Space>
-              <Tag color="blue">{jobs.length} việc đang tuyển</Tag>
-            </Space>
-          </div>
-        </Card>
+      {/* Main layout */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+          {/* Filters */}
+          <JobFilters
+            filters={filters}
+            onFilterChange={(newFilters) => setFilters(newFilters)}
+          />
 
-        {/* Jobs Grid */}
-        <Row gutter={[24, 24]}>
-          {filteredJobs.map((job: any) => (
-            <Col xs={24} md={12} lg={8} key={job.id}>
-              <Card
-                hoverable
-                style={{ 
-                  height: '100%',
-                  borderRadius: 12,
-                  border: '1px solid #e8e8e8',
-                  transition: 'all 0.3s ease',
-                  position: 'relative'
-                }}
-                bodyStyle={{ padding: 20 }}
-              >
-                {/* Save Button */}
-                <Button
-                  type="text"
-                  icon={savedJobs.includes(job.id) ? 
-                    <HeartFilled style={{ color: '#ff4d4f', fontSize: 20 }} /> : 
-                    <HeartOutlined style={{ fontSize: 20 }} />
-                  }
-                  onClick={() => toggleSaveJob(job.id)}
-                  style={{ 
-                    position: 'absolute',
-                    top: 16,
-                    right: 16,
-                    zIndex: 1
-                  }}
+          {/* Results */}
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Kết quả tìm kiếm việc làm</h2>
+                <p className="text-sm text-gray-500">Tìm thấy {jobs.length} công việc phù hợp</p>
+              </div>
+              <div className="text-sm text-gray-500">Sắp xếp: <span className="text-blue-600">Mới nhất</span></div>
+            </div>
+
+            <div className="space-y-4">
+              {jobs.map((job) => (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  isSaved={savedJobs.includes(job.id)}
+                  onSaveToggle={toggleSaveJob}
                 />
+              ))}
+            </div>
 
-                {/* Company Logo */}
-                <div style={{ 
-                  width: 60,
-                  height: 60,
-                  borderRadius: 8,
-                  background: job.companyLogoUrl ? 'transparent' : 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #14b8a6 100%)',
-                  marginBottom: 16,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 24,
-                  fontWeight: 600,
-                  color: '#fff',
-                  overflow: 'hidden',
-                  border: '1px solid #e8e8e8'
-                }}>
-                  {job.companyLogoUrl ? (
-                    <img 
-                      src={job.companyLogoUrl} 
-                      alt={job.companyName || 'Company'} 
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        e.currentTarget.parentElement!.style.background = 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #14b8a6 100%)';
-                        e.currentTarget.parentElement!.innerHTML = (job.companyName?.charAt(0) || job.title.charAt(0));
-                      }}
-                    />
-                  ) : (
-                    job.companyName?.charAt(0) || job.title.charAt(0)
-                  )}
-                </div>
-
-                {/* Job Title */}
-                <h3 style={{ 
-                  fontSize: 18, 
-                  fontWeight: 600,
-                  marginBottom: 8,
-                  color: '#1e293b',
-                  cursor: 'pointer',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
+            {jobs.length === 0 && !loading && (
+              <Card
+                style={{
+                  textAlign: 'center',
+                  padding: 60,
+                  borderRadius: 16,
+                  border: '1px solid #e5e7eb',
+                  marginTop: 16,
                 }}
-                onClick={() => router.push(`/jobs/${job.id}`)}
-                >
-                  {job.title}
+              >
+                <div style={{ fontSize: 56, marginBottom: 16 }}>🔍</div>
+                <h3 style={{ fontSize: 20, marginBottom: 8, fontWeight: 600, color: '#111827' }}>
+                  Không tìm thấy công việc phù hợp
                 </h3>
-
-                {/* Company Name */}
-                <p style={{ color: '#666', marginBottom: 12, fontSize: 14 }}>
-                  {job.companyName || 'Công ty tuyển dụng'}
-                </p>
-
-                {/* Tags */}
-                <Space size={8} wrap style={{ marginBottom: 16 }}>
-                  <Tag color="blue" style={{ borderRadius: 4 }}>
-                    {jobTypeMap[job.jobType]}
-                  </Tag>
-                  <Tag color="green" style={{ borderRadius: 4 }}>
-                    {levelMap[job.level]}
-                  </Tag>
-                </Space>
-
-                {/* Details */}
-                <Space direction="vertical" size={8} style={{ width: '100%', marginBottom: 16 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', color: '#666', fontSize: 14 }}>
-                    <EnvironmentOutlined style={{ marginRight: 8 }} />
-                    {job.location}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', color: '#666', fontSize: 14 }}>
-                    <DollarOutlined style={{ marginRight: 8 }} />
-                    {job.salaryMin} - {job.salaryMax}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', color: '#999', fontSize: 13 }}>
-                    <ClockCircleOutlined style={{ marginRight: 8 }} />
-                    {getTimeAgo(job.createdAt)}
-                  </div>
-                </Space>
-
-                {/* Action Buttons */}
-                <Space direction="vertical" size={8} style={{ width: '100%' }}>
-                  <Button
-                    block
-                    type="primary"
-                    size="large"
-                    onClick={() => router.push(`/jobs/${job.id}`)}
-                    style={{ 
-                      borderRadius: 8,
-                      background: 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #14b8a6 100%)',
-                      border: 'none',
-                      fontWeight: 500
-                    }}
-                  >
-                    Ứng tuyển ngay
-                  </Button>
-                  <Button
-                    block
-                    size="large"
-                    icon={<MessageOutlined />}
-                    onClick={() => handleStartChat(job)}
-                    style={{ 
-                      borderRadius: 8,
-                      fontWeight: 500
-                    }}
-                  >
-                    Chat với HR
-                  </Button>
-                </Space>
+                <p style={{ color: '#6b7280' }}>Thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh bộ lọc.</p>
               </Card>
-            </Col>
-          ))}
-        </Row>
-
-        {/* Empty State */}
-        {filteredJobs.length === 0 && !loading && (
-          <Card style={{ 
-            textAlign: 'center', 
-            padding: 60,
-            borderRadius: 12,
-            border: '1px solid #e8e8e8'
-          }}>
-            <div style={{ fontSize: 64, marginBottom: 16 }}>🔍</div>
-            <h3 style={{ fontSize: 20, marginBottom: 8, fontWeight: 600 }}>
-              Không tìm thấy công việc phù hợp
-            </h3>
-            <p style={{ color: '#999' }}>Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc</p>
-          </Card>
-        )}
+            )}
+          </section>
+        </div>
       </div>
+    </div>
   );
 }

@@ -55,7 +55,11 @@ public class DatabaseInitializer implements CommandLineRunner {
     }
 
     private void ensureUsersPasswordColumn() {
-        jdbcTemplate.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS encrypted_password VARCHAR(1024) NULL");
+        var columns = jdbcTemplate.queryForList("SHOW COLUMNS FROM users LIKE 'encrypted_password'");
+        if (columns.isEmpty()) {
+            jdbcTemplate.execute("ALTER TABLE users ADD COLUMN encrypted_password VARCHAR(1024) NULL");
+            System.out.println("=== Added encrypted_password column to users table ===");
+        }
     }
 
     private void ensureDefaultAdminAccount() {

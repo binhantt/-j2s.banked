@@ -66,13 +66,26 @@ public class ChatController {
 
     @PostMapping("/messages")
     public ResponseEntity<ChatMessage> sendMessage(@RequestBody Map<String, Object> request) {
-        ChatMessage message = ChatMessage.builder()
+        ChatMessage.ChatMessageBuilder builder = ChatMessage.builder()
                 .conversationId(Long.valueOf(request.get("conversationId").toString()))
                 .senderId(Long.valueOf(request.get("senderId").toString()))
                 .senderType(request.get("senderType").toString())
-                .message(request.get("message").toString())
-                .build();
+                .message(request.get("message").toString());
 
+        // Handle reply
+        if (request.containsKey("replyToMessageId") && request.get("replyToMessageId") != null) {
+            Long replyToMessageId = Long.valueOf(request.get("replyToMessageId").toString());
+            builder.replyToMessageId(replyToMessageId);
+            
+            // Get the original message content
+            messageRepository.findByConversationId(Long.valueOf(request.get("conversationId").toString()))
+                    .stream()
+                    .filter(m -> m.getId().equals(replyToMessageId))
+                    .findFirst()
+                    .ifPresent(originalMsg -> builder.replyToMessage(originalMsg.getMessage()));
+        }
+
+        ChatMessage message = builder.build();
         ChatMessage saved = sendMessageUseCase.execute(message);
         return ResponseEntity.ok(saved);
     }

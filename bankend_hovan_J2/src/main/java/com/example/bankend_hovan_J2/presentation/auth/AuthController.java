@@ -66,9 +66,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDTO> loginByPassword(@RequestBody PasswordLoginRequest request) {
-        AuthResponseDTO response = passwordLoginUseCase.execute(request.getEmail(), request.getPassword());
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> loginByPassword(@RequestBody PasswordLoginRequest request) {
+        try {
+            AuthResponseDTO response = passwordLoginUseCase.execute(request.getEmail(), request.getPassword());
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(java.util.Map.of("message", e.getMessage()));
+        }
     }
 
     @PostMapping("/refresh")

@@ -167,3 +167,14 @@ body {
 .ant-tooltip-arrow::before {
   background: #ffffff !important;
 }
+
+/* Ưu tiên màu đen cho các link có class text-black (ví dụ navbar) */
+/* Chỉ override màu link trong header (navbar), không ảnh hưởng chỗ khác */
+.ant-layout-header a {
+  color: #000000 !important;
+}
+
+.ant-layout-header a:hover,
+.ant-layout-header a:focus {
+  color: #000000 !important;
+}
