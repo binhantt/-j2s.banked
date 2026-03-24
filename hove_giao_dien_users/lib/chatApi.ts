@@ -28,24 +28,34 @@ const enrichConversation = async (conversation: any) => {
 };
 
 const enrichConversations = async (conversations: any[]) => {
-  return Promise.all((conversations || []).map((conversation) => enrichConversation(conversation)));
+  if (!Array.isArray(conversations)) {
+    console.warn('enrichConversations: conversations is not an array', conversations);
+    return [];
+  }
+  return Promise.all(conversations.map((conversation) => enrichConversation(conversation)));
 };
 
 export const chatApi = {
   // Get conversations
   getJobSeekerConversations: async (userId: number) => {
     const response = await api.get(`/api/chat/conversations/job-seeker/${userId}`);
-    return enrichConversations(response.data || []);
+    // Backend returns PagedResponse: { content: [...], totalElements, ... }
+    const page = response.data;
+    return enrichConversations(Array.isArray(page) ? page : (page?.content ?? []));
   },
 
   getHRConversations: async (userId: number) => {
     const response = await api.get(`/api/chat/conversations/hr/${userId}`);
-    return enrichConversations(response.data || []);
+    // Backend returns PagedResponse: { content: [...], totalElements, ... }
+    const page = response.data;
+    return enrichConversations(Array.isArray(page) ? page : (page?.content ?? []));
   },
 
   getAllConversations: async () => {
     const response = await api.get('/api/chat/conversations/all');
-    return enrichConversations(response.data || []);
+    // Backend returns PagedResponse: { content: [...], totalElements, ... }
+    const page = response.data;
+    return enrichConversations(Array.isArray(page) ? page : (page?.content ?? []));
   },
 
   // Create conversation
@@ -57,7 +67,9 @@ export const chatApi = {
   // Messages
   getMessages: async (conversationId: number) => {
     const response = await api.get(`/api/chat/messages/${conversationId}`);
-    return response.data;
+    // Backend returns PagedResponse: { content: [...], totalElements, ... }
+    const page = response.data;
+    return Array.isArray(page) ? page : (page?.content ?? []);
   },
 
   sendMessage: async (data: any) => {

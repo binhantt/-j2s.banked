@@ -19,7 +19,14 @@ public void deleteDomain(Long id) {
     // Kiểm tra có công ty thuộc lĩnh vực này không
     if (companyRepository.existsByDomainId(id)) {
         throw new IllegalArgumentException(
-            "Lĩnh vực này đã có công ty hoặc công việc thuộc về, không thể xóa!"
+            "Lĩnh vực này đã có công ty đang sử dụng, không thể xóa!"
+        );
+    }
+
+    // Kiểm tra có công việc thuộc lĩnh vực này không
+    if (jobPostingRepository.existsByDomainId(id)) {
+        throw new IllegalArgumentException(
+            "Lĩnh vực này đã có công việc đang tuyển dụng, không thể xóa!"
         );
     }
 

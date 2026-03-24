@@ -42,13 +42,13 @@ const roleLabel: Record<AccountRole, string> = {
 };
 
 const roleColor: Record<AccountRole, string> = {
-  job_seeker: 'green',
-  freelancer: 'lime',
-  hr: 'cyan',
-  admin: 'gold',
-  super_admin: 'red',
-  moderator: 'purple',
-  support: 'blue',
+  job_seeker: '#16a34a',
+  freelancer: '#22c55e',
+  hr: '#0891b2',
+  admin: '#ca8a04',
+  super_admin: '#dc2626',
+  moderator: '#9333ea',
+  support: '#2563eb',
 };
 
 export function UserManagementPage() {
@@ -196,24 +196,25 @@ export function UserManagementPage() {
 
   return (
     <div>
-      <div style={{ marginBottom: 20 }}>
-        <Title level={3} style={{ marginBottom: 4, color: '#0b1220' }}>
-          Quản lý tài khoản User & Backend
+      <div style={{ marginBottom: 32 }}>
+        <Title level={2} style={{ marginBottom: 8, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
+          Quản lý tài khoản
         </Title>
-        <Text type="secondary">
-          Quản trị riêng 2 nhóm tài khoản: người dùng hệ thống và tài khoản vận hành backend.
+        <Text style={{ color: '#64748b', fontSize: 15 }}>
+          Quản trị người dùng hệ thống và tài khoản vận hành backend
         </Text>
       </div>
 
-      <Card style={{ marginBottom: 16, borderRadius: 14 }}>
+      <Card style={{ marginBottom: 24, borderRadius: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
         <Space wrap style={{ width: '100%', justifyContent: 'space-between' }}>
-          <Space wrap>
+          <Space wrap size={16}>
             <Segmented
               value={groupFilter}
               onChange={handleGroupChange}
+              style={{ padding: 4, borderRadius: 12 }}
               options={[
-                { label: `User (${stats.userTotal})`, value: 'user' },
-                { label: `Backend (${stats.backendTotal})`, value: 'backend' },
+                { label: `Người dùng (${stats.userTotal})`, value: 'user' },
+                { label: `Quản trị viên (${stats.backendTotal})`, value: 'backend' },
               ]}
             />
             <Input
@@ -221,58 +222,65 @@ export function UserManagementPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Tìm theo tên hoặc email"
-              prefix={<SearchOutlined />}
-              style={{ width: 300 }}
+              prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+              style={{ width: 320, borderRadius: 12, height: 40 }}
             />
             <Select
               value={roleFilter}
               onChange={(value) => setRoleFilter(value)}
-              style={{ width: 220 }}
+              style={{ width: 220, borderRadius: 12 }}
               options={groupFilter === 'user' ? userRoleOptions : backendRoleOptions}
             />
           </Space>
-          <Space>
+          <Space size={12}>
             {groupFilter === 'backend' && (
               <Button
                 type="primary"
                 icon={<PlusOutlined />}
                 onClick={() => setCreateModalVisible(true)}
-                style={{ background: '#16a34a' }}
+                style={{ 
+                  background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+                  border: 'none',
+                  borderRadius: 12,
+                  fontWeight: 600,
+                  height: 40,
+                  boxShadow: '0 4px 12px rgba(22,163,74,0.15)'
+                }}
               >
-                Tạo tài khoản Backend
+                Tạo Admin mới
               </Button>
             )}
-            <Button icon={<ReloadOutlined />} onClick={() => void fetchUsers()}>
+            <Button 
+              icon={<ReloadOutlined />} 
+              onClick={() => void fetchUsers()}
+              style={{ borderRadius: 12, height: 40 }}
+            >
               Làm mới
             </Button>
           </Space>
         </Space>
       </Card>
 
-      <Card style={{ marginBottom: 16, borderRadius: 14 }}>
-        <Space size={32} wrap>
-          <div>
-            <Text type="secondary">Tổng tài khoản User</Text>
-            <Title level={4} style={{ margin: 0 }}>
+      <Card style={{ marginBottom: 24, borderRadius: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+        <Space size={48} wrap>
+          <div style={{ padding: '0 12px' }}>
+            <Text style={{ color: '#64748b', fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>TỔNG USER</Text>
+            <Title level={2} style={{ margin: '4px 0 0', fontWeight: 800 }}>
               {stats.userTotal}
             </Title>
           </div>
-          <div>
-            <Text type="secondary">User đang hoạt động</Text>
-            <Title level={4} style={{ margin: 0, color: '#16a34a' }}>
+          <div style={{ width: 1, height: 40, background: '#f1f5f9' }} />
+          <div style={{ padding: '0 12px' }}>
+            <Text style={{ color: '#16a34a', fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>ĐANG HOẠT ĐỘNG</Text>
+            <Title level={2} style={{ margin: '4px 0 0', fontWeight: 800, color: '#16a34a' }}>
               {stats.userActive}
             </Title>
           </div>
-          <div>
-            <Text type="secondary">Tổng tài khoản Backend</Text>
-            <Title level={4} style={{ margin: 0 }}>
+          <div style={{ width: 1, height: 40, background: '#f1f5f9' }} />
+          <div style={{ padding: '0 12px' }}>
+            <Text style={{ color: '#64748b', fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>TỔNG ADMIN</Text>
+            <Title level={2} style={{ margin: '4px 0 0', fontWeight: 800 }}>
               {stats.backendTotal}
-            </Title>
-          </div>
-          <div>
-            <Text type="secondary">Backend đang hoạt động</Text>
-            <Title level={4} style={{ margin: 0, color: '#16a34a' }}>
-              {stats.backendActive}
             </Title>
           </div>
         </Space>
@@ -295,13 +303,16 @@ export function UserManagementPage() {
               key: 'user',
               width: 300,
               render: (_: unknown, record: UserAdminRow) => (
-                <Space>
-                  <Avatar icon={<UserOutlined />} style={{ background: '#16a34a' }} />
+                <Space size={12}>
+                  <Avatar 
+                    icon={<UserOutlined />} 
+                    style={{ background: '#f0fdf4', color: '#16a34a', border: '1px solid #dcfce7' }} 
+                  />
                   <Space direction="vertical" size={0} style={{ minWidth: 0, flex: 1 }}>
-                    <Text strong ellipsis={{ tooltip: record.fullName }} style={{ maxWidth: 220 }}>
+                    <Text strong style={{ color: '#0f172a' }}>
                       {record.fullName}
                     </Text>
-                    <Text type="secondary" ellipsis={{ tooltip: record.email }} style={{ fontSize: 12, maxWidth: 220 }}>
+                    <Text style={{ fontSize: 12, color: '#64748b' }}>
                       {record.email}
                     </Text>
                   </Space>
@@ -320,7 +331,20 @@ export function UserManagementPage() {
               title: 'Vai trò',
               dataIndex: 'role',
               key: 'role',
-              render: (value: AccountRole) => <Tag color={roleColor[value]}>{roleLabel[value]}</Tag>,
+              render: (value: AccountRole) => (
+                <Tag 
+                  color="default" 
+                  style={{ 
+                    color: roleColor[value], 
+                    backgroundColor: `${roleColor[value]}10`,
+                    borderColor: `${roleColor[value]}30`,
+                    fontWeight: 600,
+                    borderRadius: 6
+                  }}
+                >
+                  {roleLabel[value]}
+                </Tag>
+              ),
             },
             {
               title: 'Trạng thái',

@@ -103,13 +103,39 @@ export const SavedItemsTabs = ({
     <>
       <style dangerouslySetInnerHTML={{__html: `
         .custom-saved-tabs .ant-tabs-nav::before { display: none; }
-        .custom-saved-tabs .ant-tabs-nav { margin-bottom: 32px; }
-        .custom-saved-tabs .ant-tabs-tab { padding: 12px 0; margin: 0 24px !important; font-size: 16px; transition: all 0.3s ease; }
-        .custom-saved-tabs .ant-tabs-tab:hover { color: #16a34a; }
-        .custom-saved-tabs .ant-tabs-tab-active .ant-tabs-tab-btn { color: #16a34a !important; text-shadow: none; font-weight: 700; transform: scale(1.05); }
-        .custom-saved-tabs .ant-tabs-ink-bar { background: #16a34a; height: 4px !important; border-radius: 4px; }
+        .custom-saved-tabs .ant-tabs-nav { margin-bottom: 40px; }
+        .custom-saved-tabs .ant-tabs-tab { 
+          padding: 12px 16px; 
+          margin: 0 4px !important; 
+          font-size: 15px; 
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          border-radius: 12px;
+          color: #64748b;
+        }
+        .custom-saved-tabs .ant-tabs-tab:hover { 
+          color: #16a34a;
+          background: #f0fdf4;
+        }
+        .custom-saved-tabs .ant-tabs-tab-active {
+          background: #f0fdf4 !important;
+        }
+        .custom-saved-tabs .ant-tabs-tab-active .ant-tabs-tab-btn { 
+          color: #16a34a !important; 
+          font-weight: 700; 
+        }
+        .custom-saved-tabs .ant-tabs-ink-bar { 
+          background: #16a34a; 
+          height: 3px !important; 
+          border-radius: 4px;
+        }
       `}} />
-      <Tabs defaultActiveKey="jobs" items={tabItems} size="large" className="custom-saved-tabs" centered />
+      <Tabs 
+        defaultActiveKey="jobs" 
+        items={tabItems} 
+        size="large" 
+        className="custom-saved-tabs" 
+        centered 
+      />
     </>
   );
 };

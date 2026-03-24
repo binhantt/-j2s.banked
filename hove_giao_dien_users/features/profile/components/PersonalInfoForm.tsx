@@ -1,5 +1,5 @@
-import { Form, Input, Button, message, Select } from 'antd';
-import { UserOutlined, MailOutlined, PhoneOutlined, EnvironmentOutlined, SaveOutlined, TagsOutlined } from '@ant-design/icons';
+import { Form, Input, Button, message, Select, Row, Col, Space, Typography } from 'antd';
+import { UserOutlined, MailOutlined, PhoneOutlined, EnvironmentOutlined, SaveOutlined, TagsOutlined, CompassOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useProfileStore } from '../store/useProfileStore';
@@ -10,6 +10,7 @@ import CertificateUpload from '@/components/CertificateUpload';
 
 const { TextArea } = Input;
 const { Option } = Select;
+const { Text } = Typography;
 
 interface PersonalInfoFormProps {
   isEditing: boolean;
@@ -173,123 +174,151 @@ export const PersonalInfoForm = ({ isEditing, onSaveSuccess }: PersonalInfoFormP
   }
 
   return (
-    <Form form={form} layout="vertical" onFinish={handleSubmit}>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-        <Form.Item label="Họ và tên" name="name" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}>
-          <Input size="large" prefix={<UserOutlined />} disabled={!isEditing} />
-        </Form.Item>
+    <Form form={form} layout="vertical" onFinish={handleSubmit} size="large">
+      <Row gutter={[24, 0]}>
+        <Col xs={24} md={12}>
+          <Form.Item label={<Space><UserOutlined style={{ color: '#16a34a' }} /> Họ và tên</Space>} name="name" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}>
+            <Input placeholder="Nguyễn Văn A" style={{ borderRadius: 12 }} disabled={!isEditing} />
+          </Form.Item>
+        </Col>
 
-        <Form.Item label="Email" name="email" rules={[{ required: true, type: 'email' }]}>
-          <Input size="large" prefix={<MailOutlined />} disabled />
-        </Form.Item>
+        <Col xs={24} md={12}>
+          <Form.Item label={<Space><MailOutlined style={{ color: '#16a34a' }} /> Email</Space>} name="email" rules={[{ required: true, type: 'email' }]}>
+            <Input style={{ borderRadius: 12 }} disabled />
+          </Form.Item>
+        </Col>
 
-        <Form.Item label="Vị trí công việc hiện tại" name="currentPosition">
-          <Input
-            size="large"
-            prefix={<UserOutlined />}
-            placeholder="VD: Senior Frontend Developer, Product Manager"
-            disabled={!isEditing}
-          />
-        </Form.Item>
+        <Col xs={24} md={12}>
+          <Form.Item label={<Space><UserOutlined style={{ color: '#16a34a' }} /> Vị trí công việc hiện tại</Space>} name="currentPosition">
+            <Input
+              placeholder="VD: Senior Frontend Developer"
+              style={{ borderRadius: 12 }}
+              disabled={!isEditing}
+            />
+          </Form.Item>
+        </Col>
 
-        <Form.Item label="Số điện thoại" name="phone">
-          <Input size="large" prefix={<PhoneOutlined />} placeholder="VD: 0123456789" disabled={!isEditing} />
-        </Form.Item>
+        <Col xs={24} md={12}>
+          <Form.Item label={<Space><PhoneOutlined style={{ color: '#16a34a' }} /> Số điện thoại</Space>} name="phone">
+            <Input placeholder="VD: 0123456789" style={{ borderRadius: 12 }} disabled={!isEditing} />
+          </Form.Item>
+        </Col>
 
-        <Form.Item 
-          label="Lĩnh vực quan tâm" 
-          name="domainId"
-          rules={[{ required: true, message: 'Vui lòng chọn lĩnh vực quan tâm!' }]}
-        >
-          <Select
-            size="large"
-            placeholder="Chọn lĩnh vực bạn quan tâm"
-            disabled={!isEditing}
-            loading={loadingDomains}
-            suffixIcon={<TagsOutlined />}
-            showSearch
-            filterOption={(input, option) =>
-              (option?.children as unknown as string)?.toLowerCase().includes(input.toLowerCase())
-            }
+        <Col xs={24}>
+          <Form.Item 
+            label={<Space><TagsOutlined style={{ color: '#16a34a' }} /> Lĩnh vực quan tâm</Space>} 
+            name="domainId"
+            rules={[{ required: true, message: 'Vui lòng chọn lĩnh vực quan tâm!' }]}
           >
-            {domains.map(domain => (
-              <Option key={domain.id} value={domain.id}>
-                {domain.name}
-                {domain.description && (
-                  <span style={{ color: '#999', fontSize: '12px', marginLeft: '8px' }}>
-                    - {domain.description}
-                  </span>
+            <Select
+              placeholder="Chọn lĩnh vực bạn quan tâm"
+              disabled={!isEditing}
+              loading={loadingDomains}
+              style={{ borderRadius: 12 }}
+              dropdownStyle={{ borderRadius: 12 }}
+              showSearch
+              filterOption={(input, option) =>
+                (option?.children as unknown as string)?.toLowerCase().includes(input.toLowerCase())
+              }
+            >
+              {domains.map(domain => (
+                <Option key={domain.id} value={domain.id}>
+                  {domain.name}
+                  {domain.description && (
+                    <Text type="secondary" style={{ fontSize: '12px', marginLeft: '8px' }}>
+                      - {domain.description}
+                    </Text>
+                  )}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Row gutter={[24, 0]}>
+        <Col xs={24} md={12}>
+          <Form.Item label={<Space><EnvironmentOutlined style={{ color: '#16a34a' }} /> Quê quán</Space>} name="hometown">
+            <Input
+              placeholder="VD: Hà Nội, TP. Hồ Chí Minh"
+              style={{ borderRadius: 12 }}
+              disabled={!isEditing}
+            />
+          </Form.Item>
+        </Col>
+
+        <Col xs={24} md={12}>
+          <Form.Item
+            label={
+              <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+                <Space><CompassOutlined style={{ color: '#16a34a' }} /> Vị trí hiện tại</Space>
+                {isEditing && (
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<EnvironmentOutlined />}
+                    onClick={handleGetCurrentLocation}
+                    loading={gettingLocation}
+                    style={{ padding: 0, height: 'auto', fontWeight: 600, color: '#16a34a' }}
+                  >
+                    Lấy GPS
+                  </Button>
                 )}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
-      </div>
+              </Space>
+            }
+            name="currentLocation"
+            extra={isEditing ? <Text type="secondary" style={{ fontSize: 11 }}>Nhấn 'Lấy GPS' để tự động cập nhật vị trí</Text> : undefined}
+          >
+            <Input
+              placeholder="Hoặc nhập thủ công địa chỉ"
+              style={{ borderRadius: 12 }}
+              disabled={!isEditing}
+            />
+          </Form.Item>
+        </Col>
+      </Row>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-        <Form.Item label="Quê quán (vị trí cố định)" name="hometown">
-          <Input
-            size="large"
-            prefix={<EnvironmentOutlined />}
-            placeholder="VD: Hà Nội, TP. Hồ Chí Minh"
-            disabled={!isEditing}
-          />
-        </Form.Item>
-
-        <Form.Item
-          label={
-            <span>
-              Vị trí hiện tại (để ứng tuyển Freelance){' '}
-              {isEditing && (
-                <Button
-                  type="link"
-                  size="small"
-                  icon={<EnvironmentOutlined />}
-                  onClick={handleGetCurrentLocation}
-                  loading={gettingLocation}
-                  style={{ padding: 0, height: 'auto' }}
-                >
-                  Lấy GPS
-                </Button>
-              )}
-            </span>
-          }
-          name="currentLocation"
-          extra={isEditing ? "Nhấn 'Lấy GPS' để tự động lấy vị trí hiện tại" : undefined}
-        >
-          <Input
-            size="large"
-            prefix={<EnvironmentOutlined />}
-            placeholder="Hoặc nhập thủ công"
-            disabled={!isEditing}
-          />
-        </Form.Item>
-      </div>
-
-      <Form.Item label="Giới thiệu bản thân" name="bio">
-        <TextArea rows={4} placeholder="Viết vài dòng về bản thân..." disabled={!isEditing} />
+      <Form.Item label={<Space><UserOutlined style={{ color: '#16a34a' }} /> Giới thiệu bản thân</Space>} name="bio">
+        <TextArea rows={4} placeholder="Viết vài dòng về bản thân, kỹ năng và mục tiêu của bạn..." style={{ borderRadius: 12, padding: '12px' }} disabled={!isEditing} />
       </Form.Item>
 
       {isEditing && (
         <Form.Item
           label={
-            <span>
-              Ảnh chứng chỉ / Bằng cấp <span style={{ color: '#ff4d4f' }}>* Bắt buộc để ứng tuyển Freelance</span>
-            </span>
+            <Text strong style={{ color: '#ef4444' }}>
+              Ảnh chứng chỉ / Bằng cấp * (Bắt buộc để ứng tuyển Freelance)
+            </Text>
           }
         >
-          <CertificateUpload
-            userId={user?.id || 0}
-            currentImages={certificateImages}
-            onImagesChange={setCertificateImages}
-          />
+          <div style={{ padding: '16px', background: '#fff1f0', borderRadius: 16, border: '1px dashed #ffa39e' }}>
+            <CertificateUpload
+              userId={user?.id || 0}
+              currentImages={certificateImages}
+              onImagesChange={setCertificateImages}
+            />
+          </div>
         </Form.Item>
       )}
 
       {isEditing && (
-        <Form.Item>
-          <Button type="primary" htmlType="submit" size="large" icon={<SaveOutlined />} loading={loading}>
-            Lưu thay đổi
+        <Form.Item style={{ marginTop: 32 }}>
+          <Button 
+            type="primary" 
+            htmlType="submit" 
+            size="large" 
+            icon={<SaveOutlined />} 
+            loading={loading}
+            style={{ 
+              height: 48, 
+              borderRadius: 12, 
+              padding: '0 32px', 
+              fontWeight: 700, 
+              background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+              border: 'none',
+              boxShadow: '0 8px 16px rgba(22,163,74,0.2)'
+            }}
+          >
+            Lưu thay đổi hồ sơ
           </Button>
         </Form.Item>
       )}

@@ -1,4 +1,4 @@
-# Controller — Danh sách cuộc trò chuyện
+# Controller — Danh sách cuộc trò chuyện (CÓ PHÂN TRANG)
 
 ```java
 // src/main/java/.../presentation/chat/ChatController.java
@@ -42,8 +42,32 @@ public class ChatController {
         return builder.build();
     }
 
+    // ========== CÓ PHÂN TRANG ==========
     @GetMapping("/conversations/all")
-    public ResponseEntity<List<ConversationDTO>> getAllConversations() {
+    public ResponseEntity<Page<ConversationDTO>> getAllConversations(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "30") int daysLimit) {
+
+        // Tính ngày bắt đầu (30 ngày trước)
+        LocalDateTime startDate = LocalDateTime.now().minusDays(daysLimit);
+
+        // Tạo Pageable sắp xếp theo updatedAt giảm dần (mới nhất trước)
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
+
+        // Query với filter ngày + phân trang
+        Page<Conversation> conversationPage = conversationRepository
+            .findByUpdatedAtAfter(startDate, pageable);
+
+        // Map sang DTO
+        Page<ConversationDTO> dtoPage = conversationPage.map(this::mapToDTO);
+
+        return ResponseEntity.ok(dtoPage);
+    }
+
+    // Endpoint cũ (giữ lại cho backward compatibility)
+    @GetMapping("/conversations/all/legacy")
+    public ResponseEntity<List<ConversationDTO>> getAllConversationsLegacy() {
         List<ConversationDTO> conversations = conversationRepository.findAll()
             .stream().map(this::mapToDTO).collect(Collectors.toList());
         return ResponseEntity.ok(conversations);
@@ -58,52 +82,45 @@ public class ChatController {
 }
 ```
 
-## Conversation Entity
-```java
-// src/main/java/.../domain/chat/entity/Conversation.java
+## Repository - Thêm method phân trang
 
-@Data @Builder @NoArgsConstructor @AllArgsConstructor
-public class Conversation {
-    private Long id;
-    private Long hrId;
-    private Long jobSeekerId;
-    private Long jobPostingId; // nullable
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+```java
+// src/main/java/.../domain/chat/repository/ConversationRepository.java
+
+@Repository
+public interface ConversationRepository extends JpaRepository<Conversation, Long> {
+    // Method cũ
+    List<Conversation> findByHrId(Long hrId);
+    List<Conversation> findByJobSeekerId(Long jobSeekerId);
+    List<Conversation> findAll();
+
+    // Method MỚI: Có phân trang + filter theo ngày
+    Page<Conversation> findByUpdatedAtAfter(LocalDateTime startDate, Pageable pageable);
 }
 ```
 
-## ConversationDTO
+## Response Pagination
+
 ```java
-// src/main/java/.../presentation/chat/dto/ConversationDTO.java
-
-@Data @Builder
-public class ConversationDTO {
-    private Long id;
-    private Long hrId;
-    private Long jobSeekerId;
-    private Long jobPostingId;
-    private ConversationUserSummaryDTO hr;
-    private ConversationUserSummaryDTO jobSeeker;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-}
-
-@Data @Builder
-public class ConversationUserSummaryDTO {
-    private Long id;
-    private String name;
-    private String avatarUrl;
-}
-```
-
-## ConversationRepository
-```java
-List<Conversation> findByHrId(Long hrId);
-List<Conversation> findByJobSeekerId(Long jobSeekerId);
-List<Conversation> findAll();
+// Kết quả trả về: Page<ConversationDTO>
+// {
+//   "content": [...],           // Danh sách cuộc trò chuyện
+//   "pageable": {
+//     "pageNumber": 0,
+//     "pageSize": 20
+//   },
+//   "totalElements": 150,       // Tổng số cuộc trò chuyện
+//   "totalPages": 8,            // Tổng số trang
+//   "first": true,
+//   "last": false,
+//   "size": 20,
+//   "number": 0,
+//   "numberOfElements": 20
+// }
 ```
 
 ## Lưu ý
-- Không filter 30 ngày ở backend — frontend tự filter
-- Nếu user bị xóa → Optional rỗng → bỏ qua, không crash
+- Phân trang mặc định: page=0, size=20
+- Filter 30 ngày mặc định (có thể tùy chỉnh qua `daysLimit`)
+- Sắp xếp theo `updatedAt` giảm dần → cuộc trò chuyện mới nhất lên đầu
+- Giữ endpoint legacy `/conversations/all/legacy` để tương thích ngược

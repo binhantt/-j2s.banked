@@ -22,6 +22,7 @@ interface BlogDetailFeatureProps {
   postId: string;
 }
 
+// Finalized premium design
 export const BlogDetailFeature = ({ postId }: BlogDetailFeatureProps) => {
   const router = useRouter();
   const [post, setPost] = useState<any>(null);
@@ -59,12 +60,21 @@ export const BlogDetailFeature = ({ postId }: BlogDetailFeatureProps) => {
           tags: [],
         };
       } else {
-        // Platform blog - try to get it, but handle 404/500 gracefully
+        // Platform blog - ensure ID is numeric to avoid 400 error from backend (Long expected)
+        const numericId = postId.trim();
+        if (!/^\d+$/.test(numericId)) {
+          console.warn('Invalid platform blog ID format:', numericId);
+          message.error('Mã bài viết không đúng định dạng');
+          setPost(null);
+          setLoading(false);
+          return;
+        }
+
         try {
-          response = await blogApi.getBlogById(postId);
+          response = await blogApi.getBlogById(numericId);
         } catch (error: any) {
           // If platform blog not found, show appropriate message
-          if (error.response?.status === 404 || error.response?.status === 500) {
+          if (error.response?.status === 404 || error.response?.status === 500 || error.response?.status === 400) {
             message.error('Bài viết không tồn tại hoặc đã bị xóa');
             setPost(null);
             setLoading(false);
@@ -135,92 +145,108 @@ export const BlogDetailFeature = ({ postId }: BlogDetailFeatureProps) => {
 
   if (!post) {
     return (
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div style={{ maxWidth: 1000, margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
         <Empty description="Không tìm thấy bài viết" />
+        <Button onClick={() => router.push('/blog')} style={{ marginTop: 24 }}>
+          Quay lại Blog
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      {/* Hero Section */}
-      <div className="relative w-full h-[50vh] sm:h-[60vh] min-h-[400px]">
+    <div style={{ background: '#f8fafc', minHeight: '100vh' }}>
+      {/* Premium Hero Section */}
+      <div style={{ 
+        position: 'relative', 
+        width: '100%', 
+        height: '60vh', 
+        minHeight: '400px',
+        overflow: 'hidden'
+      }}>
         {post.image ? (
-          <img src={post.image} alt={post.title} className="absolute inset-0 w-full h-full object-cover" />
+          <img 
+            src={post.image} 
+            alt={post.title} 
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+          />
         ) : (
-          <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-green-600 to-green-800" />
+          <div style={{ 
+            width: '100%', height: '100%', 
+            background: 'linear-gradient(135deg, #15803d 0%, #16a34a 100%)' 
+          }} />
         )}
-        <div className="absolute inset-0 bg-black/60 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
         
-        {/* Navigation & Breadcrumb Overlay */}
-        <div className="absolute top-0 left-0 w-full pt-6 px-4 sm:px-6 lg:px-8 z-20">
-          <div className="max-w-5xl mx-auto">
-            {/* Breadcrumb + Back Button Row */}
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              <Breadcrumb
-                className="[&_.ant-breadcrumb-link]:!text-white/80 [&_.ant-breadcrumb-link]:hover:!text-white [&_.ant-breadcrumb-separator]:!text-white/50"
-                items={[
-                  { title: <Link href="/" className="flex items-center gap-1"><HomeOutlined /> Trang chủ</Link> },
-                  { title: <Link href="/blog" className="flex items-center gap-1"><GlobalOutlined /> Blog</Link> },
-                  { title: <span className="text-white font-medium">{post.title?.substring(0, 40)}{post.title?.length > 40 ? '...' : ''}</span> },
-                ]}
-              />
-              <Link
-                href="/blog"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white/90 hover:text-white text-sm font-medium rounded-full transition-all duration-200 hover:scale-105"
-              >
-                <span className="text-base leading-none">←</span> Quay lại
-              </Link>
-            </div>
+        {/* Modern Overlay */}
+        <div style={{ 
+          position: 'absolute', inset: 0, 
+          background: 'linear-gradient(to top, rgba(15,23,42,0.9) 0%, rgba(15,23,42,0.4) 50%, transparent 100%)' 
+        }} />
+        
+        {/* Navigation Overlay */}
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', padding: '32px 24px 0', zIndex: 20 }}>
+          <div style={{ maxWidth: 1000, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Breadcrumb
+              items={[
+                { title: <Link href="/" style={{ color: 'rgba(255,255,255,0.8)' }}><HomeOutlined /> Trang chủ</Link> },
+                { title: <Link href="/blog" style={{ color: 'rgba(255,255,255,0.8)' }}><GlobalOutlined /> Blog</Link> },
+                { title: <span style={{ color: '#fff', fontWeight: 600 }}>Chi tiết</span> },
+              ]}
+            />
+            <Button
+              type="text"
+              onClick={() => router.push('/blog')}
+              style={{ color: '#fff', background: 'rgba(255,255,255,0.1)', borderRadius: 100, backdropFilter: 'blur(8px)' }}
+            >
+              ← Quay lại Blog
+            </Button>
           </div>
         </div>
 
-        {/* Hero Content Overlay */}
-        <div className="absolute bottom-0 left-0 w-full px-4 sm:px-6 lg:px-8 pb-20 sm:pb-24 z-10">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex flex-wrap gap-3 mb-6">
+        {/* Hero Title Container */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', padding: '0 24px 100px', zIndex: 10 }}>
+          <div style={{ maxWidth: 900, margin: '0 auto' }}>
+            <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
               <Tag 
-                color={post.source === 'platform' ? 'magenta' : 'green'} 
-                className="text-xs sm:text-sm px-4 py-1.5 rounded-full border-0 shadow-lg font-medium tracking-wide bg-white/20 backdrop-blur-md text-white flex items-center"
-                icon={post.source === 'platform' ? <GlobalOutlined /> : <BankOutlined />}
+                style={{ 
+                  background: '#16a34a', color: '#fff', border: 'none', 
+                  borderRadius: 100, padding: '4px 16px', fontWeight: 700 
+                }}
               >
-                <span className="ml-1">{post.source === 'platform' ? 'Blog nền tảng' : 'Blog công ty'}</span>
-              </Tag>
-              <Tag className="text-xs sm:text-sm px-4 py-1.5 rounded-full border-0 shadow-lg font-medium tracking-wide bg-white/20 backdrop-blur-md text-white m-0">
                 {post.category}
+              </Tag>
+              <Tag 
+                style={{ 
+                  background: 'rgba(255,255,255,0.2)', color: '#fff', border: 'none', 
+                  borderRadius: 100, padding: '4px 16px', backdropFilter: 'blur(4px)' 
+                }}
+              >
+                {post.source === 'platform' ? 'Hệ thống' : 'Công ty'}
               </Tag>
             </div>
             
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-white mb-6 leading-[1.2] drop-shadow-2xl">
+            <h1 style={{ 
+              fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 800, color: '#fff', 
+              lineHeight: 1.2, marginBottom: 24, textShadow: '0 4px 20px rgba(0,0,0,0.3)' 
+            }}>
               {post.title}
             </h1>
             
-            <div className="flex flex-wrap items-center gap-6 text-white/90">
-              <div className="flex items-center gap-3">
-                <Avatar
-                  src={post.authorAvatar}
-                  size={52}
-                  icon={<UserOutlined />}
-                  className="border-2 border-white/30 shadow-lg"
-                  style={{ background: post.source === 'platform' ? '#16a34a' : '#f59e0b' }}
-                />
-                <div>
-                  <div className="font-semibold text-white text-base tracking-wide">{post.author}</div>
-                  <div className="flex items-center gap-1.5 text-sm text-gray-300 font-light">
-                    <CalendarOutlined className="text-xs" />
-                    <span>{post.date}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 text-sm font-medium ml-auto">
-                <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm border border-white/10">
-                  <ClockCircleOutlined className="text-green-300" />
-                  <span>{post.readTime}</span>
-                </div>
-                <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm border border-white/10">
-                  <EyeOutlined className="text-green-300" />
-                  <span>{post.views.toLocaleString('vi-VN')} lượt xem</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <Avatar 
+                size={48} 
+                src={post.authorAvatar} 
+                icon={<UserOutlined />} 
+                style={{ border: '2px solid rgba(255,255,255,0.4)', background: '#16a34a' }}
+              />
+              <div>
+                <div style={{ color: '#fff', fontWeight: 700, fontSize: 16 }}>{post.author}</div>
+                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <CalendarOutlined style={{ fontSize: 12 }} />
+                  {post.date}
+                  <span style={{ margin: '0 4px' }}>·</span>
+                  <EyeOutlined style={{ fontSize: 12 }} />
+                  {post.views.toLocaleString()} lượt xem
                 </div>
               </div>
             </div>
@@ -228,172 +254,121 @@ export const BlogDetailFeature = ({ postId }: BlogDetailFeatureProps) => {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Main Content Area (Floating Card) */}
-        <div className="relative z-20 max-w-4xl mx-auto bg-white rounded-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] p-6 sm:p-10 lg:p-14 mb-16 -mt-16 sm:-mt-24">
-          {/* Article Meta Header */}
-          <div className="flex flex-wrap items-center gap-3 mb-8 pb-6 border-b border-gray-100">
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <CalendarOutlined className="text-green-600" />
-              <span>{post.date}</span>
+      <div style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px' }}>
+        {/* Main Content Card */}
+        <div style={{ 
+          background: '#fff', borderRadius: 32, padding: '48px', 
+          marginTop: -60, position: 'relative', zIndex: 30,
+          boxShadow: '0 20px 50px rgba(15,23,42,0.08)',
+          border: '1px solid #f1f5f9'
+        }}>
+          {/* Article Reading Time & Progress Marker */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32, color: '#64748b', fontSize: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <ClockCircleOutlined style={{ color: '#16a34a' }} />
+              <span>{post.readTime || '5 phút đọc'}</span>
             </div>
-            <span className="text-gray-300">·</span>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <ClockCircleOutlined className="text-green-600" />
-              <span>{post.readTime}</span>
-            </div>
-            <span className="text-gray-300">·</span>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <EyeOutlined className="text-green-600" />
-              <span>{post.views.toLocaleString('vi-VN')} lượt xem</span>
-            </div>
+            <div style={{ height: 4, width: 4, background: '#cbd5e1', borderRadius: '50%' }} />
+            <div style={{ color: '#16a34a', fontWeight: 600 }}>Kiến thức & Kinh nghiệm</div>
           </div>
 
-          <div className="prose prose-lg sm:prose-xl max-w-none prose-blue
-            prose-headings:font-bold prose-headings:text-gray-900
-            prose-p:text-gray-700 prose-p:leading-[1.9]
-            prose-a:text-green-600 prose-a:no-underline hover:prose-a:underline
-            prose-img:rounded-2xl prose-img:shadow-lg
-            prose-blockquote:border-l-4 prose-blockquote:border-green-600 prose-blockquote:bg-green-50 prose-blockquote:py-2 prose-blockquote:px-5 prose-blockquote:rounded-r-lg prose-blockquote:not-italic prose-blockquote:text-gray-700">
-            <div
-              className="text-gray-800 leading-[1.9]"
-              style={{ whiteSpace: 'pre-line' }}
-              dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br/>') }}
-            />
-          </div>
+          <div 
+            style={{ 
+              fontSize: 18, lineHeight: 1.8, color: '#334155', 
+              whiteSpace: 'pre-line' 
+            }}
+            dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br/>') }}
+          />
 
-          <Divider className="my-10 lg:my-14" />
+          <Divider style={{ margin: '48px 0' }} />
 
-          {/* Tags */}
+          {/* Tags Section */}
           {post.tags && post.tags.length > 0 && (
-            <div className="mb-12">
-              <h3 className="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">
-                <Tag color="blue" className="rounded-full border-0 m-0 w-8 h-8 flex items-center justify-center font-bold text-lg">#</Tag>
-                Chủ đề bài viết
-              </h3>
-              <div className="flex flex-wrap gap-2">
+            <div style={{ marginBottom: 40 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Chủ đề liên quan
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
                 {post.tags.map((tag: string, index: number) => (
                   <span 
                     key={index}
-                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl transition-colors cursor-pointer"
+                    style={{ 
+                      padding: '8px 20px', background: '#f8fafc', borderRadius: 12, 
+                      fontSize: 14, color: '#475569', fontWeight: 600, border: '1px solid #f1f5f9',
+                      cursor: 'pointer', transition: 'all 0.2s ease'
+                    }}
                   >
-                    {tag}
+                    #{tag}
                   </span>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Share */}
-          <div className="bg-gray-50 p-6 sm:p-8 rounded-2xl border border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-6">
+          {/* Shared Action Section */}
+          <div style={{ 
+            background: '#f0fdf4', borderRadius: 24, padding: '32px', 
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            border: '1px solid #dcfce7'
+          }}>
             <div>
-              <h3 className="text-lg font-bold text-gray-900 mb-1">Chia sẻ bài viết này</h3>
-              <p className="text-gray-500 text-sm m-0">Lan tỏa kiến thức đến cộng đồng của bạn</p>
+              <div style={{ fontSize: 18, fontWeight: 800, color: '#166534', marginBottom: 4 }}>Chia sẻ bài viết</div>
+              <p style={{ color: '#15803d', margin: 0 }}>Giúp bạn bè và đồng nghiệp cùng cập nhật kiến thức mới.</p>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <Button
-                shape="circle"
-                icon={<FacebookOutlined />}
-                size="large"
-                className="bg-[#1877f2] text-white hover:opacity-90 hover:text-white border-0 shadow-md hover:scale-110 transition-all flex items-center justify-center"
-                onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${window.location.href}`, '_blank')}
-              />
-              <Button
-                shape="circle"
-                icon={<TwitterOutlined />}
-                size="large"
-                className="bg-[#1da1f2] text-white hover:opacity-90 hover:text-white border-0 shadow-md hover:scale-110 transition-all flex items-center justify-center"
-                onClick={() => window.open(`https://twitter.com/intent/tweet?url=${window.location.href}&text=${post.title}`, '_blank')}
-              />
-              <Button
-                shape="circle"
-                icon={<LinkedinOutlined />}
-                size="large"
-                className="bg-[#0a66c2] text-white hover:opacity-90 hover:text-white border-0 shadow-md hover:scale-110 transition-all flex items-center justify-center"
-                onClick={() => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${window.location.href}`, '_blank')}
-              />
-              <Button
-                shape="circle"
-                icon={<HeartOutlined />}
-                size="large"
-                className="bg-rose-500 text-white hover:opacity-90 hover:text-white border-0 shadow-md hover:scale-110 transition-all flex items-center justify-center"
-              />
+            <div style={{ display: 'flex', gap: 12 }}>
+              <Button shape="circle" icon={<FacebookOutlined />} size="large" style={{ background: '#1877f2', color: '#fff', border: 'none' }} />
+              <Button shape="circle" icon={<TwitterOutlined />} size="large" style={{ background: '#1da1f2', color: '#fff', border: 'none' }} />
+              <Button shape="circle" icon={<LinkedinOutlined />} size="large" style={{ background: '#0a66c2', color: '#fff', border: 'none' }} />
             </div>
           </div>
         </div>
 
-        {/* Related Posts */}
+        {/* Related articles section */}
         {relatedPosts.length > 0 && (
-          <div className="mb-20">
-            <div className="flex items-end justify-between mb-8">
+          <div style={{ marginTop: 80, paddingBottom: 100 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32 }}>
               <div>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">
+                <h2 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', marginBottom: 4 }}>
                   Bài viết liên quan
                 </h2>
-                <div className="h-1.5 bg-green-600 w-16 rounded-full mt-3"></div>
+                <div style={{ height: 4, width: 48, background: '#16a34a', borderRadius: 4 }}></div>
               </div>
-              <Link
-                href="/blog"
-                className="hidden sm:inline-flex items-center gap-1.5 text-green-600 hover:text-green-700 font-semibold text-sm transition-colors"
-              >
-                Xem tất cả <span className="text-base leading-none">→</span>
+              <Link href="/blog" style={{ color: '#16a34a', fontWeight: 700, fontSize: 15 }}>
+                Xem tất cả →
               </Link>
             </div>
+
             <Row gutter={[24, 24]}>
               {relatedPosts.map((relatedPost) => (
-                <Col key={relatedPost.id} xs={24} sm={12} lg={8}>
-                  <Link href={`/blog/${relatedPost.id}`} className="block h-full group">
-                    <Card
-                      hoverable
-                      className="border border-gray-100 bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 h-full overflow-hidden"
-                      bodyStyle={{ padding: '20px' }}
-                      cover={
-                        relatedPost.image ? (
-                          <div className="h-48 overflow-hidden relative">
-                            <img
-                              src={relatedPost.image}
-                              alt={relatedPost.title}
-                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                            />
-                            <div className="absolute top-3 left-3">
-                              <Tag
-                                color={relatedPost.source === 'platform' ? 'blue' : 'green'}
-                                className="m-0 text-xs rounded-full font-medium border-0 shadow-md"
-                              >
-                                {relatedPost.source === 'platform' ? 'Nền tảng' : 'Công ty'}
-                              </Tag>
-                            </div>
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                          </div>
-                        ) : (
-                          <div className="h-48 bg-gray-100 flex items-center justify-center">
-                            <BankOutlined className="text-4xl text-gray-300" />
-                          </div>
-                        )
-                      }
-                    >
-                      <div className="mb-3 flex items-center gap-2 text-xs text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <CalendarOutlined className="text-xs" />
-                          {relatedPost.date}
-                        </span>
-                        <span>·</span>
-                        <span className="flex items-center gap-1">
-                          <ClockCircleOutlined className="text-xs" />
-                          {relatedPost.readTime}
-                        </span>
-                      </div>
-                      <h3 className="font-bold text-gray-900 mb-3 line-clamp-2 text-base group-hover:text-green-600 transition-colors leading-snug">
+                <Col key={relatedPost.id} xs={24} md={8}>
+                  <div
+                    onClick={() => router.push(`/blog/${relatedPost.id}`)}
+                    style={{ 
+                      background: '#fff', borderRadius: 24, overflow: 'hidden', 
+                      height: '100%', border: '1px solid #f1f5f9', cursor: 'pointer',
+                      transition: 'all 0.3s ease', boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
+                    }}
+                  >
+                    <div style={{ height: 180, overflow: 'hidden' }}>
+                      <img 
+                        src={relatedPost.image || 'https://via.placeholder.com/400x200/f8fafc/64748b?text=Knowledge'} 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      />
+                    </div>
+                    <div style={{ padding: 20 }}>
+                      <Tag style={{ background: '#f0fdf4', color: '#16a34a', border: 'none', borderRadius: 100, marginBottom: 12, fontSize: 10 }}>
+                        {relatedPost.category}
+                      </Tag>
+                      <h3 style={{ 
+                        fontSize: 16, fontWeight: 700, color: '#0f172a', 
+                        lineHeight: 1.4, marginBottom: 8,
+                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
+                      }}>
                         {relatedPost.title}
                       </h3>
-                      <p className="text-gray-500 text-sm line-clamp-2 leading-relaxed">
-                        {relatedPost.excerpt}
-                      </p>
-                      <div className="flex items-center gap-1.5 mt-4 text-xs font-semibold text-green-600 group-hover:gap-2.5 transition-all">
-                        Đọc ngay <span className="text-base leading-none">→</span>
-                      </div>
-                    </Card>
-                  </Link>
+                      <div style={{ fontSize: 12, color: '#64748b' }}>{relatedPost.date}</div>
+                    </div>
+                  </div>
                 </Col>
               ))}
             </Row>

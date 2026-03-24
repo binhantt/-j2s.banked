@@ -6,17 +6,21 @@ import com.example.bankend_hovan_J2.domain.chat.entity.ChatMessage;
 import com.example.bankend_hovan_J2.domain.chat.entity.Conversation;
 import com.example.bankend_hovan_J2.domain.chat.repository.ChatMessageRepository;
 import com.example.bankend_hovan_J2.domain.chat.repository.ConversationRepository;
+import com.example.bankend_hovan_J2.domain.user.repository.UserRepository;
+import com.example.bankend_hovan_J2.presentation.chat.dto.ConversationDTO;
+import com.example.bankend_hovan_J2.presentation.chat.dto.ConversationUserSummaryDTO;
+import com.example.bankend_hovan_J2.presentation.chat.dto.PagedResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.example.bankend_hovan_J2.domain.user.repository.UserRepository;
-import com.example.bankend_hovan_J2.presentation.chat.dto.ConversationDTO;
-import com.example.bankend_hovan_J2.presentation.chat.dto.ConversationUserSummaryDTO;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -37,7 +41,7 @@ public class ChatController {
                 .createdAt(conv.getCreatedAt())
                 .updatedAt(conv.getUpdatedAt());
 
-        userRepository.findById(conv.getHrId()).ifPresent(hr -> 
+        userRepository.findById(conv.getHrId()).ifPresent(hr ->
             builder.hr(ConversationUserSummaryDTO.builder()
                 .id(hr.getId())
                 .name(hr.getName())
@@ -45,7 +49,7 @@ public class ChatController {
                 .build())
         );
 
-        userRepository.findById(conv.getJobSeekerId()).ifPresent(js -> 
+        userRepository.findById(conv.getJobSeekerId()).ifPresent(js ->
             builder.jobSeeker(ConversationUserSummaryDTO.builder()
                 .id(js.getId())
                 .name(js.getName())
@@ -56,12 +60,26 @@ public class ChatController {
         return builder.build();
     }
 
+    private <T> PagedResponse<T> buildPagedResponse(Page<T> page) {
+        return PagedResponse.<T>builder()
+                .content(page.getContent())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .page(page.getNumber())
+                .size(page.getSize())
+                .first(page.isFirst())
+                .last(page.isLast())
+                .hasNext(page.hasNext())
+                .hasPrevious(page.hasPrevious())
+                .build();
+    }
+
     @PostMapping("/conversations")
     public ResponseEntity<Conversation> createConversation(@RequestBody Map<String, Object> request) {
         Long hrId = Long.valueOf(request.get("hrId").toString());
         Long jobSeekerId = Long.valueOf(request.get("jobSeekerId").toString());
-        Long jobPostingId = request.get("jobPostingId") != null 
-            ? Long.valueOf(request.get("jobPostingId").toString()) 
+        Long jobPostingId = request.get("jobPostingId") != null
+            ? Long.valueOf(request.get("jobPostingId").toString())
             : null;
 
         Conversation conversation = Conversation.builder()
@@ -75,30 +93,43 @@ public class ChatController {
     }
 
     @GetMapping("/conversations/hr/{hrId}")
-    public ResponseEntity<List<ConversationDTO>> getHRConversations(@PathVariable Long hrId) {
-        List<ConversationDTO> conversations = conversationRepository.findByHrId(hrId)
-                .stream().map(this::mapToDTO).collect(Collectors.toList());
-        return ResponseEntity.ok(conversations);
+    public ResponseEntity<PagedResponse<ConversationDTO>> getHRConversations(
+            @PathVariable Long hrId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
+        Page<ConversationDTO> dtoPage = conversationRepository.findByHrId(hrId, pageable).map(this::mapToDTO);
+        return ResponseEntity.ok(buildPagedResponse(dtoPage));
     }
 
     @GetMapping("/conversations/job-seeker/{jobSeekerId}")
-    public ResponseEntity<List<ConversationDTO>> getJobSeekerConversations(@PathVariable Long jobSeekerId) {
-        List<ConversationDTO> conversations = conversationRepository.findByJobSeekerId(jobSeekerId)
-                .stream().map(this::mapToDTO).collect(Collectors.toList());
-        return ResponseEntity.ok(conversations);
+    public ResponseEntity<PagedResponse<ConversationDTO>> getJobSeekerConversations(
+            @PathVariable Long jobSeekerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
+        Page<ConversationDTO> dtoPage = conversationRepository.findByJobSeekerId(jobSeekerId, pageable).map(this::mapToDTO);
+        return ResponseEntity.ok(buildPagedResponse(dtoPage));
     }
 
     @GetMapping("/conversations/all")
-    public ResponseEntity<List<ConversationDTO>> getAllConversations() {
-        List<ConversationDTO> conversations = conversationRepository.findAll()
-                .stream().map(this::mapToDTO).collect(Collectors.toList());
-        return ResponseEntity.ok(conversations);
+    public ResponseEntity<PagedResponse<ConversationDTO>> getAllConversations(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
+        Page<ConversationDTO> dtoPage = conversationRepository.findAll(pageable).map(this::mapToDTO);
+        return ResponseEntity.ok(buildPagedResponse(dtoPage));
     }
 
     @GetMapping("/messages/{conversationId}")
-    public ResponseEntity<List<ChatMessage>> getMessages(@PathVariable Long conversationId) {
-        List<ChatMessage> messages = messageRepository.findByConversationId(conversationId);
-        return ResponseEntity.ok(messages);
+    public ResponseEntity<PagedResponse<ChatMessage>> getMessages(
+            @PathVariable Long conversationId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Page<ChatMessage> messagePage = messageRepository.findByConversationId(conversationId,
+                PageRequest.of(page, size, sort));
+        return ResponseEntity.ok(buildPagedResponse(messagePage));
     }
 
     @PostMapping("/messages")
@@ -109,12 +140,10 @@ public class ChatController {
                 .senderType(request.get("senderType").toString())
                 .message(request.get("message").toString());
 
-        // Handle reply
         if (request.containsKey("replyToMessageId") && request.get("replyToMessageId") != null) {
             Long replyToMessageId = Long.valueOf(request.get("replyToMessageId").toString());
             builder.replyToMessageId(replyToMessageId);
-            
-            // Get the original message content
+
             messageRepository.findByConversationId(Long.valueOf(request.get("conversationId").toString()))
                     .stream()
                     .filter(m -> m.getId().equals(replyToMessageId))

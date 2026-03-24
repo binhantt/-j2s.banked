@@ -88,22 +88,22 @@ body {
 }
 
 .ant-message-success .anticon {
-  color: #16a34a !important;
+  color: #52c41a !important;
   font-size: 18px;
 }
 
 .ant-message-error .anticon {
-  color: #ef4444 !important;
+  color: #ff4d4f !important;
   font-size: 18px;
 }
 
 .ant-message-warning .anticon {
-  color: #f59e0b !important;
+  color: #faad14 !important;
   font-size: 18px;
 }
 
 .ant-message-info .anticon {
-  color: #16a34a !important;
+  color: #1890ff !important;
   font-size: 18px;
 }
 
@@ -168,6 +168,17 @@ body {
   background: #ffffff !important;
 }
 
+/* Ưu tiên màu đen cho các link có class text-black (ví dụ navbar) */
+/* Chỉ override màu link trong header (navbar), không ảnh hưởng chỗ khác */
+.ant-layout-header a {
+  color: #000000 !important;
+}
+
+.ant-layout-header a:hover,
+.ant-layout-header a:focus {
+  color: #000000 !important;
+}
+
 /* Fix border issues - Remove unwanted borders */
 * {
   box-sizing: border-box;
@@ -197,8 +208,8 @@ ant-input,
 .ant-input-affix-wrapper-focused,
 .ant-select-focused .ant-select-selector,
 .ant-input-number:focus {
-  border-color: #16a34a !important;
-  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2) !important;
+  border-color: #1890ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
 }
 
 .ant-btn {
@@ -206,15 +217,14 @@ ant-input,
   border-radius: 6px !important;
 }
 
-/* Màu xanh lá chính cho primary button - đồng bộ với admin */
 .ant-btn-primary {
   border: none !important;
   background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%) !important;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2) !important;
 }
 
 .ant-btn-default:hover {
-  border-color: #16a34a !important;
-  color: #16a34a !important;
+  border-color: #1890ff !important;
 }
 
 /* Table borders if needed */
@@ -246,7 +256,7 @@ ant-input,
   border: none !important;
   box-shadow: none !important;
   background: transparent !important;
-}
+}   
 
 .chat-search-input .ant-input,
 .chat-search-input .ant-input:focus {
@@ -261,13 +271,4 @@ ant-input,
 .ant-layout-header,
 .ant-layout-footer {
   border: none !important;
-}
-
-/* Ẩn thanh cuộn nhưng vẫn cuộn được (chat messages) */
-.chat-messages-scroll::-webkit-scrollbar {
-  display: none !important;
-}
-.chat-messages-scroll {
-  -ms-overflow-style: none !important;
-  scrollbar-width: none !important;
 }

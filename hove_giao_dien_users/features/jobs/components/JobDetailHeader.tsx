@@ -103,7 +103,14 @@ export const JobDetailHeader = ({
                 size="large"
                 icon={<UserOutlined />}
                 onClick={() => router.push(`/applications/job/${job.id}`)}
-                style={{ minWidth: 180, background: '#16a34a', border: 'none', borderRadius: 10, fontWeight: 600 }}
+                style={{
+                  minWidth: 180,
+                  background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+                  border: 'none',
+                  borderRadius: 12,
+                  fontWeight: 700,
+                  boxShadow: '0 4px 12px rgba(22,163,74,0.15)',
+                }}
               >
                 Xem ứng viên ({job.applications || 0})
               </Button>
@@ -111,7 +118,7 @@ export const JobDetailHeader = ({
                 size="large"
                 icon={<EditOutlined />}
                 onClick={() => router.push(`/jobs/edit/${job.id}`)}
-                style={{ borderRadius: 10 }}
+                style={{ borderRadius: 12, fontWeight: 600 }}
               >
                 Chỉnh sửa tin
               </Button>
@@ -126,11 +133,11 @@ export const JobDetailHeader = ({
                   disabled={hasApplied || isJobClosed}
                   style={{
                     minWidth: 180,
-                    background: '#16a34a',
+                    background: hasApplied || isJobClosed ? '#f1f5f9' : 'linear-gradient(135deg, #16a34a, #22c55e)',
                     border: 'none',
-                    borderRadius: 10,
-                    fontWeight: 600,
-                    boxShadow: '0 4px 12px rgba(22,163,74,0.3)',
+                    borderRadius: 12,
+                    fontWeight: 700,
+                    boxShadow: hasApplied || isJobClosed ? 'none' : '0 4px 12px rgba(22,163,74,0.15)',
                   }}
                 >
                   {hasApplied ? 'Đã ứng tuyển' : isJobClosed ? 'Đã đóng' : 'Ứng tuyển ngay'}
@@ -140,7 +147,12 @@ export const JobDetailHeader = ({
                 size="large"
                 icon={<HeartOutlined />}
                 onClick={onSave}
-                style={{ borderRadius: 10, borderColor: '#16a34a', color: '#16a34a' }}
+                style={{
+                  borderRadius: 12,
+                  borderColor: '#16a34a',
+                  color: '#16a34a',
+                  fontWeight: 600,
+                }}
               >
                 Lưu tin
               </Button>

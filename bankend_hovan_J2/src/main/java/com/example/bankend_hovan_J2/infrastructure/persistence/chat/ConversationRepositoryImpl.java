@@ -3,6 +3,8 @@ package com.example.bankend_hovan_J2.infrastructure.persistence.chat;
 import com.example.bankend_hovan_J2.domain.chat.entity.Conversation;
 import com.example.bankend_hovan_J2.domain.chat.repository.ConversationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -54,6 +56,21 @@ public class ConversationRepositoryImpl implements ConversationRepository {
                 .stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<Conversation> findByHrId(Long hrId, Pageable pageable) {
+        return jpaRepository.findByHrId(hrId, pageable).map(this::toDomain);
+    }
+
+    @Override
+    public Page<Conversation> findByJobSeekerId(Long jobSeekerId, Pageable pageable) {
+        return jpaRepository.findByJobSeekerId(jobSeekerId, pageable).map(this::toDomain);
+    }
+
+    @Override
+    public Page<Conversation> findAll(Pageable pageable) {
+        return jpaRepository.findAllByOrderByUpdatedAtDesc(pageable).map(this::toDomain);
     }
 
     private ConversationEntityJpa toEntity(Conversation conversation) {

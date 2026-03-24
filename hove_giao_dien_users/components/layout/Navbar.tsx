@@ -1,4 +1,4 @@
-import { Layout, Button, Avatar, Badge, Dropdown, List } from 'antd';
+import { Layout, Button, Avatar, Badge, Dropdown, List, Typography } from 'antd';
 import {
   BellOutlined,
   UserOutlined,
@@ -19,10 +19,12 @@ import { useState, useEffect } from 'react';
 import { notificationApi, Notification } from '@/lib/notificationApi';
 
 const { Header } = Layout;
+const { Text } = Typography;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 export const Navbar = () => {
   const router = useRouter();
-  const { isAuthenticated, logout, user } = useAuthStore();
+  const { isAuthenticated, logout, user, _hasHydrated } = useAuthStore();
   const [unreadCount, setUnreadCount] = useState(0);
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -30,7 +32,8 @@ export const Navbar = () => {
   const [savedItemsCount, setSavedItemsCount] = useState(0);
 
   useEffect(() => {
-    if (isAuthenticated && user?.id) {
+    console.log('[Navbar] _hasHydrated:', _hasHydrated, '| isAuthenticated:', isAuthenticated, '| user:', user, '| user.id:', user?.id);
+    if (_hasHydrated && isAuthenticated && user?.id) {
       loadUnreadCount();
       loadNotifications();
       loadSavedItemsCount();
@@ -46,14 +49,14 @@ export const Navbar = () => {
     } else {
       setSavedItemsCount(0);
     }
-  }, [isAuthenticated, user?.id]);
+  }, [_hasHydrated, isAuthenticated, user?.id]);
 
   const loadSavedItemsCount = async () => {
     if (!user?.id) return;
     try {
       const [companiesRes, jobsRes] = await Promise.all([
-        fetch(`http://localhost:8080/api/saved-companies/user/${user.id}`),
-        fetch(`http://localhost:8080/api/saved-jobs/user/${user.id}`)
+        fetch(`${API_URL}/api/saved-companies/user/${user.id}`),
+        fetch(`${API_URL}/api/saved-jobs/user/${user.id}`)
       ]);
 
       let total = 0;
@@ -221,8 +224,10 @@ export const Navbar = () => {
   return (
     <Header
       style={{
-        background: '#0b1220',
-        borderBottom: '1px solid rgba(22,163,74,0.2)',
+        background: 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -234,7 +239,7 @@ export const Navbar = () => {
         lineHeight: '72px',
       }}
     >
-      <div style={{ maxWidth: 1280, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ maxWidth: 1200, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         {/* Logo */}
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
           <div
@@ -245,20 +250,21 @@ export const Navbar = () => {
               background: 'linear-gradient(135deg, #16a34a, #22c55e)',
               display: 'grid',
               placeItems: 'center',
-              boxShadow: '0 4px 12px rgba(22,163,74,0.3)',
+              boxShadow: '0 4px 12px rgba(22,163,74,0.2)',
             }}
           >
             <span style={{ color: '#fff', fontWeight: 700, fontSize: 18 }}>V</span>
           </div>
           <span style={{
             fontSize: 22,
-            fontWeight: 700,
-            color: '#f8fafc',
+            fontWeight: 800,
+            color: '#0f172a',
             display: 'none',
+            letterSpacing: '-0.02em'
           }}
             className="logo-text"
           >
-            ViệcLàm24h
+            ViệcLàm<span style={{ color: '#16a34a' }}>24h</span>
           </span>
         </Link>
 
@@ -267,7 +273,6 @@ export const Navbar = () => {
           {[
             { href: '/', label: 'Trang chủ' },
             { href: '/jobs', label: 'Tìm việc làm' },
-            { href: '/freelance', label: 'Freelance' },
             { href: '/companies', label: 'Công ty' },
             { href: '/blog', label: 'Blog' },
           ].map((item) => (
@@ -275,11 +280,11 @@ export const Navbar = () => {
               key={item.href}
               href={item.href}
               style={{
-                color: '#94a3b8',
-                fontWeight: 500,
+                color: router.pathname === item.href ? '#16a34a' : '#475569',
+                fontWeight: router.pathname === item.href ? 700 : 500,
                 fontSize: 14,
                 textDecoration: 'none',
-                transition: 'color 0.2s',
+                transition: 'all 0.2s',
               }}
             >
               {item.label}
@@ -289,13 +294,14 @@ export const Navbar = () => {
             <Link
               href="/saved-items"
               style={{
-                color: '#94a3b8',
-                fontWeight: 500,
+                color: router.pathname === '/saved-items' ? '#16a34a' : '#475569',
+                fontWeight: router.pathname === '/saved-items' ? 700 : 500,
                 fontSize: 14,
                 textDecoration: 'none',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 6,
+                transition: 'all 0.2s',
               }}
             >
               Thư mục đã lưu
@@ -322,13 +328,14 @@ export const Navbar = () => {
             <Link
               href="/chat"
               style={{
-                color: '#94a3b8',
-                fontWeight: 500,
+                color: router.pathname === '/chat' ? '#16a34a' : '#475569',
+                fontWeight: router.pathname === '/chat' ? 700 : 500,
                 fontSize: 14,
                 textDecoration: 'none',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 6,
+                transition: 'all 0.2s',
               }}
             >
               <MessageOutlined style={{ fontSize: 14 }} />
@@ -361,13 +368,12 @@ export const Navbar = () => {
             <Dropdown menu={{ items: mobileMenuItems }} placement="bottomRight">
               <Button
                 type="text"
-                icon={<MenuOutlined style={{ fontSize: 18, color: '#f8fafc' }} />}
+                icon={<MenuOutlined style={{ fontSize: 18, color: '#1e293b' }} />}
                 style={{ width: 40, height: 40 }}
               />
             </Dropdown>
           </div>
 
-          {/* Not authenticated - Login button */}
           {!isAuthenticated ? (
             <Button
               type="primary"
@@ -376,11 +382,11 @@ export const Navbar = () => {
               style={{
                 height: 40,
                 borderRadius: 10,
-                background: '#16a34a',
+                background: 'linear-gradient(135deg, #16a34a, #22c55e)',
                 border: 'none',
-                fontWeight: 600,
+                fontWeight: 700,
                 fontSize: 14,
-                boxShadow: '0 4px 12px rgba(22,163,74,0.3)',
+                boxShadow: '0 4px 12px rgba(22,163,74,0.2)',
               }}
             >
               Đăng nhập
@@ -397,7 +403,7 @@ export const Navbar = () => {
                 <Badge count={unreadCount} size="small" offset={[-2, 2]}>
                   <Button
                     type="text"
-                    icon={<BellOutlined style={{ fontSize: 18, color: '#94a3b8' }} />}
+                    icon={<BellOutlined style={{ fontSize: 18, color: '#475569' }} />}
                     style={{
                       width: 40,
                       height: 40,
@@ -410,19 +416,30 @@ export const Navbar = () => {
                 </Badge>
               </Dropdown>
 
-              {/* User Avatar */}
-              <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-                <Avatar
-                  src={user?.avatarUrl}
-                  icon={!user?.avatarUrl && <UserOutlined />}
-                  style={{
-                    background: 'linear-gradient(135deg, #16a34a, #22c55e)',
-                    cursor: 'pointer',
-                    boxShadow: '0 2px 8px rgba(22,163,74,0.3)',
-                  }}
-                  size={40}
-                />
-              </Dropdown>
+              {/* User Avatar & Info */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div className="user-info-desktop" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.2 }}>
+                  <Text strong style={{ fontSize: 13, color: '#0f172a', maxWidth: 120 }} ellipsis>
+                    {user?.name}
+                  </Text>
+                  <Text style={{ fontSize: 11, color: '#64748b' }}>
+                    ID: {user?.id}
+                  </Text>
+                </div>
+                <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
+                  <Avatar
+                    src={user?.avatarUrl}
+                    icon={!user?.avatarUrl && <UserOutlined />}
+                    style={{
+                      background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 8px rgba(22,163,74,0.3)',
+                      border: '2px solid #ffffff',
+                    }}
+                    size={40}
+                  />
+                </Dropdown>
+              </div>
             </>
           )}
         </div>
@@ -436,6 +453,7 @@ export const Navbar = () => {
         @media (max-width: 767px) {
           .desktop-nav { display: none !important; }
           .mobile-menu { display: flex !important; }
+          .user-info-desktop { display: none !important; }
         }
         .desktop-nav a:hover {
           color: #16a34a !important;

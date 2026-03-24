@@ -136,19 +136,42 @@ export const ProfileFeature = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-16">
-      <div className={`${LAYOUT.container} py-4`}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', paddingTop: 80, paddingBottom: 40 }}>
+      <div className={LAYOUT.container}>
         <ProfileHeader isEditing={isEditing} onToggleEdit={handleToggleEdit} />
 
-        <Card>
+        <Card 
+          style={{ 
+            borderRadius: 24, 
+            boxShadow: '0 4px 24px rgba(0,0,0,0.02)', 
+            border: '1px solid #f1f5f9',
+            padding: '8px' 
+          }}
+          bodyStyle={{ padding: '8px 24px 24px' }}
+        >
           <Tabs
             activeKey={activeTab}
             onChange={handleTabChange}
             className="profile-tabs"
+            tabBarGutter={32}
+            style={{ marginBottom: 0 }}
           >
             {tabs.map((tab) => (
-              <TabPane key={tab.key} tab={tab.label}>
-                {activeTab === tab.key && renderTabContent(tab.key)}
+              <TabPane 
+                key={tab.key} 
+                tab={
+                  <span style={{ 
+                    fontSize: 15, 
+                    fontWeight: activeTab === tab.key ? 700 : 500,
+                    letterSpacing: '-0.01em'
+                  }}>
+                    {tab.label}
+                  </span>
+                }
+              >
+                <div style={{ paddingTop: 24 }}>
+                  {activeTab === tab.key && renderTabContent(tab.key)}
+                </div>
               </TabPane>
             ))}
           </Tabs>

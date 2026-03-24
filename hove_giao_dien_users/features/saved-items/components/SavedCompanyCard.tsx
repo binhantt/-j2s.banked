@@ -12,7 +12,7 @@ interface SavedCompanyCardProps {
 export const SavedCompanyCard = ({ company, savedAt, onView, onUnsave }: SavedCompanyCardProps) => {
   return (
     <div 
-      className="bg-white rounded-[24px] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_15px_40px_-10px_rgba(79,70,229,0.15)] transition-all duration-300 transform hover:-translate-y-1.5 overflow-hidden group cursor-pointer flex flex-col h-full"
+      className="bg-white rounded-[24px] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_15px_40px_-10px_rgba(22,163,74,0.12)] transition-all duration-300 transform hover:-translate-y-1.5 overflow-hidden group cursor-pointer flex flex-col h-full"
       onClick={onView}
     >
       <div
@@ -24,7 +24,7 @@ export const SavedCompanyCard = ({ company, savedAt, onView, onUnsave }: SavedCo
           style={{
             backgroundImage: company.logoUrl
               ? `url(${company.logoUrl})`
-              : 'linear-gradient(135deg, #16a34a 0%, #8b5cf6 100%)',
+              : 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             filter: company.logoUrl ? 'blur(8px) brightness(0.6)' : 'none'
@@ -40,7 +40,7 @@ export const SavedCompanyCard = ({ company, savedAt, onView, onUnsave }: SavedCo
             className="shadow-xl border-4 border-white/20 backdrop-blur-sm"
             style={{ 
               background: '#fff', 
-              color: '#4338ca', 
+              color: '#16a34a', 
               fontSize: 36, 
               fontWeight: 800 
             }}

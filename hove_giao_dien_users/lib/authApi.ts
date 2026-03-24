@@ -33,4 +33,13 @@ export const authApi = {
     });
     return response.data;
   },
+
+  /** Kiểm tra tài khoản có bị banned không thông qua refresh endpoint. */
+  checkStatus: async (refreshToken: string): Promise<{ banned?: boolean }> => {
+    const response = await api.post('/api/auth/refresh', { refreshToken });
+    if (!response.data?.token) {
+      return { banned: true };
+    }
+    return {};
+  },
 };

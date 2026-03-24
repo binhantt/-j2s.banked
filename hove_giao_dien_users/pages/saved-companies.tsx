@@ -97,40 +97,75 @@ export default function SavedCompaniesPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <Card 
-          title={
-            <div className="flex items-center gap-3">
-              <HeartFilled className="text-red-500 text-2xl" />
-              <div>
-                <h1 className="text-2xl font-bold m-0">Công ty đã lưu</h1>
-                <p className="text-gray-500 text-sm m-0 font-normal">
-                  {savedCompanies.length} công ty
-                </p>
-              </div>
+      <div style={{ background: '#f8fafc', minHeight: '100vh' }}>
+        {/* Header Section */}
+        <div style={{
+          background: 'linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%)',
+          borderBottom: '1px solid #dcfce7',
+          padding: '64px 0 48px',
+          marginBottom: 32,
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          {/* Decorative elements */}
+          <div style={{
+            position: 'absolute', top: -100, right: -100, width: 300, height: 300,
+            background: 'radial-gradient(circle, rgba(22,163,74,0.08) 0%, transparent 70%)',
+          }} />
+
+          <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px', position: 'relative' }}>
+            <div style={{ 
+              display: 'inline-flex', alignItems: 'center', gap: 8, 
+              padding: '6px 16px', borderRadius: 100, background: '#f0fdf4', 
+              border: '1px solid #dcfce7', marginBottom: 20 
+            }}>
+              <HeartFilled style={{ color: '#16a34a', fontSize: 14 }} />
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#16a34a', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Danh sách ưu tiên
+              </span>
             </div>
-          }
-          className="shadow-sm"
-        >
+            
+            <h1 style={{ fontSize: 'clamp(28px, 4vw, 36px)', fontWeight: 800, color: '#0f172a', marginBottom: 12 }}>
+              Công ty <span style={{ color: '#16a34a' }}>đã lưu</span>
+            </h1>
+            <p style={{ fontSize: 16, color: '#64748b', maxWidth: 600 }}>
+              Xem lại các doanh nghiệp bạn đang quan tâm và cập nhật cơ hội việc làm mới nhất từ họ.
+            </p>
+          </div>
+        </div>
+
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px 80px' }}>
           {loading ? (
-            <div className="text-center py-12">
+            <div style={{ textAlign: 'center', padding: '80px 0' }}>
               <Spin size="large" />
-              <p className="text-gray-500 mt-4">Đang tải...</p>
+              <p style={{ color: '#64748b', marginTop: 16 }}>Đang tải danh sách...</p>
             </div>
           ) : savedCompanies.length === 0 ? (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description={
-                <div>
-                  <p className="text-lg font-semibold mb-2">Bạn chưa lưu công ty nào</p>
-                  <p className="text-gray-500">Khám phá và lưu các công ty yêu thích của bạn</p>
-                </div>
-              }
-            >
-              <Button type="primary" size="large" onClick={() => router.push('/companies')}>
-                Khám phá công ty
-              </Button>
-            </Empty>
+            <div style={{ background: '#fff', borderRadius: 24, padding: 80, textAlign: 'center', border: '1px solid #f1f5f9' }}>
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={
+                  <div style={{ marginTop: 16 }}>
+                    <p style={{ fontSize: 20, fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>Bạn chưa lưu công ty nào</p>
+                    <p style={{ color: '#64748b' }}>Khám phá các doanh nghiệp để tìm kiếm nơi làm việc lý tưởng.</p>
+                  </div>
+                }
+              >
+                <Button 
+                  type="primary" 
+                  size="large" 
+                  onClick={() => router.push('/companies')}
+                  style={{ 
+                    height: 48, borderRadius: 12, 
+                    background: 'linear-gradient(135deg, #16a34a, #22c55e)', 
+                    border: 'none', fontWeight: 700, marginTop: 12,
+                    paddingInline: 32, boxShadow: '0 4px 12px rgba(22,163,74,0.15)'
+                  }}
+                >
+                  Khám phá công ty
+                </Button>
+              </Empty>
+            </div>
           ) : (
             <Row gutter={[24, 24]}>
               {savedCompanies.map((item) => {
@@ -139,110 +174,70 @@ export default function SavedCompaniesPage() {
 
                 return (
                   <Col key={item.id} xs={24} sm={12} lg={8}>
-                    <Card
-                      hoverable
-                      className="h-full"
-                      cover={
-                        <div 
-                          className="h-48 bg-gradient-to-br from-green-600 to-green-500 flex items-center justify-center relative"
-                          style={{
-                            backgroundImage: company.logoUrl ? `url(${company.logoUrl})` : undefined,
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center',
-                          }}
-                        >
-                          {!company.logoUrl && (
-                            <Avatar size={80} className="bg-white text-green-600 text-3xl font-bold">
-                              {company.name?.charAt(0)}
-                            </Avatar>
-                          )}
-                          <div className="absolute top-2 right-2">
-                            <Button
-                              type="primary"
-                              danger
-                              shape="circle"
-                              icon={<HeartFilled />}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleUnsave(company.id, company.name);
-                              }}
-                            />
-                          </div>
-                        </div>
-                      }
-                      actions={[
-                        <Button
-                          key="view"
-                          type="link"
-                          icon={<EyeOutlined />}
-                          onClick={() => router.push(`/companies/${company.id}`)}
-                        >
-                          Xem chi tiết
-                        </Button>,
-                        <Button
-                          key="unsave"
-                          type="link"
-                          danger
-                          icon={<DeleteOutlined />}
-                          onClick={() => handleUnsave(company.id, company.name)}
-                        >
-                          Bỏ lưu
-                        </Button>,
-                      ]}
+                    <div 
+                      className="bg-white rounded-[24px] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_15px_40px_-10px_rgba(22,163,74,0.12)] transition-all duration-300 transform hover:-translate-y-1.5 overflow-hidden group cursor-pointer flex flex-col h-full"
+                      onClick={() => router.push(`/companies/${company.id}`)}
                     >
-                      <Card.Meta
-                        title={
-                          <div 
-                            className="text-lg font-bold cursor-pointer hover:text-green-600"
-                            onClick={() => router.push(`/companies/${company.id}`)}
+                      <div className="h-40 flex items-center justify-center relative overflow-hidden">
+                        <div 
+                          className="absolute inset-0 transition-transform duration-700 group-hover:scale-110"
+                          style={{
+                            backgroundImage: company.logoUrl ? `url(${company.logoUrl})` : 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+                            backgroundSize: 'cover', backgroundPosition: 'center',
+                            filter: company.logoUrl ? 'blur(8px) brightness(0.6)' : 'none'
+                          }}
+                        />
+                        {company.logoUrl && <div className="absolute inset-0 bg-black/40" />}
+                        <div className="relative z-10">
+                          <Avatar 
+                            size={80} className="shadow-xl border-4 border-white/20 backdrop-blur-sm"
+                            style={{ background: '#fff', color: '#16a34a', fontSize: 36, fontWeight: 800 }}
+                            src={company.logoUrl}
                           >
-                            {company.name}
-                          </div>
-                        }
-                        description={
-                          <div className="space-y-2">
-                            {company.industry && (
-                              <Tag color="blue">{company.industry}</Tag>
-                            )}
-                            {company.address && (
-                              <div className="flex items-start gap-2 text-gray-600 text-sm">
-                                <EnvironmentOutlined className="mt-1" />
-                                <span className="line-clamp-1">{company.address}</span>
-                              </div>
-                            )}
-                            {company.companySize && (
-                              <div className="flex items-center gap-2 text-gray-600 text-sm">
-                                <TeamOutlined />
-                                <span>{company.companySize}</span>
-                              </div>
-                            )}
-                            {company.website && (
-                              <div className="flex items-center gap-2 text-gray-600 text-sm">
-                                <GlobalOutlined />
-                                <a 
-                                  href={company.website} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-green-600 hover:text-green-700 truncate"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  Website
-                                </a>
-                              </div>
-                            )}
-                            <div className="text-gray-400 text-xs mt-3 pt-3 border-t">
-                              Đã lưu: {dayjs(item.createdAt).format('DD/MM/YYYY HH:mm')}
+                            {!company.logoUrl && (company.name?.charAt(0))}
+                          </Avatar>
+                        </div>
+                        <Button
+                          type="primary" danger shape="circle" icon={<HeartFilled className="text-lg" />}
+                          className="!absolute top-4 right-4 z-20 w-10 h-10 flex items-center justify-center bg-white/20 backdrop-blur-md border border-white/30 hover:bg-rose-500 hover:border-rose-500 hover:text-white transition-colors"
+                          onClick={(e) => { e.stopPropagation(); handleUnsave(company.id, company.name); }}
+                        />
+                      </div>
+                      <div className="p-6 flex flex-col flex-grow">
+                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-green-600 transition-colors line-clamp-1 mb-2 text-center">
+                          {company.name}
+                        </h3>
+                        <div className="flex justify-center flex-wrap gap-2 mb-4">
+                          {company.industry && <Tag className="rounded-full px-3 py-1 border-0 bg-green-50 text-green-600 font-semibold text-xs m-0">{company.industry}</Tag>}
+                        </div>
+                        <div className="flex flex-col gap-3 text-sm text-gray-600 mt-2 mb-6 flex-grow">
+                          {company.address && (
+                            <div className="flex items-start gap-3">
+                              <EnvironmentOutlined className="text-gray-400 text-base mt-0.5" />
+                              <span className="line-clamp-2 font-medium leading-relaxed">{company.address}</span>
                             </div>
+                          )}
+                          {company.companySize && (
+                            <div className="flex items-center gap-3">
+                              <TeamOutlined className="text-gray-400 text-base" />
+                              <span className="font-medium">{company.companySize} nhân viên</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="pt-5 border-t border-gray-100 flex items-center justify-between mt-auto">
+                          <div className="text-xs font-semibold text-gray-400">
+                            Lưu ngày: {dayjs(item.createdAt).format('DD/MM/YYYY')}
                           </div>
-                        }
-                      />
-                    </Card>
+                          <span className="text-green-600 font-semibold text-sm group-hover:underline">Chi tiết &rarr;</span>
+                        </div>
+                      </div>
+                    </div>
                   </Col>
                 );
               })}
             </Row>
           )}
-        </Card>
+        </div>
       </div>
     </MainLayout>
   );

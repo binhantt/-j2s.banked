@@ -74,7 +74,7 @@ export const JobInfoSidebar = ({ job, onChatWithHR, companyName }: JobInfoSideba
                   title="Ứng viên"
                   value={job.applications || 0}
                   prefix={<UserOutlined />}
-                  valueStyle={{ color: '#16a34a', fontSize: 20 }}
+                  valueStyle={{ color: '#1890ff', fontSize: 20 }}
                 />
               </Col>
               <Col span={12}>
@@ -87,8 +87,8 @@ export const JobInfoSidebar = ({ job, onChatWithHR, companyName }: JobInfoSideba
               </Col>
             </Row>
             
-            <div style={{ marginTop: 20, padding: 16, background: '#f0fdf4', borderRadius: 8, border: '1px solid #dcfce7' }}>
-              <div style={{ fontWeight: 600, marginBottom: 8, color: '#16a34a' }}>
+            <div style={{ marginTop: 20, padding: 16, background: '#f6ffed', borderRadius: 8 }}>
+              <div style={{ fontWeight: 600, marginBottom: 8, color: '#389e0d' }}>
                 Quản lý tuyển dụng
               </div>
               <Button 
@@ -181,7 +181,7 @@ export const JobInfoSidebar = ({ job, onChatWithHR, companyName }: JobInfoSideba
             styles={{ body: { padding: '20px 24px' } }}
           >
             <div style={{ 
-              background: '#f0fdf4', 
+              background: '#e6f7ff', 
               padding: '16px', 
               borderRadius: 8,
               marginBottom: 16,
@@ -219,13 +219,13 @@ export const JobInfoSidebar = ({ job, onChatWithHR, companyName }: JobInfoSideba
             width: 48,
             height: 48,
             borderRadius: 8,
-            background: '#f0fdf4',
+            background: '#f0f0f0',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: 20,
             fontWeight: 600,
-            color: '#16a34a'
+            color: '#1890ff'
           }}>
             {companyInitial}
           </div>

@@ -9,13 +9,13 @@ export default function ConversationsPage() {
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, _hasHydrated } = useAuthStore();
 
   useEffect(() => {
-    if (user?.id) {
+    if (_hasHydrated && user?.id) {
       loadConversations();
     }
-  }, [user?.id]);
+  }, [_hasHydrated, user?.id]);
 
   const loadConversations = async () => {
     if (!user?.id) return;

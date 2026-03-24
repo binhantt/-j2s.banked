@@ -7,13 +7,14 @@ import { Spin } from 'antd';
 
 function ChatListPageContent() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, _hasHydrated } = useAuthStore();
 
   useEffect(() => {
-    if (user?.id) {
+    console.log('[ChatListPage] _hasHydrated:', _hasHydrated, '| user:', user, '| user.id:', user?.id);
+    if (_hasHydrated && user?.id) {
       loadAndRedirect();
     }
-  }, [user?.id]);
+  }, [_hasHydrated, user?.id]);
 
   const loadAndRedirect = async () => {
     if (!user?.id) return;
@@ -42,11 +43,25 @@ function ChatListPageContent() {
   return (
     <div style={{ 
       display: 'flex', 
+      flexDirection: 'column',
       justifyContent: 'center', 
       alignItems: 'center', 
-      height: 'calc(100vh - 64px)' 
+      height: 'calc(100vh - 64px)',
+      background: '#f8fafc'
     }}>
-      <Spin size="large" tip="Đang tải tin nhắn..." />
+      <div style={{ 
+        background: '#fff', 
+        padding: '40px 60px', 
+        borderRadius: 24, 
+        boxShadow: '0 20px 50px rgba(15,23,42,0.05)',
+        textAlign: 'center'
+      }}>
+        <Spin 
+          size="large" 
+          tip={<span style={{ color: '#16a34a', fontWeight: 600, marginTop: 16, display: 'block' }}>Đang kết nối tin nhắn...</span>} 
+        />
+        <p style={{ color: '#64748b', marginTop: 24 }}>Vui lòng đợi trong giây lát</p>
+      </div>
     </div>
   );
 }

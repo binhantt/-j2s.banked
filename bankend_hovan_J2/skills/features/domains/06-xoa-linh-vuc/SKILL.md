@@ -17,6 +17,8 @@ DELETE /api/domains/{id}
     → false → throw RuntimeException
   → companyRepository.existsByDomainId(id)?
     → true → throw IllegalArgumentException("Lĩnh vực này đã có công ty...")
+  → jobPostingRepository.existsByDomainId(id)?
+    → true → throw IllegalArgumentException("Lĩnh vực này đã có công việc...")
   → domainRepository.deleteById(id)
 → ResponseEntity.ok().build()
 ```
@@ -24,6 +26,7 @@ DELETE /api/domains/{id}
 ## Tác vụ
 - [x] Validate tồn tại
 - [x] Kiểm tra không có công ty thuộc lĩnh vực
+- [x] Kiểm tra không có công việc thuộc lĩnh vực
 - [x] Xóa khỏi database
 - [x] Return 200 OK
 
@@ -36,8 +39,10 @@ DELETE /api/domains/{id}
 ### `references/`
 - Exception: IllegalArgumentException (khác với RuntimeException thông thường)
 - Check: companyRepository.existsByDomainId(id)
+- Check: jobPostingRepository.existsByDomainId(id)
 
 ## Ràng buộc
 - Không xóa được nếu có công ty đang reference đến lĩnh vực
+- Không xóa được nếu có công việc đang reference đến lĩnh vực
 - Ném IllegalArgumentException với message rõ ràng
 - Không xóa cascade — chỉ xóa record Domain

@@ -220,39 +220,46 @@ export function DomainManagementPage() {
 
   return (
     <div>
-      <div style={{ marginBottom: 20 }}>
-        <Title level={3} style={{ marginBottom: 4, color: '#0b1220' }}>
+      <div style={{ marginBottom: 32 }}>
+        <Title level={2} style={{ marginBottom: 8, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
           Quản lý lĩnh vực
         </Title>
-        <Text style={{ color: '#6b7280' }}>
+        <Text style={{ color: '#64748b', fontSize: 15 }}>
           Quản lý các lĩnh vực nghề nghiệp và phân loại công việc
         </Text>
       </div>
 
       <DomainStats domains={domains} />
 
-      <Card style={{ borderRadius: 14 }}>
-        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Card style={{ borderRadius: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+        <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <Text strong>Tổng số lĩnh vực: {domains.length}</Text>
-            <Text style={{ marginLeft: 16, color: '#6b7280' }}>
+            <Text strong style={{ color: '#0f172a' }}>Tổng số lĩnh vực: {domains.length}</Text>
+            <Text style={{ marginLeft: 16, color: '#64748b' }}>
               Hoạt động: {domains.filter(d => d.isActive).length}
             </Text>
           </div>
           
-          <Space>
+          <Space size={12}>
             <Button 
               icon={<PlusOutlined />} 
               type="primary"
               onClick={() => setCreateModalVisible(true)}
-              style={{ borderRadius: 8 }}
+              style={{ 
+                borderRadius: 12, 
+                height: 40,
+                background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+                border: 'none',
+                fontWeight: 600,
+                boxShadow: '0 4px 12px rgba(22,163,74,0.15)'
+              }}
             >
               Thêm lĩnh vực
             </Button>
             <Button 
               icon={<ReloadOutlined />} 
               onClick={() => void loadDomains()}
-              style={{ borderRadius: 8 }}
+              style={{ borderRadius: 12, height: 40 }}
             >
               Làm mới
             </Button>

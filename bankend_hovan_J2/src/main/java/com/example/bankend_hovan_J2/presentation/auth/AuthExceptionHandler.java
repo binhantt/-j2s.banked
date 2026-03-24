@@ -19,4 +19,18 @@ public class AuthExceptionHandler {
         error.put("error", "not found");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
+        String message = ex.getMessage();
+        if (message != null && message.contains("bị khóa")) {
+            Map<String, Object> body = new HashMap<>();
+            body.put("banned", true);
+            body.put("message", message);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+        }
+        Map<String, Object> error = new HashMap<>();
+        error.put("message", message);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
 }

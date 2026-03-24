@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Select, Checkbox } from 'antd';
+import { Select, Checkbox, Divider } from 'antd';
 import { JobFilters as JobFiltersType, jobApiService } from '../api/jobApi';
+import { FilterOutlined, DollarOutlined, ExperimentOutlined, ThunderboltOutlined } from '@ant-design/icons';
 
 interface JobFiltersProps {
   filters: JobFiltersType;
@@ -9,23 +10,21 @@ interface JobFiltersProps {
 
 const filterCardStyle = {
   background: '#fff',
-  borderRadius: 14,
-  border: '1px solid #f0fdf4',
-  padding: 20,
-  marginBottom: 16,
+  borderRadius: 20,
+  border: '1px solid rgba(0,0,0,0.05)',
+  padding: '24px',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
+  marginBottom: 20,
 };
 
 const sectionTitleStyle = {
   fontWeight: 700,
-  fontSize: 14,
-  color: '#0b1220',
-  marginBottom: 12,
-};
-
-const sectionSubStyle = {
-  fontSize: 12,
-  color: '#94a3b8',
-  marginBottom: 4,
+  fontSize: 15,
+  color: '#0f172a',
+  marginBottom: 16,
+  display: 'flex',
+  alignItems: 'center',
+  gap: 10,
 };
 
 export default function JobFilters({ filters, onFilterChange }: JobFiltersProps) {
@@ -45,34 +44,49 @@ export default function JobFilters({ filters, onFilterChange }: JobFiltersProps)
   ];
 
   return (
-    <aside>
-      <div style={{ ...filterCardStyle, marginBottom: 16 }}>
-        <div style={sectionTitleStyle}>Bộ lọc nâng cao</div>
-        <div style={sectionSubStyle}>Lọc theo nhu cầu của bạn</div>
+    <aside style={{ position: 'sticky', top: 100 }}>
+      <div style={{ ...filterCardStyle, padding: '20px 24px' }}>
+        <div style={{ ...sectionTitleStyle, marginBottom: 4 }}>
+          <FilterOutlined style={{ color: '#16a34a' }} />
+          Bộ lọc nâng cao
+        </div>
+        <p style={{ fontSize: 13, color: '#64748b', margin: 0 }}>Tối ưu tìm kiếm của bạn</p>
       </div>
 
-      {/* Job Type Filter */}
       <div style={filterCardStyle}>
-        <div style={sectionTitleStyle}>Loại hình công việc</div>
+        {/* Job Type Filter */}
+        <div style={sectionTitleStyle}>
+          <ThunderboltOutlined style={{ color: '#16a34a' }} />
+          Loại hình công việc
+        </div>
         <Checkbox.Group
-          style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
+          style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
           value={filters.jobType}
           onChange={(values) => onFilterChange({ jobType: values as string[] })}
-          options={[
+        >
+          {[
             { label: 'Toàn thời gian', value: 'full-time' },
             { label: 'Bán thời gian', value: 'part-time' },
             { label: 'Thực tập', value: 'internship' },
             { label: 'Freelance', value: 'contract' },
-          ]}
-        />
-      </div>
+          ].map((opt) => (
+            <Checkbox key={opt.value} value={opt.value} style={{ fontSize: 14, color: '#475569' }}>
+              {opt.label}
+            </Checkbox>
+          ))}
+        </Checkbox.Group>
 
-      {/* Salary Filter */}
-      <div style={filterCardStyle}>
-        <div style={sectionTitleStyle}>Mức lương</div>
+        <Divider style={{ margin: '24px 0' }} />
+
+        {/* Salary Filter */}
+        <div style={sectionTitleStyle}>
+          <DollarOutlined style={{ color: '#16a34a' }} />
+          Mức lương
+        </div>
         <Select
           size="large"
-          style={{ width: '100%', borderRadius: 10 }}
+          style={{ width: '100%' }}
+          placeholder="Tất cả mức lương"
           value={filters.salaryRange}
           onChange={(value) => onFilterChange({ salaryRange: value })}
           options={[
@@ -83,14 +97,17 @@ export default function JobFilters({ filters, onFilterChange }: JobFiltersProps)
             { value: 'over-50', label: 'Trên 50 triệu' },
           ]}
         />
-      </div>
 
-      {/* Experience Filter */}
-      <div style={filterCardStyle}>
-        <div style={sectionTitleStyle}>Kinh nghiệm</div>
+        <Divider style={{ margin: '24px 0' }} />
+
+        {/* Experience Filter */}
+        <div style={sectionTitleStyle}>
+          <ExperimentOutlined style={{ color: '#16a34a' }} />
+          Kinh nghiệm
+        </div>
         <Select
           size="large"
-          style={{ width: '100%', borderRadius: 10 }}
+          style={{ width: '100%' }}
           value={filters.experience}
           onChange={(value) => onFilterChange({ experience: value })}
           options={experienceOptions}

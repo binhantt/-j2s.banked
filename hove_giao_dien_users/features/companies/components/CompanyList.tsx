@@ -72,39 +72,46 @@ export const CompanyList = () => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: 20,
-          paddingBottom: 16,
-          borderBottom: '1px solid #e5e7eb',
+          marginBottom: 32,
+          paddingBottom: 20,
+          borderBottom: '1px solid rgba(0,0,0,0.05)',
         }}
       >
         <div>
           <h2
             style={{
-              fontSize: 18,
-              fontWeight: 600,
-              color: '#111827',
-              marginBottom: 2,
+              fontSize: 24,
+              fontWeight: 800,
+              color: '#0f172a',
+              marginBottom: 4,
+              letterSpacing: '-0.02em',
             }}
           >
-            Công ty nổi bật
+            Doanh nghiệp nổi bật
           </h2>
-          <p style={{ fontSize: 13, color: '#6b7280', margin: 0 }}>
-            Tìm thấy {companies.length} công ty phù hợp
+          <p style={{ fontSize: 15, color: '#64748b', fontWeight: 500, margin: 0 }}>
+            Tìm thấy <span style={{ color: '#16a34a', fontWeight: 700 }}>{companies.length}</span> công ty đang tuyển dụng
           </p>
         </div>
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
-            fontSize: 13,
-            color: '#6b7280',
+            gap: 8,
+            fontSize: 14,
+            fontWeight: 700,
+            color: '#64748b',
+            background: '#fff',
+            padding: '8px 16px',
+            borderRadius: 12,
+            border: '1px solid rgba(0,0,0,0.04)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
           }}
         >
           <SortAscendingOutlined style={{ color: '#16a34a' }} />
           Sắp xếp:{' '}
-          <span style={{ color: '#16a34a', fontWeight: 600 }}>
-            Nổi bật nhất
+          <span style={{ color: '#16a34a' }}>
+            Phù hợp nhất
           </span>
         </div>
       </div>
@@ -114,31 +121,32 @@ export const CompanyList = () => {
         <Card
           style={{
             textAlign: 'center',
-            padding: 60,
-            borderRadius: 16,
-            border: '1px solid #e5e7eb',
+            padding: '100px 40px',
+            borderRadius: 24,
+            border: '1px dashed #e2e8f0',
+            background: 'rgba(255,255,255,0.5)',
           }}
-          styles={{ body: { padding: 60 } }}
+          styles={{ body: { padding: 0 } }}
         >
           <AppstoreOutlined
-            style={{ fontSize: 48, color: '#d1d5db', marginBottom: 16 }}
+            style={{ fontSize: 64, color: '#cbd5e1', marginBottom: 24 }}
           />
           <h3
             style={{
-              fontSize: 18,
-              fontWeight: 600,
-              color: '#111827',
-              marginBottom: 8,
+              fontSize: 22,
+              fontWeight: 800,
+              color: '#0f172a',
+              marginBottom: 12,
             }}
           >
-            Không tìm thấy công ty phù hợp
+            Chưa tìm thấy công ty phù hợp
           </h3>
-          <p style={{ color: '#6b7280', fontSize: 14 }}>
-            Thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh bộ lọc.
+          <p style={{ color: '#64748b', fontSize: 16, maxWidth: 400, margin: '0 auto' }}>
+            Chúng tôi không tìm thấy kết quả nào khớp với tìm kiếm của bạn. Hãy thử thay đổi từ khóa hoặc bộ lọc.
           </p>
         </Card>
       ) : (
-        <Row gutter={[20, 20]}>
+        <Row gutter={[24, 24]}>
           {companies.map((company) => (
             <Col key={company.id} xs={24} sm={12} lg={8}>
               <CompanyCard

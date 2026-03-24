@@ -5,9 +5,13 @@ import type { UserAdminRow } from '../types/userTypes';
 
 interface UsersState {
   users: UserAdminRow[];
+  totalElements: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
   loading: boolean;
   error: string | null;
-  fetchUsers: () => Promise<void>;
+  fetchUsers: (page?: number, size?: number, userType?: string) => Promise<void>;
   setUserActive: (id: number, isActive: boolean) => void;
   createBackendUser: (data: {
     email: string;
@@ -61,12 +65,19 @@ export const useUsersStore = create<UsersState>((set, get) => ({
   loading: false,
   error: null,
 
-  fetchUsers: async () => {
+  fetchUsers: async (page = 0, size = 100) => {
     set({ loading: true, error: null });
     try {
-      const data = await userApi.getAllUsers();
-      const users = data.map(convertToUserAdminRow);
-      set({ users, loading: false });
+      const data = await userApi.getAllUsers(page, size);
+      const users = (data.content || []).map(convertToUserAdminRow);
+      set({
+        users,
+        totalElements: data.totalElements || 0,
+        totalPages: data.totalPages || 0,
+        currentPage: data.page || 0,
+        pageSize: data.size || size,
+        loading: false,
+      });
     } catch (error) {
       set({
         loading: false,

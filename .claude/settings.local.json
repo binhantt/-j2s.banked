@@ -8,7 +8,19 @@
       "Bash(Get-ChildItem -Path \"d:\\\\DOANJ2\\\\bankend_hovan_J2\\\\skills\" -Force -ErrorAction SilentlyContinue)",
       "Bash(Select-Object Name, Mode, LastWriteTime)",
       "Bash(grep -rn jobPostingId d:/DOANJ2/hove_giao_dien_users --include=*.tsx --include=*.ts)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(find /d/DOANJ2/hove_giao_dien_users/src -type f \\\\\\(-name *.ts -o -name *.tsx -o -name *.js -o -name *.jsx \\\\\\))",
+      "Bash(find /d/DOANJ2/hove_giao_dien_users -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))",
+      "Bash(find /d/DOANJ2/hove_giao_dien_users/store -type f -name *.ts)",
+      "Bash(find /d/DOANJ2/hove_giao_dien_users/pages -type f -name *.tsx -o -name *.ts)",
+      "Bash(dir /s /b \"D:\\\\DOANJ2\\\\bankend_hovan_J2\\\\src\")",
+      "Bash(findstr /i \"\\\\.java$\")",
+      "Bash(dir /b \"D:\\\\DOANJ2\\\\admin\")",
+      "Bash(find ./hove_giao_dien_users -maxdepth 3 -type f -not -path */node_modules/* -not -path */.next/* -not -path */.git/*)",
+      "Bash(npm run:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/chat)",
+      "Read(//d//**)",
+      "Bash(dir)"
     ]
   }
 }

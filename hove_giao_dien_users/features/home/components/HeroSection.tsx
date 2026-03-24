@@ -93,10 +93,11 @@ export const HeroSection = () => {
               icon={<SearchOutlined />}
               style={{
                 height: 48, borderRadius: 12,
-                background: '#16a34a', border: 'none',
-                fontWeight: 600, fontSize: 15,
+                background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+                border: 'none',
+                fontWeight: 700, fontSize: 15,
                 paddingInline: 28,
-                boxShadow: '0 4px 14px rgba(22,163,74,0.35)',
+                boxShadow: '0 6px 16px rgba(22,163,74,0.15)',
               }}
             >
               Bắt đầu tìm việc

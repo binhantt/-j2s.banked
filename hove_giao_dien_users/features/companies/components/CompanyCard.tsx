@@ -7,7 +7,6 @@ import {
   RightOutlined,
 } from '@ant-design/icons';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
 import { Company } from '../api/companyApi';
 import { DomainDisplay } from '@/components/DomainDisplay';
 
@@ -32,38 +31,44 @@ export const CompanyCard = ({ company, isSaved = false, onSaveToggle }: CompanyC
       hoverable
       onClick={() => router.push(`/companies/${company.id}`)}
       style={{
-        borderRadius: 16,
-        border: '1px solid #e5e7eb',
+        borderRadius: 24,
+        border: '1px solid rgba(0,0,0,0.04)',
         overflow: 'hidden',
-        transition: 'all 0.25s ease',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
         cursor: 'pointer',
         height: '100%',
+        background: '#fff',
       }}
       styles={{ body: { padding: 0, display: 'flex', flexDirection: 'column' } }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.boxShadow =
-          '0 8px 24px rgba(0,0,0,0.1)';
-        (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
+        (e.currentTarget as HTMLElement).style.boxShadow = '0 15px 45px rgba(0,0,0,0.08)';
+        (e.currentTarget as HTMLElement).style.transform = 'translateY(-6px)';
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.boxShadow =
-          '0 1px 4px rgba(0,0,0,0.04)';
+        (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 20px rgba(0,0,0,0.03)';
         (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
       }}
     >
       {/* Cover Banner */}
       <div
         style={{
-          height: 100,
+          height: 120,
           position: 'relative',
-          background:
-            company.logoUrl
-              ? 'linear-gradient(135deg, #16a34a, #22c55e)'
-              : 'linear-gradient(135deg, #0b1220, #1e3a5f)',
+          background: company.logoUrl
+            ? 'linear-gradient(135deg, #f8fafc, #f1f5f9)'
+            : 'linear-gradient(135deg, #16a34a, #22c55e)',
           overflow: 'hidden',
         }}
       >
+        {/* Soft pattern overlay */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          opacity: 0.05,
+          backgroundImage: 'radial-gradient(#16a34a 1px, transparent 1px)',
+          backgroundSize: '20px 20px',
+        }} />
+
         {/* Blurred logo as background texture */}
         {company.logoUrl && (
           <div
@@ -73,8 +78,8 @@ export const CompanyCard = ({ company, isSaved = false, onSaveToggle }: CompanyC
               backgroundImage: `url(${company.logoUrl})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              filter: 'blur(2px)',
-              opacity: 0.3,
+              filter: 'blur(4px)',
+              opacity: 0.15,
             }}
           />
         )}
@@ -87,23 +92,24 @@ export const CompanyCard = ({ company, isSaved = false, onSaveToggle }: CompanyC
             isSaved ? (
               <HeartFilled style={{ fontSize: 18, color: '#ef4444' }} />
             ) : (
-              <HeartOutlined style={{ fontSize: 18, color: '#fff' }} />
+              <HeartOutlined style={{ fontSize: 18, color: company.logoUrl ? '#94a3b8' : '#fff' }} />
             )
           }
           onClick={handleSaveToggle}
           style={{
             position: 'absolute',
-            top: 10,
-            right: 10,
+            top: 12,
+            right: 12,
             zIndex: 2,
-            width: 36,
-            height: 36,
+            width: 38,
+            height: 38,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'rgba(0,0,0,0.3)',
-            backdropFilter: 'blur(4px)',
-            border: 'none',
+            background: 'rgba(255,255,255,0.8)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(0,0,0,0.04)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
           }}
         />
       </div>
@@ -111,41 +117,42 @@ export const CompanyCard = ({ company, isSaved = false, onSaveToggle }: CompanyC
       {/* Card Body */}
       <div
         style={{
-          padding: '0 18px 18px',
+          padding: '0 24px 24px',
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
         }}
       >
         {/* Logo — overlaps the banner */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: -32, marginBottom: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: -40, marginBottom: 16 }}>
           <Avatar
             src={company.logoUrl}
-            size={64}
+            size={80}
             style={{
-              border: '3px solid #fff',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-              background: '#f3f4f6',
-              fontSize: 24,
-              fontWeight: 700,
+              border: '4px solid #fff',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+              background: '#fff',
+              fontSize: 32,
+              fontWeight: 800,
               color: '#16a34a',
             }}
           >
-            {company.name?.charAt(0)}
+            {company.name?.charAt(0).toUpperCase()}
           </Avatar>
         </div>
 
         {/* Company Name */}
         <h3
           style={{
-            fontSize: 16,
-            fontWeight: 700,
-            color: '#111827',
-            marginBottom: 6,
-            lineHeight: 1.4,
+            fontSize: 20,
+            fontWeight: 800,
+            color: '#0f172a',
+            marginBottom: 8,
+            lineHeight: 1.3,
+            letterSpacing: '-0.01em',
             overflow: 'hidden',
             display: '-webkit-box',
-            WebkitLineClamp: 2,
+            WebkitLineClamp: 1,
             WebkitBoxOrient: 'vertical',
           }}
         >
@@ -154,7 +161,7 @@ export const CompanyCard = ({ company, isSaved = false, onSaveToggle }: CompanyC
 
         {/* Domain tag */}
         {company.domainId && (
-          <div style={{ marginBottom: 10 }}>
+          <div style={{ marginBottom: 16 }}>
             <DomainDisplay domainId={company.domainId} size="small" />
           </div>
         )}
@@ -165,8 +172,8 @@ export const CompanyCard = ({ company, isSaved = false, onSaveToggle }: CompanyC
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            gap: 6,
-            marginBottom: 14,
+            gap: 10,
+            marginBottom: 20,
           }}
         >
           {company.address && (
@@ -174,13 +181,14 @@ export const CompanyCard = ({ company, isSaved = false, onSaveToggle }: CompanyC
               style={{
                 display: 'flex',
                 alignItems: 'flex-start',
-                gap: 8,
-                fontSize: 13,
-                color: '#6b7280',
+                gap: 10,
+                fontSize: 14,
+                color: '#64748b',
+                fontWeight: 500,
               }}
             >
               <EnvironmentOutlined
-                style={{ color: '#9ca3af', marginTop: 2, flexShrink: 0 }}
+                style={{ color: '#16a34a', marginTop: 3, flexShrink: 0 }}
               />
               <span
                 style={{
@@ -201,12 +209,13 @@ export const CompanyCard = ({ company, isSaved = false, onSaveToggle }: CompanyC
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 8,
-                fontSize: 13,
-                color: '#6b7280',
+                gap: 10,
+                fontSize: 14,
+                color: '#64748b',
+                fontWeight: 500,
               }}
             >
-              <TeamOutlined style={{ color: '#9ca3af' }} />
+              <TeamOutlined style={{ color: '#16a34a' }} />
               <span>{company.companySize} nhân viên</span>
             </div>
           )}
@@ -221,20 +230,21 @@ export const CompanyCard = ({ company, isSaved = false, onSaveToggle }: CompanyC
             router.push(`/companies/${company.id}`);
           }}
           style={{
-            height: 42,
-            borderRadius: 10,
+            height: 48,
+            borderRadius: 14,
             background: 'linear-gradient(135deg, #16a34a, #22c55e)',
             border: 'none',
-            fontWeight: 600,
-            fontSize: 14,
+            fontWeight: 700,
+            fontSize: 15,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 6,
+            gap: 8,
+            boxShadow: '0 6px 16px rgba(22,163,74,0.15)',
           }}
-          icon={<RightOutlined style={{ fontSize: 12 }} />}
+          icon={<RightOutlined style={{ fontSize: 13 }} />}
         >
-          Xem chi tiết công ty
+          Chi tiết doanh nghiệp
         </Button>
       </div>
     </Card>

@@ -66,8 +66,8 @@ export default function JobsListPage() {
   };
 
   return (
-    <div className="bg-[#f7f8fa]">
-      {/* Search Bar */}
+    <div className="bg-[#f8fafc] min-h-screen">
+      {/* Search Bar Section */}
       <JobSearchBar
         searchText={filters.searchText || ''}
         location={filters.location || 'all'}
@@ -76,26 +76,30 @@ export default function JobsListPage() {
         onSearch={handleSearch}
       />
 
-      {/* Main layout */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
-          {/* Filters */}
+      {/* Main Content Layout */}
+      <div className="max-w-[1240px] mx-auto px-6 py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-10">
+          {/* Left Sidebar - Filters */}
           <JobFilters
             filters={filters}
             onFilterChange={(newFilters) => setFilters(newFilters)}
           />
 
-          {/* Results */}
+          {/* Right Content - Results */}
           <section>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">Kết quả tìm kiếm việc làm</h2>
-                <p className="text-sm text-gray-500">Tìm thấy {jobs.length} công việc phù hợp</p>
+                <h2 className="text-2xl font-extrabold text-[#0f172a] tracking-tight">Kết quả tìm kiếm</h2>
+                <p className="text-[15px] font-medium text-[#64748b] mt-1">
+                  Đã tìm thấy <span className="text-[#16a34a] font-bold">{jobs.length}</span> công việc phù hợp
+                </p>
               </div>
-              <div className="text-sm text-gray-500">Sắp xếp: <span className="text-green-600">Mới nhất</span></div>
+              <div className="bg-white px-4 py-2 rounded-xl border border-slate-100 shadow-sm text-[13px] font-bold text-[#64748b]">
+                Sắp xếp: <span className="text-[#16a34a]">Mới nhất</span>
+              </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="flex flex-col gap-6">
               {jobs.map((job) => (
                 <JobCard
                   key={job.id}
@@ -108,19 +112,22 @@ export default function JobsListPage() {
 
             {jobs.length === 0 && !loading && (
               <Card
+                className="mt-6"
                 style={{
                   textAlign: 'center',
-                  padding: 60,
-                  borderRadius: 16,
-                  border: '1px solid #e5e7eb',
-                  marginTop: 16,
+                  padding: '80px 40px',
+                  borderRadius: 24,
+                  border: '1px dashed #e2e8f0',
+                  background: 'rgba(255,255,255,0.5)',
                 }}
               >
-                <div style={{ fontSize: 56, marginBottom: 16 }}>🔍</div>
-                <h3 style={{ fontSize: 20, marginBottom: 8, fontWeight: 600, color: '#111827' }}>
+                <div style={{ fontSize: 64, marginBottom: 24 }}>🔍</div>
+                <h3 className="text-xl font-extrabold text-[#0f172a] mb-2">
                   Không tìm thấy công việc phù hợp
                 </h3>
-                <p style={{ color: '#6b7280' }}>Thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh bộ lọc.</p>
+                <p className="text-[#64748b] text-base">
+                  Thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh bộ lọc để có thêm kết quả.
+                </p>
               </Card>
             )}
           </section>

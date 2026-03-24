@@ -374,9 +374,22 @@ export const CVManagement = () => {
 
   return (
     <Card
-      title="Quản lý CV"
+      title={<Text strong style={{ fontSize: 18, color: '#0f172a' }}>Danh sách CV của bạn</Text>}
+      style={{ borderRadius: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}
       extra={
-        <Button type="primary" icon={<PlusOutlined />} onClick={openAddModal}>
+        <Button 
+          type="primary" 
+          icon={<PlusOutlined />} 
+          onClick={openAddModal}
+          style={{ 
+            borderRadius: 10, 
+            height: 40, 
+            fontWeight: 600,
+            background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+            border: 'none',
+            boxShadow: '0 4px 12px rgba(22,163,74,0.15)'
+          }}
+        >
           Thêm CV mới
         </Button>
       }
@@ -393,7 +406,13 @@ export const CVManagement = () => {
       />
 
       <Modal
-        title={editingCV ? 'Chỉnh sửa CV' : 'Thêm CV mới'}
+        title={
+          <div style={{ padding: '4px 0', borderBottom: '1px solid #f1f5f9', marginBottom: 16 }}>
+            <Text style={{ fontSize: 18, fontWeight: 800, color: '#0f172a' }}>
+              {editingCV ? 'Chỉnh sửa thông tin CV' : 'Tải lên CV mới'}
+            </Text>
+          </div>
+        }
         open={isModalOpen}
         onCancel={() => {
           setIsModalOpen(false);
@@ -402,6 +421,9 @@ export const CVManagement = () => {
         }}
         footer={null}
         width={600}
+        centered
+        style={{ borderRadius: 24, overflow: 'hidden' }}
+        bodyStyle={{ padding: '0 24px 24px' }}
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item
@@ -414,19 +436,35 @@ export const CVManagement = () => {
 
           {!editingCV && (
             <>
-              <Form.Item label="Upload CV" required>
+              <Form.Item label={<Text strong>Tải lên tệp CV</Text>} required>
                 <Upload
                   accept=".pdf,.doc,.docx"
                   beforeUpload={handleUpload}
                   showUploadList={false}
                   disabled={uploading}
                 >
-                  <Button icon={<UploadOutlined />} loading={uploading} size="large" block>
-                    {uploading ? 'Đang upload...' : 'Chọn file CV'}
+                  <Button 
+                    icon={<UploadOutlined />} 
+                    loading={uploading} 
+                    size="large" 
+                    block
+                    style={{ 
+                      height: 80, 
+                      borderRadius: 16, 
+                      border: '2px dashed #e2e8f0',
+                      background: '#f8fafc',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 8
+                    }}
+                  >
+                    {uploading ? 'Đang xử lý tệp...' : <><UploadOutlined style={{ fontSize: 24, color: '#16a34a' }} /> <Text style={{ color: '#64748b' }}>Kéo thả hoặc click để chọn file</Text></>}
                   </Button>
                 </Upload>
-                <div style={{ marginTop: 8, fontSize: 12, color: '#6b7280' }}>
-                  Hỗ trợ PDF, DOC, DOCX • Tối đa 10MB
+                <div style={{ marginTop: 12, fontSize: 12, color: '#94a3b8', textAlign: 'center' }}>
+                  Hỗ trợ định dạng PDF, DOC, DOCX • Tối đa 10MB
                 </div>
               </Form.Item>
 
@@ -460,17 +498,31 @@ export const CVManagement = () => {
             />
           </Form.Item>
 
-          <Form.Item>
-            <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
-              <Button onClick={() => {
-                setIsModalOpen(false);
-                form.resetFields();
-                setEditingCV(null);
-              }}>
-                Hủy
+          <Form.Item style={{ marginBottom: 0, marginTop: 24 }}>
+            <Space style={{ width: '100%', justifyContent: 'flex-end', gap: 12 }}>
+              <Button 
+                onClick={() => {
+                  setIsModalOpen(false);
+                  form.resetFields();
+                  setEditingCV(null);
+                }}
+                style={{ borderRadius: 10, height: 40, padding: '0 24px' }}
+              >
+                Hủy bỏ
               </Button>
-              <Button type="primary" htmlType="submit">
-                {editingCV ? 'Cập nhật' : 'Thêm CV'}
+              <Button 
+                type="primary" 
+                htmlType="submit"
+                style={{ 
+                  borderRadius: 10, 
+                  height: 40, 
+                  padding: '0 32px',
+                  fontWeight: 600,
+                  background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+                  border: 'none'
+                }}
+              >
+                {editingCV ? 'Lưu cập nhật' : 'Hoàn tất tải lên'}
               </Button>
             </Space>
           </Form.Item>

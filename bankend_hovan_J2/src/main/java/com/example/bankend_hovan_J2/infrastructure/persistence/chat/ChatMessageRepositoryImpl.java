@@ -3,6 +3,8 @@ package com.example.bankend_hovan_J2.infrastructure.persistence.chat;
 import com.example.bankend_hovan_J2.domain.chat.entity.ChatMessage;
 import com.example.bankend_hovan_J2.domain.chat.repository.ChatMessageRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,11 @@ public class ChatMessageRepositoryImpl implements ChatMessageRepository {
                 .stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<ChatMessage> findByConversationId(Long conversationId, Pageable pageable) {
+        return jpaRepository.findByConversationId(conversationId, pageable).map(this::toDomain);
     }
 
     public List<ChatMessage> findRecentByConversationId(Long conversationId, LocalDateTime after) {

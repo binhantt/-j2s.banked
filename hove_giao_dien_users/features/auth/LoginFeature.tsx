@@ -93,6 +93,14 @@ const UserTypeModal = memo(({
 
 UserTypeModal.displayName = 'UserTypeModal';
 
+// Đọc banned message NGAY khi module load, trước cả React render
+const bannedMessageOnLoad = (() => {
+  if (typeof window === 'undefined') return '';
+  const msg = sessionStorage.getItem('bannedMessage');
+  if (msg) sessionStorage.removeItem('bannedMessage');
+  return msg || '';
+})();
+
 export const LoginFeature = () => {
   const router = useRouter();
   const { googleLogin, githubLogin, facebookLogin, isLoading } = useAuthStore();
@@ -101,6 +109,15 @@ export const LoginFeature = () => {
   const [pendingGitHubCode, setPendingGitHubCode] = useState<string>('');
   const [pendingFacebookToken, setPendingFacebookToken] = useState<string>('');
   const [loginMethod, setLoginMethod] = useState<'google' | 'github' | 'facebook'>('google');
+  const [bannedMsg, setBannedMsg] = useState(bannedMessageOnLoad);
+
+  // Hiện message ngay khi component mount (không chờ Zustand rehydrate)
+  useEffect(() => {
+    if (bannedMsg) {
+      message.error(bannedMsg);
+      setBannedMsg(''); // clear sau khi show
+    }
+  }, [bannedMsg]);
 
   const handleGoogleSuccess = useCallback(async (credentialResponse: any) => {
     const idToken = credentialResponse.credential;

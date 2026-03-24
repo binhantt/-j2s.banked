@@ -4,6 +4,10 @@ import com.example.bankend_hovan_J2.domain.user.entity.User;
 import com.example.bankend_hovan_J2.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,15 +28,40 @@ public class UserManagementController {
     private final com.example.bankend_hovan_J2.infrastructure.security.AesGcmCryptoService aesGcmCryptoService;
 
     @GetMapping
-    public ResponseEntity<List<Map<String, Object>>> getAllUsers() {
+    public ResponseEntity<Map<String, Object>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String userType,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
         try {
-            List<com.example.bankend_hovan_J2.infrastructure.persistence.user.UserEntityJpa> users = 
-                userJpaRepository.findAll();
-            
-            List<Map<String, Object>> response = users.stream()
+            Sort sort = sortDir.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+            Pageable pageable = PageRequest.of(page, size, sort);
+
+            Page<com.example.bankend_hovan_J2.infrastructure.persistence.user.UserEntityJpa> userPage;
+            if (userType != null && !userType.isBlank()) {
+                userPage = userJpaRepository.findByUserType(userType, pageable);
+            } else {
+                userPage = userJpaRepository.findAll(pageable);
+            }
+
+            List<Map<String, Object>> content = userPage.getContent().stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
-            
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("content", content);
+            response.put("totalElements", userPage.getTotalElements());
+            response.put("totalPages", userPage.getTotalPages());
+            response.put("page", userPage.getNumber());
+            response.put("size", userPage.getSize());
+            response.put("first", userPage.isFirst());
+            response.put("last", userPage.isLast());
+            response.put("hasNext", userPage.hasNext());
+            response.put("hasPrevious", userPage.hasPrevious());
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error fetching users", e);

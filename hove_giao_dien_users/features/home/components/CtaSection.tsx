@@ -38,13 +38,13 @@ export const CtaSection = () => {
               icon={<ArrowRightOutlined />}
               style={{
                 height: 48,
-                borderRadius: 12,
-                background: '#16a34a',
+                borderRadius: 14,
+                background: 'linear-gradient(135deg, #16a34a, #22c55e)',
                 border: 'none',
-                fontWeight: 600,
+                fontWeight: 700,
                 fontSize: 15,
                 paddingInline: 32,
-                boxShadow: '0 4px 14px rgba(22,163,74,0.35)',
+                boxShadow: '0 6px 16px rgba(22,163,74,0.15)',
               }}
             >
               Khám phá việc làm phù hợp

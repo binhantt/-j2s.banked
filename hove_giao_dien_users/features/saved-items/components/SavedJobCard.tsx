@@ -46,7 +46,7 @@ export const SavedJobCard = ({ job, savedAt, onView, onUnsave }: SavedJobCardPro
           style={{
             borderRadius: 18,
             border: '1px solid #f3f4f6',
-            background: job.companyLogoUrl ? '#fff' : 'linear-gradient(135deg, #16a34a 0%, #8b5cf6 100%)',
+            background: job.companyLogoUrl ? '#fff' : 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
             color: '#fff',
             fontSize: '28px',
             fontWeight: 800,
@@ -69,8 +69,8 @@ export const SavedJobCard = ({ job, savedAt, onView, onUnsave }: SavedJobCardPro
 
       <div className="mt-6 flex flex-col gap-3.5 text-sm text-gray-600 flex-grow">
         <span className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
-            <DollarOutlined className="text-emerald-500 text-base" />
+          <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center shrink-0">
+            <DollarOutlined className="text-green-600 text-base" />
           </div>
           <span className="font-bold text-gray-800 text-base">{formatSalary(job)}</span>
         </span>
@@ -91,7 +91,15 @@ export const SavedJobCard = ({ job, savedAt, onView, onUnsave }: SavedJobCardPro
           <Button 
             type="primary" 
             onClick={(e) => { e.stopPropagation(); onView(); }}
-            className="bg-green-600 hover:bg-green-500 shadow-md shadow-green-200 font-semibold rounded-xl px-6 h-10"
+            style={{
+              background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+              border: 'none',
+              fontWeight: 700,
+              borderRadius: 12,
+              height: 40,
+              paddingInline: 24,
+              boxShadow: '0 4px 12px rgba(22,163,74,0.15)',
+            }}
           >
             Ứng tuyển
           </Button>

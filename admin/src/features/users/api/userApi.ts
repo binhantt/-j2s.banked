@@ -16,9 +16,27 @@ export interface UserResponse {
   updatedAt: string;
 }
 
+export interface PagedUsersResponse {
+  content: UserResponse[];
+  totalElements: number;
+  totalPages: number;
+  page: number;
+  size: number;
+  first: boolean;
+  last: boolean;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
+
+function buildPageParams(page: number, size: number, userType?: string): string {
+  const params = new URLSearchParams({ page: String(page), size: String(size) });
+  if (userType) params.append('userType', userType);
+  return `?${params.toString()}`;
+}
+
 export const userApi = {
-  async getAllUsers(): Promise<UserResponse[]> {
-    return httpRequest<UserResponse[]>('/admin/users');
+  async getAllUsers(page = 0, size = 20, userType?: string): Promise<PagedUsersResponse> {
+    return httpRequest<PagedUsersResponse>(`/admin/users${buildPageParams(page, size, userType)}`);
   },
 
   async getUserById(id: number): Promise<UserResponse> {

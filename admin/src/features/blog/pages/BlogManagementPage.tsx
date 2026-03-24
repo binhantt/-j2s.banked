@@ -114,22 +114,24 @@ export function BlogManagementPage() {
 
   return (
     <div>
-      <div style={{ marginBottom: 20 }}>
-        <Title level={3} style={{ marginBottom: 4, color: '#0b1220' }}>
+      <div style={{ marginBottom: 32 }}>
+        <Title level={2} style={{ marginBottom: 8, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
           Quản lý Blog
         </Title>
-        <Text type="secondary">
-          Xem, theo dõi và quản lý các bài viết blog từ nền tảng và từ công ty.
+        <Text style={{ color: '#64748b', fontSize: 15 }}>
+          Quản lý bài viết blog từ nền tảng và đối tác
         </Text>
       </div>
 
       <Card
-        style={{ marginBottom: 16, borderRadius: 14 }}
+        style={{ marginBottom: 24, borderRadius: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}
         extra={
-          <Space>
-            {/* Nút "Tạo bài viết" hiện sẽ được handle ở App thông qua view "blogCreate" */}
-            <Button onClick={() => message.info('Chọn mục Blog → Tạo mới ở header để tạo bài viết')}>Tạo bài viết</Button>
-            <Button icon={<ReloadOutlined />} onClick={() => void loadPosts()}>
+          <Space size={12}>
+            <Button 
+              icon={<ReloadOutlined />} 
+              onClick={() => void loadPosts()}
+              style={{ borderRadius: 12, height: 40 }}
+            >
               Làm mới
             </Button>
           </Space>

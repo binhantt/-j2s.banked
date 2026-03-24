@@ -47,18 +47,19 @@ export function AdminLayout({
   );
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f3f6fb' }}>
+    <Layout style={{ minHeight: '100vh', background: '#f8fafc' }}>
       <Sider
-        width={320}
+        width={300}
         trigger={null}
         style={{
-          background: 'linear-gradient(180deg, #0b1220 0%, #0a1530 100%)',
-          borderRight: '1px solid rgba(148,163,184,0.2)',
+          background: '#ffffff',
+          borderRight: '1px solid #e2e8f0',
           position: 'sticky',
           top: 0,
           left: 0,
           height: '100vh',
-          overflow: 'hidden',
+          boxShadow: '4px 0 16px rgba(15,23,42,0.02)',
+          zIndex: 40,
         }}
       >
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -68,59 +69,39 @@ export function AdminLayout({
                 height: 84,
                 display: 'flex',
                 alignItems: 'center',
-                padding: '0 22px',
+                padding: '0 28px',
                 gap: 14,
                 flexShrink: 0,
               }}
             >
-              {/* Stylized V logo */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
-                  <path
-                    d="M5 8L13.5 28.5L19 15L24.5 28.5L33 8"
-                    stroke="#16a34a"
-                    strokeWidth="3.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    fill="none"
-                  />
-                  <path
-                    d="M5 8L13.5 28.5L19 15L24.5 28.5L33 8"
-                    stroke="url(#grad)"
-                    strokeWidth="3.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    fill="none"
-                  />
-                  <defs>
-                    <linearGradient id="grad" x1="5" y1="8" x2="33" y2="28.5" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#16a34a" />
-                      <stop offset="1" stopColor="#22c55e" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
-                  <span
-                    style={{
-                      color: '#ffffff',
-                      fontWeight: 700,
-                      fontSize: 22,
-                      letterSpacing: '-0.3px',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
+              {/* Premium Logo */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 12,
+                  background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+                  display: 'grid',
+                  placeItems: 'center',
+                  boxShadow: '0 8px 16px rgba(22,163,74,0.15)',
+                }}>
+                  <svg width="24" height="24" viewBox="0 0 38 38" fill="none">
+                    <path
+                      d="M5 8L13.5 28.5L19 15L24.5 28.5L33 8"
+                      stroke="#ffffff"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      fill="none"
+                    />
+                  </svg>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
+                  <span style={{ color: '#0f172a', fontWeight: 800, fontSize: 18, letterSpacing: '-0.5px' }}>
                     Việc Làm
                   </span>
-                  <span
-                    style={{
-                      color: '#16a34a',
-                      fontWeight: 800,
-                      fontSize: 22,
-                      letterSpacing: '-0.3px',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    24h
+                  <span style={{ color: '#16a34a', fontWeight: 800, fontSize: 18, letterSpacing: '-0.5px' }}>
+                    24h ADMIN
                   </span>
                 </div>
               </div>
@@ -130,26 +111,27 @@ export function AdminLayout({
               theme={{
                 components: {
                   Menu: {
-                    darkItemBg: 'transparent',
-                    darkItemColor: '#9fb2cf',
-                    darkItemHoverBg: 'rgba(22,163,74,0.14)',
-                    darkItemSelectedBg: '#16a34a',
-                    darkItemSelectedColor: '#ffffff',
+                    itemBg: 'transparent',
+                    itemColor: '#64748b',
+                    itemHoverBg: '#f0fdf4',
+                    itemHoverColor: '#16a34a',
+                    itemSelectedBg: '#16a34a',
+                    itemSelectedColor: '#ffffff',
+                    itemMarginInline: 12,
+                    itemBorderRadius: 12,
                   },
                 },
               }}
             >
               <Menu
                 mode="inline"
-                theme="dark"
                 selectedKeys={[currentView]}
                 items={menuItems}
                 onClick={({ key }: { key: string }) => onChangeView(key)}
                 style={{
                   borderInlineEnd: 'none',
-                  marginTop: 8,
+                  marginTop: 16,
                   background: 'transparent',
-                  paddingInline: 12,
                 }}
               />
             </ConfigProvider>
@@ -157,23 +139,47 @@ export function AdminLayout({
 
           <div
             style={{
-              borderTop: '1px solid rgba(148,163,184,0.22)',
-              padding: '18px 20px',
-              marginTop: 20,
-              flexShrink: 0,
+              padding: '24px',
+              borderTop: '1px solid #f1f5f9',
+              background: '#fafafa',
+              margin: '0 12px 12px',
+              borderRadius: 20,
             }}
           >
-            <Space direction="vertical" style={{ width: '100%' }} size={12}>
-              <Space>
-                <Avatar size={48} icon={<UserOutlined />} style={{ backgroundColor: '#16a34a' }} />
-                <Space direction="vertical" size={0}>
-                  <Text style={{ color: '#f8fafc', fontWeight: 700 }}>Quản trị viên</Text>
-                  <Text style={{ color: '#8ea4c8', fontSize: 14 }}>admin@company.vn</Text>
-                </Space>
-              </Space>
+            <Space direction="vertical" style={{ width: '100%' }} size={16}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <Badge dot color="#22c55e" offset={[-4, 40]}>
+                  <Avatar 
+                    size={48} 
+                    icon={<UserOutlined />} 
+                    style={{ 
+                      backgroundColor: '#f0fdf4', 
+                      color: '#16a34a',
+                      border: '2px solid #ffffff',
+                      boxShadow: '0 4px 8px rgba(0,0,0,0.05)'
+                    }} 
+                  />
+                </Badge>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <Text style={{ color: '#0f172a', fontWeight: 700, fontSize: 15 }}>Quản trị viên</Text>
+                  <Text style={{ color: '#64748b', fontSize: 12 }}>Bảng điều khiển</Text>
+                </div>
+              </div>
 
-              <Button block icon={<LogoutOutlined />} onClick={onLogout}>
-                Thoát
+              <Button 
+                block 
+                size="large"
+                icon={<LogoutOutlined />} 
+                onClick={onLogout}
+                style={{
+                  borderRadius: 12,
+                  fontWeight: 600,
+                  color: '#ef4444',
+                  border: '1px solid #fee2e2',
+                  background: '#ffffff',
+                }}
+              >
+                Đăng xuất
               </Button>
             </Space>
           </div>
@@ -183,49 +189,81 @@ export function AdminLayout({
       <Layout>
         <Header
           style={{
-            height: 76,
+            height: 84,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            background: '#f3f6fb',
-            borderBottom: '1px solid #dde5ef',
-            padding: '0 24px',
+            background: '#ffffff',
+            borderBottom: '1px solid #f1f5f9',
+            padding: '0 32px',
             position: 'sticky',
             top: 0,
             zIndex: 30,
+            boxShadow: '0 4px 12px rgba(15,23,42,0.01)',
           }}
         >
-          <Input
-            size="large"
-            prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
-            placeholder="Tìm kiếm nội dung..."
-            style={{ maxWidth: 600, borderRadius: 12, background: '#eef2f7' }}
-          />
+          <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+            <Input
+              size="large"
+              prefix={<SearchOutlined style={{ color: '#94a3b8', marginRight: 8 }} />}
+              placeholder="Tìm kiếm nội dung, người dùng hoặc báo cáo..."
+              style={{ 
+                maxWidth: 500, 
+                borderRadius: 14, 
+                background: '#f8fafc',
+                border: '1px solid #eef2f7',
+                padding: '10px 16px'
+              }}
+            />
+          </div>
 
-          <Space size={14}>
-            <Badge dot>
-              <Button type="text" shape="circle" icon={<BellOutlined style={{ fontSize: 18 }} />} />
-            </Badge>
+          <Space size={20}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Badge count={5} size="small" offset={[-5, 5]}>
+                <Button 
+                  type="text" 
+                  shape="circle" 
+                  icon={<BellOutlined style={{ fontSize: 20, color: '#64748b' }} />} 
+                  style={{ width: 44, height: 44 }}
+                />
+              </Badge>
+            </div>
+            
+            <div style={{ width: '1px', height: 24, background: '#e2e8f0' }} />
+
             {currentView === 'blog' && (
               <Button
                 type="primary"
+                size="large"
                 icon={<PlusOutlined />}
                 style={{
-                  borderRadius: 12,
+                  height: 48,
+                  padding: '0 24px',
+                  borderRadius: 14,
                   border: 'none',
-                  fontWeight: 600,
-                  background: '#16a34a',
+                  fontWeight: 700,
+                  fontSize: 15,
+                  background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+                  boxShadow: '0 8px 16px rgba(22,163,74,0.2)',
                 }}
                 onClick={() => onCreateClick?.('blogCreate')}
               >
-                + Bài viết mới
+                Bài viết mới
               </Button>
             )}
           </Space>
         </Header>
 
-        <Content style={{ padding: 20 }}>
-          <div style={{ minHeight: 'calc(100vh - 116px)' }}>{children}</div>
+        <Content style={{ padding: '32px', background: '#f8fafc' }}>
+          <div style={{ 
+            minHeight: 'calc(100vh - 148px)',
+            background: '#ffffff',
+            borderRadius: 24,
+            padding: 24,
+            boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+          }}>
+            {children}
+          </div>
         </Content>
       </Layout>
     </Layout>

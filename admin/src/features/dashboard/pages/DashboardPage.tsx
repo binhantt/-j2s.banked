@@ -39,24 +39,26 @@ export function DashboardPage() {
 
   return (
     <div>
-      <div style={{ marginBottom: 22 }}>
-        <Title level={3} style={{ marginBottom: 4, color: '#0b1220' }}>
-          Dashboard Admin
+      <div style={{ marginBottom: 32 }}>
+        <Title level={2} style={{ marginBottom: 8, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
+          Dashboard Quan quản trị
         </Title>
-        <Text type="secondary">Theo dõi dữ liệu vận hành nền tảng tuyển dụng theo thời gian thực.</Text>
+        <Text style={{ color: '#64748b', fontSize: 15 }}>
+          Theo dõi dữ liệu vận hành nền tảng tuyển dụng theo thời gian thực.
+        </Text>
       </div>
 
       <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
         {overviewData.map((item) => (
           <Col xs={24} sm={12} xl={6} key={item.key}>
-            <Card style={{ borderRadius: 14, border: '1px solid #e6edf8' }}>
-              <Statistic title={item.title} value={item.value} prefix={<span style={{ color: item.color }}>{item.icon}</span>} />
+            <Card style={{ borderRadius: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+              <Statistic title={<Text style={{ color: '#64748b' }}>{item.title}</Text>} value={item.value} prefix={<span style={{ color: item.color }}>{item.icon}</span>} />
             </Card>
           </Col>
         ))}
       </Row>
 
-      <Card title="Biểu đồ tăng trưởng" style={{ borderRadius: 14, marginBottom: 20 }}>
+      <Card title={<Text strong style={{ color: '#0f172a' }}>Biểu đồ tăng trưởng</Text>} style={{ borderRadius: 20, marginBottom: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
         <svg viewBox="0 0 760 240" width="100%" height="240" preserveAspectRatio="none">
           <defs>
             <linearGradient id="lineArea" x1="0" y1="0" x2="0" y2="1">
@@ -84,7 +86,7 @@ export function DashboardPage() {
 
       <Row gutter={[16, 16]}>
         <Col xs={24} xl={16}>
-          <Card title="Tin tuyển dụng mới" style={{ borderRadius: 14 }} extra={<Tag color="green">+12% tuần này</Tag>}>
+          <Card title={<Text strong style={{ color: '#0f172a' }}>Tin tuyển dụng mới</Text>} style={{ borderRadius: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }} extra={<Tag color="green">+12% tuần này</Tag>}>
             <Table
               rowKey="id"
               pagination={false}
@@ -106,7 +108,7 @@ export function DashboardPage() {
         </Col>
 
         <Col xs={24} xl={8}>
-          <Card title="Hiệu suất hệ thống" style={{ height: '100%', borderRadius: 14 }}>
+          <Card title={<Text strong style={{ color: '#0f172a' }}>Hiệu suất hệ thống</Text>} style={{ height: '100%', borderRadius: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
             <div style={{ marginBottom: 16 }}>
               <Text strong>Tỷ lệ duyệt tin</Text>
               <Progress percent={93} strokeColor="#16a34a" />
