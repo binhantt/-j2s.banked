@@ -20,7 +20,8 @@ src/main/java/com/example/bankend_hovan_J2/
 │   ├── company/
 │   │   └── CompanyController.java        ← /api/companies/**
 │   ├── job/
-│   │   └── JobPostingController.java     ← /api/jobs/**
+│   │   ├── JobPostingController.java     ← /api/jobs/**
+│   │   └── JobPostingResponse.java       ← Response DTO
 │   └── application/
 │       └── JobApplicationController.java  ← /api/applications/**
 │
