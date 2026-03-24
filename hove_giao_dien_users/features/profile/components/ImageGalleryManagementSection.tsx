@@ -148,26 +148,22 @@ export const ImageGalleryManagementSection = () => {
 
   const handleDelete = async (image: CompanyImage) => {
     try {
-      // Try new API first
-      if (image.id && typeof image.id === 'number' && image.id > 1000) {
-        await companyImageApi.deleteCompanyImage(image.id);
-      } else {
-        // Fallback to old method
-        const newImages = images.filter((img) => img.imageUrl !== image.imageUrl);
-        const company = await companyApi.getCompanyByHrId(user!.id);
-        if (company) {
-          await companyApi.updateCompany(company.id, {
-            ...company,
-            images: JSON.stringify(newImages.map(img => img.imageUrl)),
-          } as any);
-        }
+      // Always try real API first (uses real DB id from addCompanyImage)
+      await companyImageApi.deleteCompanyImage(image.id);
+    } catch (apiError) {
+      // Fallback: if real API fails (e.g. fake id from old data), remove from company's images JSON
+      const newImages = images.filter((img) => img.imageUrl !== image.imageUrl);
+      const company = await companyApi.getCompanyByHrId(user!.id);
+      if (company) {
+        await companyApi.updateCompany(company.id, {
+          ...company,
+          images: JSON.stringify(newImages.map(img => img.imageUrl)),
+        } as any);
       }
-      
-      setImages(images.filter((img) => img.imageUrl !== image.imageUrl));
-      message.success('Đã xóa ảnh!');
-    } catch (error) {
-      message.error('Xóa ảnh thất bại!');
     }
+
+    setImages(images.filter((img) => img.imageUrl !== image.imageUrl));
+    message.success('Đã xóa ảnh!');
   };
 
   return (

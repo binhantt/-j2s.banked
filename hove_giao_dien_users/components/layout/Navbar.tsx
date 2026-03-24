@@ -429,6 +429,7 @@ export const Navbar = () => {
       </div>
 
       <style>{`
+        .mobile-menu { display: none; }
         @media (min-width: 768px) {
           .logo-text { display: block !important; }
         }
