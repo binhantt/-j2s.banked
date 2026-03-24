@@ -8,6 +8,7 @@ interface User {
   email: string;
   avatarUrl?: string;
   userType: 'job_seeker' | 'freelancer' | 'hr';
+  companyId?: number;
 }
 
 interface AuthStore {

@@ -27,6 +27,8 @@ public class UpdateJobPostingUseCase {
         existing.setLevel(jobPosting.getLevel());
         existing.setExperience(jobPosting.getExperience());
         existing.setStatus(jobPosting.getStatus());
+        existing.setMaxApplicants(jobPosting.getMaxApplicants());
+        existing.setInterviewRounds(jobPosting.getInterviewRounds());
 
         return jobPostingRepository.save(existing);
     }

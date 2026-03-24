@@ -7,6 +7,7 @@ import com.example.bankend_hovan_J2.domain.company.repository.CompanyBlogReposit
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ public class CompanyBlogController {
     private final UpdateCompanyBlogUseCase updateBlogUseCase;
 
     @PostMapping
+    @PreAuthorize("hasRole('HR')")
     public ResponseEntity<CompanyBlog> createBlog(@RequestBody Map<String, Object> request) {
         CompanyBlog blog = mapToBlog(request);
         CompanyBlog created = createBlogUseCase.execute(blog);
@@ -27,6 +29,7 @@ public class CompanyBlogController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('HR')")
     public ResponseEntity<CompanyBlog> updateBlog(@PathVariable Long id, @RequestBody Map<String, Object> request) {
         CompanyBlog blog = mapToBlog(request);
         CompanyBlog updated = updateBlogUseCase.execute(id, blog);
@@ -65,13 +68,14 @@ public class CompanyBlogController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('HR')")
     public ResponseEntity<Void> deleteBlog(@PathVariable Long id) {
         blogRepository.deleteById(id);
         return ResponseEntity.ok().build();
     }
 
     private CompanyBlog mapToBlog(Map<String, Object> request) {
-        return CompanyBlog.builder()
+        CompanyBlog blog = CompanyBlog.builder()
                 .companyId(getLong(request, "companyId"))
                 .title(getString(request, "title"))
                 .content(getString(request, "content"))
@@ -79,6 +83,22 @@ public class CompanyBlogController {
                 .authorName(getString(request, "authorName"))
                 .status(getString(request, "status"))
                 .build();
+        
+        // Validate required fields
+        if (blog.getCompanyId() == null) {
+            throw new IllegalArgumentException("Company ID is required");
+        }
+        if (blog.getTitle() == null || blog.getTitle().trim().isEmpty()) {
+            throw new IllegalArgumentException("Title is required");
+        }
+        if (blog.getContent() == null || blog.getContent().trim().isEmpty()) {
+            throw new IllegalArgumentException("Content is required");
+        }
+        if (blog.getAuthorName() == null || blog.getAuthorName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Author name is required");
+        }
+        
+        return blog;
     }
 
     private String getString(Map<String, Object> map, String key) {

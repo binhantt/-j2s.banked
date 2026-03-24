@@ -1,0 +1,24 @@
+package com.example.bankend_hovan_J2.application.domain;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class CreateDomainRequest {
+    @NotBlank(message = "Tên lĩnh vực không được để trống")
+    @Size(max = 100, message = "Tên lĩnh vực không được vượt quá 100 ký tự")
+    private String name;
+
+    @Size(max = 500, message = "Mô tả không được vượt quá 500 ký tự")
+    private String description;
+
+    private Boolean isActive;
+}

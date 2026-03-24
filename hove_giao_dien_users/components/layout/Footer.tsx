@@ -16,126 +16,183 @@ export const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <AntFooter className="bg-gray-50 border-t border-gray-200 pt-12 pb-6 mt-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Row gutter={[32, 32]} className="mb-8">
-          {/* Company Info */}
+    <AntFooter
+      style={{
+        background: '#0b1220',
+        borderTop: '1px solid rgba(22,163,74,0.15)',
+        paddingTop: 48,
+        paddingBottom: 24,
+        marginTop: 64,
+      }}
+    >
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
+        <Row gutter={[32, 32]} style={{ marginBottom: 32 }}>
+          {/* Logo & Description */}
           <Col xs={24} sm={12} md={8}>
-            <div className="mb-4">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 via-cyan-500 to-teal-500 rounded-xl flex items-center justify-center shadow-md">
-                  <span className="text-white font-bold text-xl">V</span>
-                </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent">
-                  ViệcLàm24h
-                </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 10,
+                  background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+                  display: 'grid',
+                  placeItems: 'center',
+                  boxShadow: '0 4px 12px rgba(22,163,74,0.3)',
+                }}
+              >
+                <span style={{ color: '#fff', fontWeight: 700, fontSize: 18 }}>V</span>
               </div>
-              <p className="text-gray-600 text-sm mb-4 leading-relaxed">
-                Nền tảng tìm kiếm việc làm hàng đầu Việt Nam. Kết nối ứng viên
-                với hàng nghìn cơ hội nghề nghiệp.
-              </p>
+              <span style={{
+                fontSize: 20,
+                fontWeight: 700,
+                color: '#f8fafc',
+              }}>
+                ViệcLàm24h
+              </span>
             </div>
-            <Space size="large">
+            <p style={{
+              color: '#64748b',
+              fontSize: 14,
+              lineHeight: 1.7,
+              marginBottom: 20,
+            }}>
+              Nền tảng tìm kiếm việc làm và freelance hàng đầu Việt Nam. Kết nối ứng viên với hàng nghìn cơ hội nghề nghiệp từ các công ty uy tín.
+            </p>
+            <Space size="middle">
               <a
                 href="#"
-                className="text-gray-500 hover:text-indigo-600 hover:scale-110 transition-all duration-200"
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 8,
+                  background: 'rgba(22,163,74,0.1)',
+                  border: '1px solid rgba(22,163,74,0.2)',
+                  display: 'grid',
+                  placeItems: 'center',
+                  color: '#16a34a',
+                  transition: 'all 0.2s',
+                }}
               >
-                <FacebookOutlined className="text-xl" />
+                <FacebookOutlined style={{ fontSize: 16 }} />
               </a>
               <a
                 href="#"
-                className="text-gray-500 hover:text-indigo-600 hover:scale-110 transition-all duration-200"
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 8,
+                  background: 'rgba(22,163,74,0.1)',
+                  border: '1px solid rgba(22,163,74,0.2)',
+                  display: 'grid',
+                  placeItems: 'center',
+                  color: '#16a34a',
+                  transition: 'all 0.2s',
+                }}
               >
-                <TwitterOutlined className="text-xl" />
+                <TwitterOutlined style={{ fontSize: 16 }} />
               </a>
               <a
                 href="#"
-                className="text-gray-500 hover:text-indigo-600 hover:scale-110 transition-all duration-200"
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 8,
+                  background: 'rgba(22,163,74,0.1)',
+                  border: '1px solid rgba(22,163,74,0.2)',
+                  display: 'grid',
+                  placeItems: 'center',
+                  color: '#16a34a',
+                  transition: 'all 0.2s',
+                }}
               >
-                <LinkedinOutlined className="text-xl" />
+                <LinkedinOutlined style={{ fontSize: 16 }} />
               </a>
               <a
                 href="#"
-                className="text-gray-500 hover:text-indigo-600 hover:scale-110 transition-all duration-200"
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 8,
+                  background: 'rgba(22,163,74,0.1)',
+                  border: '1px solid rgba(22,163,74,0.2)',
+                  display: 'grid',
+                  placeItems: 'center',
+                  color: '#16a34a',
+                  transition: 'all 0.2s',
+                }}
               >
-                <InstagramOutlined className="text-xl" />
+                <InstagramOutlined style={{ fontSize: 16 }} />
               </a>
             </Space>
           </Col>
 
           {/* Quick Links */}
           <Col xs={24} sm={12} md={8}>
-            <h3 className="text-gray-900 font-semibold text-base mb-4">
+            <h3 style={{
+              color: '#f8fafc',
+              fontWeight: 700,
+              fontSize: 15,
+              marginBottom: 16,
+            }}>
               Liên kết nhanh
             </h3>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/jobs"
-                  className="text-gray-600 hover:text-indigo-600 hover:translate-x-1 transition-all duration-200 text-sm inline-block"
-                >
-                  Tìm việc làm
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/freelance"
-                  className="text-gray-600 hover:text-indigo-600 hover:translate-x-1 transition-all duration-200 text-sm inline-block"
-                >
-                  Freelance
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/companies"
-                  className="text-gray-600 hover:text-indigo-600 hover:translate-x-1 transition-all duration-200 text-sm inline-block"
-                >
-                  Công ty
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/blog"
-                  className="text-gray-600 hover:text-indigo-600 hover:translate-x-1 transition-all duration-200 text-sm inline-block"
-                >
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/cv-builder"
-                  className="text-gray-600 hover:text-indigo-600 hover:translate-x-1 transition-all duration-200 text-sm inline-block"
-                >
-                  Tạo CV online
-                </Link>
-              </li>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              {[
+                { href: '/jobs', label: 'Tìm việc làm' },
+                { href: '/freelance', label: 'Freelance' },
+                { href: '/companies', label: 'Công ty' },
+                { href: '/blog', label: 'Blog' },
+                { href: '/cv-builder', label: 'Tạo CV online' },
+              ].map((item) => (
+                <li key={item.href} style={{ marginBottom: 8 }}>
+                  <Link
+                    href={item.href}
+                    style={{
+                      color: '#64748b',
+                      fontSize: 14,
+                      textDecoration: 'none',
+                      transition: 'color 0.2s',
+                    }}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </Col>
 
-          {/* Contact Info */}
+          {/* Contact */}
           <Col xs={24} sm={12} md={8}>
-            <h3 className="text-gray-900 font-semibold text-base mb-4">Liên hệ</h3>
-            <ul className="space-y-3">
-              <li className="flex items-start gap-2">
-                <EnvironmentOutlined className="text-indigo-600 text-base mt-0.5" />
-                <span className="text-gray-600 text-sm leading-relaxed">
+            <h3 style={{
+              color: '#f8fafc',
+              fontWeight: 700,
+              fontSize: 15,
+              marginBottom: 16,
+            }}>
+              Liên hệ
+            </h3>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              <li style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
+                <EnvironmentOutlined style={{ color: '#16a34a', fontSize: 16, marginTop: 2 }} />
+                <span style={{ color: '#64748b', fontSize: 14, lineHeight: 1.6 }}>
                   Tầng 10, Tòa nhà ABC, 123 Nguyễn Huệ, Q.1, TP.HCM
                 </span>
               </li>
-              <li className="flex items-center gap-2">
-                <PhoneOutlined className="text-indigo-600 text-base" />
+              <li style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                <PhoneOutlined style={{ color: '#16a34a', fontSize: 16 }} />
                 <a
                   href="tel:+84123456789"
-                  className="text-gray-600 hover:text-indigo-600 transition-colors text-sm"
+                  style={{ color: '#64748b', fontSize: 14, textDecoration: 'none' }}
                 >
                   +84 123 456 789
                 </a>
               </li>
-              <li className="flex items-center gap-2">
-                <MailOutlined className="text-indigo-600 text-base" />
+              <li style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <MailOutlined style={{ color: '#16a34a', fontSize: 16 }} />
                 <a
                   href="mailto:contact@vieclam24h.vn"
-                  className="text-gray-600 hover:text-indigo-600 transition-colors text-sm"
+                  style={{ color: '#64748b', fontSize: 14, textDecoration: 'none' }}
                 >
                   contact@vieclam24h.vn
                 </a>
@@ -145,35 +202,37 @@ export const Footer = () => {
         </Row>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-200 pt-6">
+        <div style={{
+          borderTop: '1px solid rgba(22,163,74,0.15)',
+          paddingTop: 24,
+        }}>
           <Row justify="space-between" align="middle" gutter={[16, 16]}>
-            <Col xs={24} md={12} className="text-center md:text-left">
-              <p className="text-gray-500 text-sm">
+            <Col xs={24} md={12} style={{ textAlign: 'left' }}>
+              <p style={{ color: '#475569', fontSize: 13 }}>
                 © {currentYear} ViệcLàm24h. All rights reserved.
               </p>
             </Col>
-            <Col xs={24} md={12} className="text-center md:text-right">
-              <Space size="middle" wrap className="text-sm">
-                <Link
-                  href="/privacy"
-                  className="text-gray-500 hover:text-indigo-600 transition-colors"
-                >
-                  Chính sách bảo mật
-                </Link>
-                <span className="text-gray-300">|</span>
-                <Link
-                  href="/terms"
-                  className="text-gray-500 hover:text-indigo-600 transition-colors"
-                >
-                  Điều khoản
-                </Link>
-                <span className="text-gray-300">|</span>
-                <Link
-                  href="/cookies"
-                  className="text-gray-500 hover:text-indigo-600 transition-colors"
-                >
-                  Cookie
-                </Link>
+            <Col xs={24} md={12} style={{ textAlign: 'right' }}>
+              <Space size="middle" wrap style={{ fontSize: 13 }}>
+                {[
+                  { href: '/privacy', label: 'Chính sách bảo mật' },
+                  { href: '/terms', label: 'Điều khoản' },
+                  { href: '/cookies', label: 'Cookie' },
+                ].map((item, i) => (
+                  <span key={item.href} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    {i > 0 && <span style={{ color: '#1e293b' }}>|</span>}
+                    <Link
+                      href={item.href}
+                      style={{
+                        color: '#475569',
+                        fontSize: 13,
+                        textDecoration: 'none',
+                      }}
+                    >
+                      {item.label}
+                    </Link>
+                  </span>
+                ))}
               </Space>
             </Col>
           </Row>

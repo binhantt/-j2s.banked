@@ -18,13 +18,13 @@ export default function ConversationsPage() {
   }, [user?.id]);
 
   const loadConversations = async () => {
+    if (!user?.id) return;
+    
     setLoading(true);
     try {
       let data;
       if (user?.userType === 'hr') {
         data = await chatApi.getHRConversations(user.id);
-      } else if (user?.userType === 'admin') {
-        data = await chatApi.getAllConversations();
       } else {
         data = await chatApi.getJobSeekerConversations(user.id);
       }

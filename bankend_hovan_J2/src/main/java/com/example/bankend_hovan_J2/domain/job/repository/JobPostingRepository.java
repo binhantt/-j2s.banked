@@ -12,4 +12,5 @@ public interface JobPostingRepository {
     List<JobPosting> findByStatus(String status);
     List<JobPosting> findByUserId(Long userId);
     void deleteById(Long id);
+    long countActiveJobsByDomainId(Long domainId);
 }

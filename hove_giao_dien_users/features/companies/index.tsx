@@ -5,9 +5,9 @@ export { CompanyDetailFeature } from './CompanyDetailFeature';
 
 export const CompaniesFeature = () => {
   return (
-    <div style={{ background: '#f7f8fa', minHeight: '100vh' }}>
-      <CompanySearch />
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px 48px' }}>
+    <div style={{ background: '#f3f6fb', minHeight: '100vh', paddingBottom: 32 }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <CompanySearch />
         <CompanyList />
       </div>
     </div>

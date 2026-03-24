@@ -23,6 +23,7 @@ export default function SaveCompanyButton({
     if (user && companyId) {
       checkSaved();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, companyId]);
 
   const checkSaved = async () => {
@@ -57,7 +58,9 @@ export default function SaveCompanyButton({
       if (error.response?.data?.error === 'Company already saved') {
         setSaved(true);
       } else {
-        message.error('Có lỗi xảy ra');
+        const msg = error?.response?.data?.message || error?.message || 'Có lỗi xảy ra';
+        console.error('❌ Lỗi khi lưu/bỏ lưu công ty:', msg);
+        message.error(`Không thể lưu công ty: ${msg}`);
       }
     } finally {
       setLoading(false);

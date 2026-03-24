@@ -24,7 +24,7 @@ export default function JobsListPage() {
     try {
       const { savedJobApi } = await import('@/lib/savedJobApi');
       const saved = await savedJobApi.getUserSavedJobs(user.id);
-      setSavedJobs(saved.map((s: any) => s.jobPostingId));
+      setSavedJobs(saved.map((s: any) => s.jobId));
     } catch (error) {
       console.error('Load saved jobs error:', error);
     }
@@ -33,6 +33,12 @@ export default function JobsListPage() {
   const toggleSaveJob = async (jobId: number) => {
     if (!isAuthenticated || !user?.id) {
       message.warning('Vui lòng đăng nhập để lưu công việc');
+      return;
+    }
+
+    if (!jobId || jobId <= 0) {
+      console.error('❌ Lỗi: jobId không hợp lệ', jobId);
+      message.error('ID công việc không hợp lệ');
       return;
     }
 
@@ -48,9 +54,10 @@ export default function JobsListPage() {
         setSavedJobs([...savedJobs, jobId]);
         message.success('Đã lưu công việc');
       }
-    } catch (error) {
-      console.error('Toggle save job error:', error);
-      message.error('Có lỗi xảy ra');
+    } catch (error: any) {
+      const msg = error?.response?.data?.message || error?.response?.data?.error || error?.message || 'Có lỗi xảy ra';
+      console.error('❌ Lỗi lưu/bỏ lưu công việc:', msg);
+      message.error(`Không thể lưu công việc: ${msg}`);
     }
   };
 
@@ -85,7 +92,7 @@ export default function JobsListPage() {
                 <h2 className="text-xl font-semibold text-gray-900">Kết quả tìm kiếm việc làm</h2>
                 <p className="text-sm text-gray-500">Tìm thấy {jobs.length} công việc phù hợp</p>
               </div>
-              <div className="text-sm text-gray-500">Sắp xếp: <span className="text-blue-600">Mới nhất</span></div>
+              <div className="text-sm text-gray-500">Sắp xếp: <span className="text-green-600">Mới nhất</span></div>
             </div>
 
             <div className="space-y-4">

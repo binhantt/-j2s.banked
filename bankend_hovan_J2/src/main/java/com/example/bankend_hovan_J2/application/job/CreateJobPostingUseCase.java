@@ -17,6 +17,10 @@ public class CreateJobPostingUseCase {
         if (jobPosting.getStatus() == null || jobPosting.getStatus().isEmpty()) {
             jobPosting.setStatus("active");
         }
+        // Default interview rounds
+        if (jobPosting.getInterviewRounds() == null || jobPosting.getInterviewRounds() < 1) {
+            jobPosting.setInterviewRounds(1);
+        }
 
         return jobPostingRepository.save(jobPosting);
     }

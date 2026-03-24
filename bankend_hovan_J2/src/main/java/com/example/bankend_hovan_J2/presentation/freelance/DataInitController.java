@@ -18,7 +18,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/freelance/init")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(originPatterns = "http://localhost:3000")
 public class DataInitController {
     private final FreelanceProjectRepository projectRepository;
     private final ProjectMilestoneRepository milestoneRepository;

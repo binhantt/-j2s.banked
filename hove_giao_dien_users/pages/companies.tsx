@@ -3,7 +3,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 
 const CompaniesPage = () => {
   return (
-    <MainLayout>
+    <MainLayout fullWidth>
       <CompaniesFeature />
     </MainLayout>
   );

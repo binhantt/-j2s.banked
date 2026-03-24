@@ -72,6 +72,20 @@ export const uploadApi = {
   getViewUrl: (fileUrl: string): string => {
     // Extract filename from fileUrl (/uploads/cv/filename.pdf)
     const filename = fileUrl.split('/').pop();
-    return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/upload/cv/view/${filename}`;
+    return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/uploads/cv/${filename}`;
+  },
+  
+  getSecureViewUrl: (fileUrl: string, viewerId: number, embed: boolean = true, token?: string): string => {
+    const filename = fileUrl.split('/').pop();
+    const baseUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/uploads/cv/${filename}`;
+    let url = `${baseUrl}?viewerId=${viewerId}&embed=${embed}`;
+    if (token) {
+      url += `&token=${token}`;
+    }
+    const authToken = localStorage.getItem('token');
+    if (authToken) {
+      url += `&auth_token=${authToken}`;
+    }
+    return url;
   },
 };

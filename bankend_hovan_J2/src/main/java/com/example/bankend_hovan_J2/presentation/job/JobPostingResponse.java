@@ -18,8 +18,8 @@ public class JobPostingResponse {
     private Long userId;
     private String title;
     private String location;
-    private String salaryMin;
-    private String salaryMax;
+    private Long salaryMin;
+    private Long salaryMax;
     private String jobType;
     private String level;
     private String experience;
@@ -29,6 +29,8 @@ public class JobPostingResponse {
     private LocalDate deadline;
     private String status;
     private Integer applications;
+    private Integer maxApplicants;
+    private Integer interviewRounds;
     private Integer views;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -55,6 +57,8 @@ public class JobPostingResponse {
                 .deadline(entity.getDeadline())
                 .status(entity.getStatus())
                 .applications(entity.getApplications())
+                .maxApplicants(entity.getMaxApplicants())
+                .interviewRounds(entity.getInterviewRounds())
                 .views(entity.getViews())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())

@@ -24,12 +24,12 @@ public class JobPostingRepositoryImpl implements JobPostingRepository {
 
     @Override
     public Optional<JobPosting> findById(Long id) {
-        return jpaRepository.findById(id).map(this::toDomain);
+        return jpaRepository.findActiveById(id).map(this::toDomain);
     }
 
     @Override
     public List<JobPosting> findAll() {
-        return jpaRepository.findAll().stream()
+        return jpaRepository.findAllActive().stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
     }
@@ -53,6 +53,11 @@ public class JobPostingRepositoryImpl implements JobPostingRepository {
         jpaRepository.deleteById(id);
     }
 
+    @Override
+    public long countActiveJobsByDomainId(Long domainId) {
+        return jpaRepository.countActiveJobsByDomainId(domainId);
+    }
+
     private JobPostingEntityJpa toEntity(JobPosting domain) {
         JobPostingEntityJpa entity = new JobPostingEntityJpa();
         entity.setId(domain.getId());
@@ -70,6 +75,8 @@ public class JobPostingRepositoryImpl implements JobPostingRepository {
         entity.setDeadline(domain.getDeadline());
         entity.setStatus(domain.getStatus());
         entity.setApplications(domain.getApplications());
+        entity.setMaxApplicants(domain.getMaxApplicants());
+        entity.setInterviewRounds(domain.getInterviewRounds());
         entity.setViews(domain.getViews());
         entity.setCreatedAt(domain.getCreatedAt());
         entity.setUpdatedAt(domain.getUpdatedAt());

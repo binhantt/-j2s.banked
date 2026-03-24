@@ -14,11 +14,11 @@ interface StatsCardProps {
 
 export const StatsCard = ({ value, label, icon, color = 'primary', trend }: StatsCardProps) => {
   const colorClasses = {
-    primary: 'text-indigo-600',
+    primary: 'text-green-600',
     success: 'text-green-600',
     warning: 'text-amber-600',
     error: 'text-red-600',
-    info: 'text-blue-600',
+    info: 'text-green-600',
   };
 
   return (

@@ -47,7 +47,7 @@ export default function CandidateDetailPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'orange';
+      case 'pending': return 'green';
       case 'reviewing': return 'blue';
       case 'accepted': return 'green';
       case 'rejected': return 'red';

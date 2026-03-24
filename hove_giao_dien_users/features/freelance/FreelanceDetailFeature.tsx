@@ -204,7 +204,7 @@ Website cần có đầy đủ các tính năng cơ bản của một trang thư
               <Divider className="my-3" />
               <div>
                 <div className="text-gray-600 mb-1 flex items-center">
-                  <ClockCircleOutlined className="mr-2 text-blue-600" />
+                  <ClockCircleOutlined className="mr-2 text-green-600" />
                   Thời gian
                 </div>
                 <div className="font-semibold text-gray-900">
@@ -301,7 +301,7 @@ Website cần có đầy đủ các tính năng cơ bản của một trang thư
             type="primary"
             size="large"
             onClick={() => setIsChatOpen(true)}
-            className="h-16 w-16 rounded-full shadow-2xl flex items-center justify-center bg-gradient-to-br from-green-600 to-teal-600 border-0 hover:from-green-700 hover:to-teal-700 hover:scale-110 transition-transform"
+            className="h-16 w-16 rounded-full shadow-2xl flex items-center justify-center bg-gradient-to-br from-green-600 to-green-600 border-0 hover:from-green-700 hover:to-teal-700 hover:scale-110 transition-transform"
           >
             <MessageOutlined className="text-2xl" />
           </Button>
@@ -312,7 +312,7 @@ Website cần có đầy đủ các tính năng cơ bản của một trang thư
       {isChatOpen && (
         <div className="fixed bottom-6 right-6 w-[380px] h-[600px] bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 flex flex-col overflow-hidden">
           {/* Chat Header */}
-          <div className="bg-gradient-to-r from-green-600 to-teal-600 text-white p-4 flex items-center justify-between">
+          <div className="bg-gradient-to-r from-green-600 to-green-600 text-white p-4 flex items-center justify-between">
             <div className="flex items-center gap-3 flex-1">
               <div className="relative">
                 <Avatar
@@ -371,7 +371,7 @@ Website cần có đầy đủ các tính năng cơ bản của một trang thư
                   <div
                     className={`inline-block px-4 py-3 rounded-2xl max-w-[280px] ${
                       msg.sender === 'user'
-                        ? 'bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-tr-none'
+                        ? 'bg-gradient-to-r from-green-600 to-green-600 text-white rounded-tr-none'
                         : 'bg-white text-gray-800 shadow-sm rounded-tl-none'
                     }`}
                   >

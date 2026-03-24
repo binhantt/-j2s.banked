@@ -10,13 +10,13 @@ interface ApplyModalProps {
   onSubmit: (values: any) => void;
 }
 
-export const ApplyModal = ({ 
-  open, 
-  job, 
-  form, 
-  loading, 
-  onCancel, 
-  onSubmit 
+export const ApplyModal = ({
+  open,
+  job,
+  form,
+  loading,
+  onCancel,
+  onSubmit
 }: ApplyModalProps) => {
   return (
     <Modal
@@ -47,17 +47,17 @@ export const ApplyModal = ({
             marginBottom: 20,
             padding: 16,
             borderRadius: 12,
-            background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdfa 100%)',
-            border: '1px solid #dbeafe',
+            background: '#f0fdf4',
+            border: '1px solid #dcfce7',
           }}
         >
-          <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 8, color: '#1f2937' }}>
+          <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 8, color: '#0b1220' }}>
             {job?.title}
           </div>
-          <div style={{ fontSize: 14, color: '#4b5563', marginBottom: 6 }}>
+          <div style={{ fontSize: 14, color: '#64748b', marginBottom: 6 }}>
             {job?.companyName || 'Công ty tuyển dụng'}
           </div>
-          <div style={{ fontSize: 13, color: '#6b7280' }}>
+          <div style={{ fontSize: 13, color: '#94a3b8' }}>
             {job?.location} • {job?.salaryMin} - {job?.salaryMax}
           </div>
         </div>
@@ -98,7 +98,9 @@ export const ApplyModal = ({
                 border: 'none',
                 paddingInline: 22,
                 fontWeight: 600,
-                background: 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #14b8a6 100%)',
+                background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+                boxShadow: '0 4px 12px rgba(22,163,74,0.3)',
+                borderRadius: 10,
               }}
             >
               Xem trước và gửi

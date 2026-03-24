@@ -23,6 +23,7 @@ export default function SaveJobButton({
     if (user && jobId) {
       checkSaved();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, jobId]);
 
   const checkSaved = async () => {
@@ -57,7 +58,9 @@ export default function SaveJobButton({
       if (error.response?.data?.error === 'Job already saved') {
         setSaved(true);
       } else {
-        message.error('Có lỗi xảy ra');
+        const msg = error?.response?.data?.message || error?.message || 'Có lỗi xảy ra';
+        console.error('❌ Lỗi khi lưu/bỏ lưu việc:', msg);
+        message.error(`Không thể lưu việc: ${msg}`);
       }
     } finally {
       setLoading(false);

@@ -21,7 +21,7 @@ import java.util.Optional;
 @Slf4j
 @RestController
 @RequestMapping("/api/cv")
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = "*")
 @RequiredArgsConstructor
 public class CVViewController {
 

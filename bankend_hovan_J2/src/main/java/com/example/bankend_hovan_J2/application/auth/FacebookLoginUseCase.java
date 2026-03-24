@@ -59,6 +59,14 @@ public class FacebookLoginUseCase {
                         });
                 });
 
+        // Check if account is active (skip check for admin users)
+        boolean isAdmin = "admin".equalsIgnoreCase(user.getUserType()) || 
+                         "super_admin".equalsIgnoreCase(user.getUserType());
+        
+        if (!isAdmin && user.getIsActive() != null && !user.getIsActive()) {
+            throw new RuntimeException("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.");
+        }
+
         String jwtAccessToken = jwtProvider.generateAccessToken(
             user.getId(), 
             user.getEmail().getValue(),

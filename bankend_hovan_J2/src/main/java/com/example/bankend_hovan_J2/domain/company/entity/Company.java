@@ -16,7 +16,7 @@ public class Company {
     private Long hrId;
     private String name;
     private String logoUrl;
-    private String industry;
+    private Long domainId; // Reference to Domain entity
     private String companySize;
     private Integer foundedYear;
     private String website;

@@ -3,6 +3,7 @@ import { MessageOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { chatApi } from '@/lib/chatApi';
+import { savedJobApi } from '@/lib/savedJobApi';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/router';
 import { useJobDetailStore } from './store/useJobDetailStore';
@@ -89,15 +90,22 @@ export const JobDetailFeature = ({ jobId }: JobDetailFeatureProps) => {
   };
 
   const handleSaveJob = async () => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !user?.id) {
       message.warning('Vui lòng đăng nhập để lưu tin');
       router.push('/login');
       return;
     }
+
     try {
+      await savedJobApi.saveJob(user.id, Number(jobId));
       message.success('Đã lưu tin tuyển dụng');
-    } catch (error) {
-      message.error('Không thể lưu tin');
+    } catch (error: any) {
+      const msg = error?.response?.data?.error || 'Có lỗi xảy ra';
+      if (msg === 'Job already saved') {
+        message.info('Bạn đã lưu tin này rồi');
+      } else {
+        message.error('Không thể lưu tin');
+      }
     }
   };
 
@@ -222,8 +230,8 @@ export const JobDetailFeature = ({ jobId }: JobDetailFeatureProps) => {
             width: 60,
             height: 60,
             fontSize: 24,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            background: 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #14b8a6 100%)',
+            boxShadow: '0 4px 12px rgba(22,163,74,0.4)',
+            background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
             border: 'none'
           }}
         />
@@ -276,7 +284,8 @@ export const JobDetailFeature = ({ jobId }: JobDetailFeatureProps) => {
             style={{
               border: 'none',
               fontWeight: 600,
-              background: 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #14b8a6 100%)',
+              background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+              boxShadow: '0 4px 12px rgba(22,163,74,0.3)',
             }}
           >
             Xác nhận ứng tuyển
@@ -287,8 +296,8 @@ export const JobDetailFeature = ({ jobId }: JobDetailFeatureProps) => {
           style={{
             marginBottom: 16,
             padding: 14,
-            background: '#f0f9ff',
-            border: '1px solid #bae6fd',
+            background: '#f0fdf4',
+            border: '1px solid #dcfce7',
             borderRadius: 10,
           }}
         >

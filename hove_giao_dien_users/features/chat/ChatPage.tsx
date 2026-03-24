@@ -1,14 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
-import { Input, Button, Avatar, message, Empty, Card, Typography, Tag } from 'antd';
+import { Input, Button, Avatar, message, Empty, Card, Typography, Tag, Upload } from 'antd';
+import type { UploadProps } from 'antd';
 import {
   SendOutlined,
   UserOutlined,
   SearchOutlined,
   ClockCircleOutlined,
   CloseOutlined,
+  PictureOutlined,
 } from '@ant-design/icons';
 import { useRouter } from 'next/router';
 import { chatApi } from '@/lib/chatApi';
+import { uploadApi } from '@/lib/uploadApi';
 import { useAuthStore } from '@/store/useAuthStore';
 import { MainLayout } from '@/components/layout/MainLayout';
 
@@ -33,10 +36,15 @@ function ChatPageContent() {
   const [selectedConversation, setSelectedConversation] = useState<any>(null);
   const [search, setSearch] = useState('');
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [messageSearch, setMessageSearch] = useState('');
+  const [highlightedMsgIndex, setHighlightedMsgIndex] = useState<number | null>(null);
+  const messageSearchInputRef = useRef<HTMLInputElement>(null);
+  const highlightedMsgRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { user } = useAuthStore();
   const { id } = router.query;
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (user?.id) loadConversations();
@@ -61,11 +69,9 @@ function ChatPageContent() {
     }
   }, [selectedConversation]);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
   const loadConversations = async () => {
+    if (!user?.id) return;
+    
     try {
       const data =
         user?.userType === 'hr'
@@ -123,15 +129,75 @@ function ChatPageContent() {
     }
   };
 
+  const handleSendImage = async (file: File) => {
+    if (!selectedConversation || !user?.id) return false;
+
+    setUploadingImage(true);
+    try {
+      const imageUrl = await uploadApi.uploadImage(file);
+
+      const messageData: any = {
+        conversationId: selectedConversation.id,
+        senderId: user.id,
+        senderType: user?.userType,
+        message: imageUrl,
+      };
+
+      if (replyingTo) {
+        messageData.replyToMessageId = replyingTo.id;
+      }
+
+      await chatApi.sendMessage(messageData);
+      setReplyingTo(null);
+      await loadMessages(selectedConversation.id, false);
+      message.success('Đã gửi ảnh');
+    } catch {
+      message.error('Không thể gửi ảnh');
+    } finally {
+      setUploadingImage(false);
+    }
+
+    return false;
+  };
+
+  const getConversationDisplayName = (conv: any) => {
+    if (user?.userType === 'hr') {
+      return conv.jobSeekerName || conv.jobSeekerFullName || `Ứng viên #${conv.jobSeekerId}`;
+    }
+
+    return conv.companyName || conv.hrCompanyName || conv.company?.name || `Công ty #${conv.hrId}`;
+  };
+
   const filteredConversations = conversations.filter((conv) => {
-    const displayName = user?.userType === 'hr' ? `Ứng viên #${conv.jobSeekerId}` : `HR #${conv.hrId}`;
+    const displayName = getConversationDisplayName(conv);
     return displayName.toLowerCase().includes(search.toLowerCase());
   });
+
+  const foundIndices = messageSearch
+    ? messages
+        .map((msg, idx) =>
+          msg.message.toLowerCase().includes(messageSearch.toLowerCase()) ? idx : -1
+        )
+        .filter((idx) => idx !== -1)
+    : [];
+
+  const highlightNext = () => {
+    if (foundIndices.length === 0) return;
+    const currentIdx = highlightedMsgIndex !== null ? foundIndices.indexOf(highlightedMsgIndex) : -1;
+    const nextIdx = foundIndices[(currentIdx + 1) % foundIndices.length];
+    setHighlightedMsgIndex(foundIndices[nextIdx >= 0 ? nextIdx : 0]);
+  };
+
+  useEffect(() => {
+    if (highlightedMsgIndex !== null && highlightedMsgRef.current) {
+      highlightedMsgRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [highlightedMsgIndex]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-8">
       <div className="mb-8 text-center">
-        <h1 className="mb-3 bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-4xl font-bold text-transparent md:text-5xl">
+        <h1 style={{ fontSize: 'clamp(24px, 5vw, 36px)', fontWeight: 700, color: '#0b1220', marginBottom: 12, textAlign: 'center' }}>
           Tin nhắn
         </h1>
         <p className="text-base text-gray-600 md:text-lg">Trao đổi nhanh với ứng viên và nhà tuyển dụng</p>
@@ -149,13 +215,16 @@ function ChatPageContent() {
         <div className="grid min-h-[72vh] grid-cols-1 lg:grid-cols-[340px_1fr]">
           <aside className="border-b border-slate-100 bg-white lg:border-b-0 lg:border-r">
             <div className="border-b border-slate-100 p-4">
+            
               <Input
                 size="large"
+                variant="borderless"
+                className="chat-search-input"
                 placeholder="Tìm cuộc trò chuyện..."
                 prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                style={{ borderRadius: 12 }}
+                style={{ borderRadius: 12, border: 'none', boxShadow: 'none', background: 'transparent' }}
               />
             </div>
 
@@ -173,20 +242,20 @@ function ChatPageContent() {
                       onClick={() => handleSelectConversation(conv)}
                       className="w-full border-0 px-4 py-3 text-left transition-all"
                       style={{
-                        background: isSelected ? 'linear-gradient(90deg, #eff6ff 0%, #f0fdfa 100%)' : '#fff',
-                        borderLeft: isSelected ? '3px solid #0ea5e9' : '3px solid transparent',
+                        background: isSelected ? 'linear-gradient(90deg, #f0fdf4 0%, #f0fdf4 100%)' : '#fff',
+                        borderLeft: isSelected ? '3px solid #16a34a' : '3px solid transparent',
                         cursor: 'pointer',
                       }}
                     >
                       <div className="flex items-center gap-3">
                         <Avatar
                           icon={<UserOutlined />}
-                          style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #14b8a6 100%)' }}
+                          style={{ background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)' }}
                         />
                         <div className="min-w-0 flex-1">
                           <div className="mb-0.5 flex items-start justify-between gap-2">
                             <Text strong ellipsis>
-                              {user?.userType === 'hr' ? `Ứng viên #${conv.jobSeekerId}` : `HR #${conv.hrId}`}
+                              {getConversationDisplayName(conv)}
                             </Text>
                             <Text type="secondary" style={{ fontSize: 11 }}>
                               {new Date(conv.updatedAt).toLocaleDateString('vi-VN')}
@@ -205,8 +274,9 @@ function ChatPageContent() {
           </aside>
 
           <section className="flex min-h-[46vh] flex-col bg-slate-50">
+          
             {!selectedConversation ? (
-              <div className="flex flex-1 items-center justify-center p-6">
+              <div className="flex flex-1 items-center justify-center p-6 ">
                 <Empty
                   image={Empty.PRESENTED_IMAGE_SIMPLE}
                   description="Chọn một cuộc trò chuyện để bắt đầu nhắn tin"
@@ -215,22 +285,53 @@ function ChatPageContent() {
             ) : (
               <>
                 <div className="border-b border-slate-100 bg-white px-4 py-3 md:px-5">
-                  <div className="flex items-center gap-3">
-                    <Avatar icon={<UserOutlined />} style={{ background: '#0ea5e9' }} />
-                    <div>
-                      <Title level={5} style={{ margin: 0 }}>
-                        {user?.userType === 'hr'
-                          ? `Ứng viên #${selectedConversation.jobSeekerId}`
-                          : `HR #${selectedConversation.hrId}`}
-                      </Title>
-                      <Tag color="cyan" style={{ marginTop: 4, borderRadius: 999 }}>
-                        Đang hoạt động
-                      </Tag>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <Avatar icon={<UserOutlined />} style={{ background: '#16a34a' }} />
+                      <div>
+                        <Title level={5} style={{ margin: 0 }}>
+                          {getConversationDisplayName(selectedConversation)}
+                        </Title>
+                        <Tag style={{ marginTop: 4, borderRadius: 999, border: '1px solid #dcfce7', color: '#16a34a', background: '#f0fdf4' }}>
+                          Đang hoạt động
+                        </Tag>
+                      </div>
                     </div>
+                    {selectedConversation && (
+                      <div className="flex items-center gap-2">
+                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                          <SearchOutlined style={{ position: 'absolute', left: 10, color: '#94a3b8', fontSize: 14, zIndex: 1, pointerEvents: 'none' }} />
+                          <Input
+                            ref={messageSearchInputRef as any}
+                            size="small"
+                            placeholder="Tìm tin nhắn..."
+                            value={messageSearch}
+                            onChange={(e) => {
+                              setMessageSearch(e.target.value);
+                              setHighlightedMsgIndex(null);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                highlightNext();
+                              }
+                            }}
+                            style={{ width: 160, borderRadius: 8, fontSize: 13, paddingLeft: 30 }}
+                          />
+                        </div>
+                        {messageSearch && (
+                          <span style={{ fontSize: 12, color: '#64748b', whiteSpace: 'nowrap' }}>
+                            {foundIndices.length > 0
+                              ? `${(highlightedMsgIndex !== null ? foundIndices.indexOf(highlightedMsgIndex) : -1) + 1}/${foundIndices.length}`
+                              : 'Không tìm thấy'}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 md:p-5">
+                <div className="flex-1 overflow-y-auto p-4 md:p-5 chat-messages-scroll" ref={messagesEndRef} style={{ maxHeight: '350px' }}>
                   {messages.length === 0 ? (
                     <Empty description="Chưa có tin nhắn nào" />
                   ) : (
@@ -239,20 +340,26 @@ function ChatPageContent() {
                       return (
                         <div
                           key={index}
+                          ref={highlightedMsgIndex === index ? highlightedMsgRef : null}
                           className="mb-3 flex"
-                          style={{ justifyContent: isMe ? 'flex-end' : 'flex-start' }}
+                          style={{
+                            justifyContent: isMe ? 'flex-end' : 'flex-start',
+                            background: highlightedMsgIndex === index ? '#fef9c3' : undefined,
+                            borderRadius: 12,
+                            transition: 'background 0.3s',
+                          }}
                         >
                           <div
                             style={{
                               maxWidth: '75%',
                               borderRadius: 14,
                               background: isMe
-                                ? 'linear-gradient(135deg, #3b82f6 0%, #14b8a6 100%)'
+                                ? 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)'
                                 : '#ffffff',
                               color: isMe ? '#fff' : '#111827',
-                              border: isMe ? 'none' : '1px solid #e7edf4',
+                              border: isMe ? 'none' : '1px solid #dcfce7',
                               boxShadow: isMe
-                                ? '0 6px 14px rgba(37, 99, 235, 0.22)'
+                                ? '0 6px 14px rgba(22, 163, 74, 0.22)'
                                 : '0 4px 10px rgba(15, 23, 42, 0.04)',
                             }}
                           >
@@ -263,7 +370,7 @@ function ChatPageContent() {
                                   margin: '10px 10px 0',
                                   borderRadius: 8,
                                   background: isMe ? 'rgba(255,255,255,0.15)' : '#f8fafc',
-                                  borderLeft: `3px solid ${isMe ? '#fff' : '#3b82f6'}`,
+                                  borderLeft: `3px solid ${isMe ? '#fff' : '#16a34a'}`,
                                   fontSize: 12,
                                   opacity: 0.9,
                                 }}
@@ -283,7 +390,15 @@ function ChatPageContent() {
                               whiteSpace: 'pre-wrap', 
                               lineHeight: 1.45 
                             }}>
-                              {msg.message}
+                              {typeof msg.message === 'string' && msg.message.match(/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i) ? (
+                                <img
+                                  src={msg.message}
+                                  alt="chat-image"
+                                  style={{ maxWidth: 260, borderRadius: 10, display: 'block' }}
+                                />
+                              ) : (
+                                msg.message
+                              )}
                             </div>
                             <div
                               style={{
@@ -308,7 +423,7 @@ function ChatPageContent() {
                                 size="small"
                                 onClick={() => setReplyingTo(msg)}
                                 style={{
-                                  color: isMe ? '#fff' : '#3b82f6',
+                                  color: isMe ? '#fff' : '#16a34a',
                                   padding: '0 4px',
                                   height: 'auto',
                                   fontSize: 11,
@@ -322,7 +437,6 @@ function ChatPageContent() {
                       );
                     })
                   )}
-                  <div ref={messagesEndRef} />
                 </div>
 
                 <div className="border-t border-slate-100 bg-white p-3 md:p-4">
@@ -331,16 +445,16 @@ function ChatPageContent() {
                       style={{
                         marginBottom: 12,
                         padding: '10px 12px',
-                        background: '#f0f9ff',
+                        background: '#f0fdf4',
                         borderRadius: 8,
-                        borderLeft: '3px solid #3b82f6',
+                        borderLeft: '3px solid #16a34a',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'flex-start',
                       }}
                     >
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 12, fontWeight: 600, color: '#3b82f6', marginBottom: 4 }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: '#16a34a', marginBottom: 4 }}>
                           Đang trả lời:
                         </div>
                         <div
@@ -365,6 +479,18 @@ function ChatPageContent() {
                     </div>
                   )}
                   <div className="flex items-end gap-2">
+                    <Upload
+                      accept="image/*"
+                      showUploadList={false}
+                      beforeUpload={handleSendImage}
+                      disabled={uploadingImage || loading}
+                    >
+                      <Button
+                        icon={<PictureOutlined />}
+                        loading={uploadingImage}
+                        style={{ height: 42, borderRadius: 12 }}
+                      />
+                    </Upload>
                     <Input.TextArea
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
@@ -387,7 +513,7 @@ function ChatPageContent() {
                         height: 42,
                         borderRadius: 12,
                         border: 'none',
-                        background: 'linear-gradient(135deg, #3b82f6 0%, #14b8a6 100%)',
+                        background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
                         fontWeight: 600,
                       }}
                     >

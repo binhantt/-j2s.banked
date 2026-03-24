@@ -23,7 +23,7 @@ public class CompanyRepositoryImpl implements CompanyRepository {
 
     @Override
     public Optional<Company> findById(Long id) {
-        return jpaRepository.findById(id).map(this::toDomain);
+        return jpaRepository.findActiveById(id).map(this::toDomain);
     }
 
     @Override
@@ -32,8 +32,13 @@ public class CompanyRepositoryImpl implements CompanyRepository {
     }
 
     @Override
+    public Optional<Company> findByHrIdIncludingInactive(Long hrId) {
+        return jpaRepository.findByHrIdIncludingInactive(hrId).map(this::toDomain);
+    }
+
+    @Override
     public List<Company> findAll() {
-        return jpaRepository.findAll()
+        return jpaRepository.findAllActive()
                 .stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
@@ -44,13 +49,18 @@ public class CompanyRepositoryImpl implements CompanyRepository {
         jpaRepository.deleteById(id);
     }
 
+    @Override
+    public boolean existsByDomainId(Long domainId) {
+        return jpaRepository.existsByDomainId(domainId);
+    }
+
     private CompanyEntityJpa toEntity(Company company) {
         return CompanyEntityJpa.builder()
                 .id(company.getId())
                 .hrId(company.getHrId())
                 .name(company.getName())
                 .logoUrl(company.getLogoUrl())
-                .industry(company.getIndustry())
+                .domainId(company.getDomainId())
                 .companySize(company.getCompanySize())
                 .foundedYear(company.getFoundedYear())
                 .website(company.getWebsite())
@@ -75,7 +85,7 @@ public class CompanyRepositoryImpl implements CompanyRepository {
                 .hrId(entity.getHrId())
                 .name(entity.getName())
                 .logoUrl(entity.getLogoUrl())
-                .industry(entity.getIndustry())
+                .domainId(entity.getDomainId())
                 .companySize(entity.getCompanySize())
                 .foundedYear(entity.getFoundedYear())
                 .website(entity.getWebsite())

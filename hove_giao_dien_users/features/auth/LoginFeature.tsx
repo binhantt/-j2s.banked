@@ -5,6 +5,13 @@ import { useRouter } from 'next/router';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useState, useCallback, memo, useEffect } from 'react';
 
+// Facebook SDK type declaration
+declare global {
+  interface Window {
+    FB?: any;
+  }
+}
+
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 const GITHUB_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || '';
 const FACEBOOK_APP_ID = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '';
@@ -36,11 +43,11 @@ const UserTypeModal = memo(({
       <button
         onClick={() => onSelect('job_seeker')}
         disabled={loading}
-        className="w-full p-4 border-2 border-indigo-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 transition-all group disabled:opacity-50"
+        className="w-full p-4 border-2 border-green-200 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all group disabled:opacity-50"
       >
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center group-hover:bg-indigo-500 transition-colors">
-            <UserOutlined className="text-2xl text-indigo-600 group-hover:text-white" />
+          <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-500 transition-colors">
+            <UserOutlined className="text-2xl text-green-600 group-hover:text-white" />
           </div>
           <div className="text-left flex-1">
             <h3 className="font-semibold text-gray-900">Người tìm việc</h3>
@@ -68,11 +75,11 @@ const UserTypeModal = memo(({
       <button
         onClick={() => onSelect('hr')}
         disabled={loading}
-        className="w-full p-4 border-2 border-orange-200 rounded-xl hover:border-orange-500 hover:bg-orange-50 transition-all group disabled:opacity-50"
+        className="w-full p-4 border-2 border-green-200 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all group disabled:opacity-50"
       >
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center group-hover:bg-orange-500 transition-colors">
-            <TeamOutlined className="text-2xl text-orange-600 group-hover:text-white" />
+          <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-500 transition-colors">
+            <TeamOutlined className="text-2xl text-green-600 group-hover:text-white" />
           </div>
           <div className="text-left flex-1">
             <h3 className="font-semibold text-gray-900">Nhà tuyển dụng</h3>
@@ -253,7 +260,7 @@ export const LoginFeature = () => {
     <>
       <div className="min-h-screen flex">
         {/* Left Side - Branding */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-12 flex-col justify-between relative overflow-hidden">
+        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-600 via-purple-600 to-pink-500 p-12 flex-col justify-between relative overflow-hidden">
           <div className="absolute inset-0 bg-black opacity-10"></div>
           <div className="absolute top-0 right-0 w-96 h-96 bg-white opacity-5 rounded-full -mr-48 -mt-48"></div>
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-white opacity-5 rounded-full -ml-48 -mb-48"></div>
@@ -261,7 +268,7 @@ export const LoginFeature = () => {
           <div className="relative z-10">
             <Link href="/" className="inline-flex items-center gap-3">
               <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-2xl">
-                <span className="text-indigo-600 font-bold text-3xl">V</span>
+                <span className="text-green-600 font-bold text-3xl">V</span>
               </div>
               <span className="text-3xl font-bold text-white">
                 ViệcLàm24h
@@ -311,11 +318,11 @@ export const LoginFeature = () => {
             {/* Mobile Logo */}
             <div className="lg:hidden text-center mb-8">
               <Link href="/" className="inline-flex items-center gap-2">
-                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
                   <span className="text-white font-bold text-2xl">V</span>
                 </div>
                 <span className="text-2xl font-bold text-gray-800">
-                  ViệcLàm<span className="text-indigo-600">24h</span>
+                  ViệcLàm<span className="text-green-600">24h</span>
                 </span>
               </Link>
             </div>
@@ -359,7 +366,7 @@ export const LoginFeature = () => {
                     icon={<FacebookOutlined className="text-xl" />}
                     onClick={handleFacebookLogin}
                     loading={isLoading}
-                    className="h-14 font-medium text-base border-2 border-blue-300 hover:border-blue-600 hover:text-blue-600 hover:shadow-lg transition-all"
+                    className="h-14 font-medium text-base border-2 border-green-300 hover:border-green-600 hover:text-green-600 hover:shadow-lg transition-all"
                   >
                     Đăng nhập với Facebook
                   </Button>
@@ -369,7 +376,7 @@ export const LoginFeature = () => {
                   <span className="text-gray-600">Chưa có tài khoản? </span>
                   <Link
                     href="/register"
-                    className="text-indigo-600 hover:text-indigo-700 font-semibold hover:underline"
+                    className="text-green-600 hover:text-green-700 font-semibold hover:underline"
                   >
                     Đăng ký ngay
                   </Link>
@@ -379,11 +386,11 @@ export const LoginFeature = () => {
               <div className="bg-gray-50 px-8 py-4 border-t border-gray-100">
                 <p className="text-center text-xs text-gray-500">
                   Bằng việc đăng nhập, bạn đồng ý với{' '}
-                  <Link href="/terms" className="text-indigo-600 hover:underline">
+                  <Link href="/terms" className="text-green-600 hover:underline">
                     Điều khoản
                   </Link>{' '}
                   và{' '}
-                  <Link href="/privacy" className="text-indigo-600 hover:underline">
+                  <Link href="/privacy" className="text-green-600 hover:underline">
                     Chính sách bảo mật
                   </Link>
                 </p>
@@ -394,7 +401,7 @@ export const LoginFeature = () => {
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
                 Cần hỗ trợ?{' '}
-                <Link href="/support" className="text-indigo-600 hover:underline font-medium">
+                <Link href="/support" className="text-green-600 hover:underline font-medium">
                   Liên hệ chúng tôi
                 </Link>
               </p>

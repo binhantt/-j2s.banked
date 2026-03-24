@@ -1,12 +1,15 @@
 import { useEffect } from 'react';
-import { Card, Empty, List, Space, Tag, Typography, message } from 'antd';
-import { UserOutlined, MessageOutlined } from '@ant-design/icons';
+import { Card, Empty, List, Space, Tag, Typography, message, Image, Avatar } from 'antd';
+import { MessageOutlined } from '@ant-design/icons';
 import type { ConversationSummary } from '../types/chatTypes';
 import { useChatMonitorStore } from '../store/useChatMonitorStore';
 
 const { Title, Text, Paragraph } = Typography;
 
 export function ChatMonitorPage() {
+  const isImageUrl = (url: string) => {
+    return url.match(/\.(jpeg|jpg|gif|png|webp)$/i) || url.includes('firebasestorage.googleapis.com');
+  };
   const {
     conversations,
     messages,
@@ -67,28 +70,47 @@ export function ChatMonitorPage() {
                     onClick={() => void handleSelectConversation(conv)}
                     style={{
                       cursor: 'pointer',
-                      borderRadius: 10,
-                      marginBottom: 6,
-                      paddingInline: 10,
-                      background: isSelected ? '#e0f2fe' : undefined,
+                      borderRadius: 12,
+                      marginBottom: 10,
+                      padding: 14,
+                      background: isSelected ? '#f0fdf4' : '#ffffff',
+                      border: `1px solid ${isSelected ? '#bbf7d0' : '#f0f0f0'}`,
+                      transition: 'all 0.2s ease',
+                      boxShadow: isSelected ? '0 2px 8px rgba(34, 197, 94, 0.1)' : 'none',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 8,
                     }}
                   >
-                    <List.Item.Meta
-                      avatar={<UserOutlined />}
-                      title={
-                        <Space>
-                          <Text strong>Conv #{conv.id}</Text>
-                          <Tag color="blue">HR #{conv.hrId}</Tag>
-                          <Tag color="green">UV #{conv.jobSeekerId}</Tag>
-                          {conv.jobPostingId && <Tag>Job #{conv.jobPostingId}</Tag>}
-                        </Space>
-                      }
-                      description={
-                        <Text type="secondary">
-                          Cập nhật: {new Date(conv.updatedAt).toLocaleString('vi-VN')}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Text strong style={{ color: isSelected ? '#166534' : '#1f2937' }}>
+                        Trò chuyện #{conv.id}
+                      </Text>
+                      {conv.jobPostingId && (
+                        <Tag color="purple" style={{ margin: 0, border: 'none' }}>Job #{conv.jobPostingId}</Tag>
+                      )}
+                    </div>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <Space size={8}>
+                        <Avatar size="small" style={{ backgroundColor: '#e0f2fe', color: '#0284c7', fontSize: 12 }}>HR</Avatar>
+                        <Text style={{ fontSize: 13 }}>
+                          {conv.hr?.name || `HR #${conv.hrId}`}
                         </Text>
-                      }
-                    />
+                      </Space>
+                      <Space size={8}>
+                        <Avatar size="small" style={{ backgroundColor: '#dcfce7', color: '#166534', fontSize: 12 }}>UV</Avatar>
+                        <Text style={{ fontSize: 13 }}>
+                          {conv.jobSeeker?.name || `Ứng viên #${conv.jobSeekerId}`}
+                        </Text>
+                      </Space>
+                    </div>
+
+                    <div style={{ marginTop: 2 }}>
+                      <Text type="secondary" style={{ fontSize: 11 }}>
+                        Cập nhật: {new Date(conv.updatedAt).toLocaleString('vi-VN')}
+                      </Text>
+                    </div>
                   </List.Item>
                 );
               }}
@@ -113,29 +135,47 @@ export function ChatMonitorPage() {
           ) : (
             <div style={{ maxHeight: 520, overflowY: 'auto', paddingRight: 4 }}>
               {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  style={{
-                    marginBottom: 12,
-                    padding: 10,
-                    borderRadius: 10,
-                    background:
-                      msg.senderType === 'hr'
-                        ? 'linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%)'
-                        : '#f9fafb',
-                    border: '1px solid #e5e7eb',
-                  }}
-                >
-                  <Space style={{ marginBottom: 4 }}>
-                    <Tag color={msg.senderType === 'hr' ? 'blue' : 'green'}>
-                      {msg.senderType === 'hr' ? `HR #${msg.senderId}` : `Ứng viên #${msg.senderId}`}
-                    </Tag>
-                    <Text type="secondary" style={{ fontSize: 11 }}>
-                      {new Date(msg.createdAt).toLocaleString('vi-VN')}
-                    </Text>
-                  </Space>
-                  <Paragraph style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>{msg.message}</Paragraph>
-                </div>
+                  <div
+                    key={msg.id}
+                    style={{
+                      marginBottom: 20,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: msg.senderType === 'hr' ? 'flex-end' : 'flex-start',
+                    }}
+                  >
+                    <div style={{ marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8, flexDirection: msg.senderType === 'hr' ? 'row-reverse' : 'row' }}>
+                      <Avatar size="small" style={{ backgroundColor: msg.senderType === 'hr' ? '#e0f2fe' : '#dcfce7', color: msg.senderType === 'hr' ? '#0284c7' : '#166534', fontSize: 11 }}>
+                        {msg.senderType === 'hr' ? 'HR' : 'UV'}
+                      </Avatar>
+                      <Text style={{ fontSize: 13, fontWeight: 500 }}>
+                        {msg.senderType === 'hr' ? (selected?.hr?.name || `HR #${msg.senderId}`) : (selected?.jobSeeker?.name || `Ứng viên #${msg.senderId}`)}
+                      </Text>
+                      <Text type="secondary" style={{ fontSize: 11 }}>
+                        {new Date(msg.createdAt).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' })}
+                      </Text>
+                    </div>
+                    <div
+                      style={{
+                        padding: '10px 14px',
+                        borderRadius: 18,
+                        borderTopLeftRadius: msg.senderType !== 'hr' ? 4 : 18,
+                        borderTopRightRadius: msg.senderType === 'hr' ? 4 : 18,
+                        background: msg.senderType === 'hr' ? '#2563eb' : '#f3f4f6',
+                        color: msg.senderType === 'hr' ? '#ffffff' : '#1f2937',
+                        maxWidth: '85%',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                      }}
+                    >
+                      {isImageUrl(msg.message) ? (
+                        <Image src={msg.message} alt="sent image" style={{ maxWidth: 220, borderRadius: 8, display: 'block' }} />
+                      ) : (
+                        <Paragraph style={{ marginBottom: 0, whiteSpace: 'pre-wrap', color: 'inherit' }}>
+                          {msg.message}
+                        </Paragraph>
+                      )}
+                    </div>
+                  </div>
               ))}
             </div>
           )}
@@ -144,4 +184,3 @@ export function ChatMonitorPage() {
     </div>
   );
 }
-

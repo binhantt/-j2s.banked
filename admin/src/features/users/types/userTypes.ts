@@ -1,12 +1,7 @@
 export type AccountGroup = 'user' | 'backend';
 
-export type UserRole = 'job_seeker' | 'freelancer' | 'hr' | 'admin';
+export type AccountRole = 'job_seeker' | 'freelancer' | 'hr' | 'admin' | 'super_admin' | 'moderator' | 'support';
 
-export type BackendRole = 'super_admin' | 'moderator' | 'support';
-
-export type AccountRole = UserRole | BackendRole;
-
-// Dòng dữ liệu hiển thị trên bảng quản lý User & Backend
 export interface UserAdminRow {
   id: number;
   fullName: string;
@@ -14,7 +9,6 @@ export interface UserAdminRow {
   group: AccountGroup;
   role: AccountRole;
   isActive: boolean;
-  createdAt: string;
   lastLogin: string;
+  createdAt: string;
 }
-

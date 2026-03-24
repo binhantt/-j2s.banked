@@ -44,7 +44,7 @@ export default function BlogDetailPage() {
       <MainLayout>
         <div style={{ textAlign: 'center', padding: '100px 0' }}>
           <h2>Không tìm thấy blog</h2>
-          <Button type="primary" onClick={() => router.push('/blogs')}>
+          <Button type="primary" onClick={() => router.push('/blog')}>
             Quay lại danh sách
           </Button>
         </div>
@@ -54,57 +54,62 @@ export default function BlogDetailPage() {
 
   return (
     <MainLayout>
-      <div style={{ padding: '24px', maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ padding: '32px 24px', maxWidth: 900, margin: '0 auto' }}>
         <Button
           icon={<ArrowLeftOutlined />}
-          onClick={() => router.push('/blogs')}
-          style={{ marginBottom: '24px' }}
+          onClick={() => router.push('/blog')}
+          style={{ marginBottom: 24, borderRadius: 8 }}
         >
           Quay lại
         </Button>
 
-        <Card>
+        <Card style={{ borderRadius: 14, border: '1px solid #e5e7eb' }}>
           {blog.imageUrl && (
             <img
               alt={blog.title}
               src={blog.imageUrl}
               style={{
                 width: '100%',
-                maxHeight: '400px',
+                maxHeight: 400,
                 objectFit: 'cover',
-                borderRadius: '8px',
-                marginBottom: '24px',
+                borderRadius: 10,
+                marginBottom: 24,
               }}
             />
           )}
 
-          <h1 style={{ 
-            fontSize: '32px',
-            fontWeight: 'bold',
-            marginBottom: '16px',
-            lineHeight: '1.4'
+          <h1 style={{
+            fontSize: 'clamp(20px, 4vw, 32px)',
+            fontWeight: 700,
+            marginBottom: 16,
+            lineHeight: 1.3,
+            color: '#0b1220',
+            letterSpacing: '-0.01em',
           }}>
             {blog.title}
           </h1>
 
           <div style={{
             display: 'flex',
-            gap: '24px',
-            marginBottom: '24px',
-            fontSize: '14px',
-            color: '#6b7280',
-            flexWrap: 'wrap'
+            gap: 24,
+            marginBottom: 24,
+            fontSize: 14,
+            color: '#64748b',
+            flexWrap: 'wrap',
           }}>
-            <span>
-              <UserOutlined /> {blog.authorName}
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <UserOutlined style={{ color: '#16a34a' }} />
+              {blog.authorName}
             </span>
-            <span>
-              <CalendarOutlined /> {new Date(blog.createdAt!).toLocaleDateString('vi-VN')}
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <CalendarOutlined style={{ color: '#16a34a' }} />
+              {new Date(blog.createdAt!).toLocaleDateString('vi-VN')}
             </span>
-            <span>
-              <EyeOutlined /> {blog.views || 0} lượt xem
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <EyeOutlined style={{ color: '#16a34a' }} />
+              {blog.views || 0} lượt xem
             </span>
-            <Tag color={blog.status === 'published' ? 'green' : 'orange'}>
+            <Tag color={blog.status === 'published' ? 'green' : 'green'} style={{ borderRadius: 6 }}>
               {blog.status === 'published' ? 'Đã xuất bản' : 'Nháp'}
             </Tag>
           </div>
@@ -112,22 +117,23 @@ export default function BlogDetailPage() {
           <Divider />
 
           <div style={{
-            fontSize: '16px',
-            lineHeight: '1.8',
+            fontSize: 16,
+            lineHeight: 1.9,
             color: '#374151',
-            whiteSpace: 'pre-wrap'
+            whiteSpace: 'pre-wrap',
           }}>
             {blog.content}
           </div>
 
           {blog.publishedAt && (
             <div style={{
-              marginTop: '32px',
-              padding: '16px',
-              backgroundColor: '#f9fafb',
-              borderRadius: '8px',
-              fontSize: '14px',
-              color: '#6b7280'
+              marginTop: 32,
+              padding: 16,
+              background: '#f0fdf4',
+              borderRadius: 10,
+              border: '1px solid #dcfce7',
+              fontSize: 14,
+              color: '#64748b',
             }}>
               Xuất bản lúc: {new Date(blog.publishedAt).toLocaleString('vi-VN')}
             </div>

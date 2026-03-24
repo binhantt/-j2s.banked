@@ -12,6 +12,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import com.example.bankend_hovan_J2.domain.user.repository.UserRepository;
+import com.example.bankend_hovan_J2.presentation.chat.dto.ConversationDTO;
+import com.example.bankend_hovan_J2.presentation.chat.dto.ConversationUserSummaryDTO;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -21,6 +26,35 @@ public class ChatController {
     private final ChatMessageRepository messageRepository;
     private final CreateConversationUseCase createConversationUseCase;
     private final SendMessageUseCase sendMessageUseCase;
+    private final UserRepository userRepository;
+
+    private ConversationDTO mapToDTO(Conversation conv) {
+        ConversationDTO.ConversationDTOBuilder builder = ConversationDTO.builder()
+                .id(conv.getId())
+                .hrId(conv.getHrId())
+                .jobSeekerId(conv.getJobSeekerId())
+                .jobPostingId(conv.getJobPostingId())
+                .createdAt(conv.getCreatedAt())
+                .updatedAt(conv.getUpdatedAt());
+
+        userRepository.findById(conv.getHrId()).ifPresent(hr -> 
+            builder.hr(ConversationUserSummaryDTO.builder()
+                .id(hr.getId())
+                .name(hr.getName())
+                .avatarUrl(hr.getAvatarUrl())
+                .build())
+        );
+
+        userRepository.findById(conv.getJobSeekerId()).ifPresent(js -> 
+            builder.jobSeeker(ConversationUserSummaryDTO.builder()
+                .id(js.getId())
+                .name(js.getName())
+                .avatarUrl(js.getAvatarUrl())
+                .build())
+        );
+
+        return builder.build();
+    }
 
     @PostMapping("/conversations")
     public ResponseEntity<Conversation> createConversation(@RequestBody Map<String, Object> request) {
@@ -41,20 +75,23 @@ public class ChatController {
     }
 
     @GetMapping("/conversations/hr/{hrId}")
-    public ResponseEntity<List<Conversation>> getHRConversations(@PathVariable Long hrId) {
-        List<Conversation> conversations = conversationRepository.findByHrId(hrId);
+    public ResponseEntity<List<ConversationDTO>> getHRConversations(@PathVariable Long hrId) {
+        List<ConversationDTO> conversations = conversationRepository.findByHrId(hrId)
+                .stream().map(this::mapToDTO).collect(Collectors.toList());
         return ResponseEntity.ok(conversations);
     }
 
     @GetMapping("/conversations/job-seeker/{jobSeekerId}")
-    public ResponseEntity<List<Conversation>> getJobSeekerConversations(@PathVariable Long jobSeekerId) {
-        List<Conversation> conversations = conversationRepository.findByJobSeekerId(jobSeekerId);
+    public ResponseEntity<List<ConversationDTO>> getJobSeekerConversations(@PathVariable Long jobSeekerId) {
+        List<ConversationDTO> conversations = conversationRepository.findByJobSeekerId(jobSeekerId)
+                .stream().map(this::mapToDTO).collect(Collectors.toList());
         return ResponseEntity.ok(conversations);
     }
 
     @GetMapping("/conversations/all")
-    public ResponseEntity<List<Conversation>> getAllConversations() {
-        List<Conversation> conversations = conversationRepository.findAll();
+    public ResponseEntity<List<ConversationDTO>> getAllConversations() {
+        List<ConversationDTO> conversations = conversationRepository.findAll()
+                .stream().map(this::mapToDTO).collect(Collectors.toList());
         return ResponseEntity.ok(conversations);
     }
 

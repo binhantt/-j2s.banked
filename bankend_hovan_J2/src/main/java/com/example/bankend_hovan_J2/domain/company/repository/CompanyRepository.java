@@ -9,6 +9,8 @@ public interface CompanyRepository {
     Company save(Company company);
     Optional<Company> findById(Long id);
     Optional<Company> findByHrId(Long hrId);
+    Optional<Company> findByHrIdIncludingInactive(Long hrId);
     List<Company> findAll();
     void deleteById(Long id);
+    boolean existsByDomainId(Long domainId);
 }

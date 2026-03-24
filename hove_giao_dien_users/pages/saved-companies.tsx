@@ -144,7 +144,7 @@ export default function SavedCompaniesPage() {
                       className="h-full"
                       cover={
                         <div 
-                          className="h-48 bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center relative"
+                          className="h-48 bg-gradient-to-br from-green-600 to-green-500 flex items-center justify-center relative"
                           style={{
                             backgroundImage: company.logoUrl ? `url(${company.logoUrl})` : undefined,
                             backgroundSize: 'cover',
@@ -152,7 +152,7 @@ export default function SavedCompaniesPage() {
                           }}
                         >
                           {!company.logoUrl && (
-                            <Avatar size={80} className="bg-white text-blue-600 text-3xl font-bold">
+                            <Avatar size={80} className="bg-white text-green-600 text-3xl font-bold">
                               {company.name?.charAt(0)}
                             </Avatar>
                           )}
@@ -193,7 +193,7 @@ export default function SavedCompaniesPage() {
                       <Card.Meta
                         title={
                           <div 
-                            className="text-lg font-bold cursor-pointer hover:text-blue-600"
+                            className="text-lg font-bold cursor-pointer hover:text-green-600"
                             onClick={() => router.push(`/companies/${company.id}`)}
                           >
                             {company.name}
@@ -223,7 +223,7 @@ export default function SavedCompaniesPage() {
                                   href={company.website} 
                                   target="_blank" 
                                   rel="noopener noreferrer"
-                                  className="text-blue-600 hover:text-blue-700 truncate"
+                                  className="text-green-600 hover:text-green-700 truncate"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   Website

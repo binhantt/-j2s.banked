@@ -16,3 +16,14 @@ export interface BlogPostDetail extends BlogPostSummary {
   image?: string | null;
 }
 
+export interface CreateBlogPostPayload {
+  title: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  category: string;
+  readTime: string;
+  image?: string | null;
+  tags?: string[];
+}
+

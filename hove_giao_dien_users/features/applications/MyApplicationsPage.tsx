@@ -20,14 +20,16 @@ export default function MyApplicationsPage() {
   }, [user?.id]);
 
   const loadApplications = async () => {
+    if (!user?.id) return;
+    
     setLoading(true);
     try {
       const data = await applicationApi.getUserApplications(user.id);
       setApplications(data);
       
       // Load job info for each application
-      const jobIds = [...new Set(data.map((app: any) => app.jobPostingId))];
-      const jobsData: any = {};
+      const jobIds = [...new Set(data.map((app: any) => app.jobPostingId))] as number[];
+      const jobsData: Record<number, any> = {};
       
       await Promise.all(
         jobIds.map(async (jobId) => {
@@ -47,11 +49,11 @@ export default function MyApplicationsPage() {
       
       setJobsInfo(jobsData);
       
-      // Check for newly accepted applications
-      const acceptedApps = data.filter((app: any) => app.status === 'accepted');
+      // Check for newly accepted applications that are not confirmed yet
+      const acceptedApps = data.filter((app: any) => app.status === 'accepted' && !app.userConfirmed);
       if (acceptedApps.length > 0) {
         message.success({
-          content: `Chúc mừng! Bạn có ${acceptedApps.length} đơn ứng tuyển được chấp nhận`,
+          content: `Chúc mừng! Bạn có ${acceptedApps.length} đơn ứng tuyển được chấp nhận. Vui lòng xác nhận đi làm.`,
           duration: 5,
         });
       }
@@ -84,7 +86,7 @@ export default function MyApplicationsPage() {
 
   const statusMap: any = {
     'pending': { text: 'Chờ xét duyệt', color: 'blue' },
-    'reviewing': { text: 'Đang xem xét', color: 'orange' },
+    'reviewing': { text: 'Đang xem xét', color: 'green' },
     'accepted': { text: 'Đã chấp nhận', color: 'green' },
     'rejected': { text: 'Đã từ chối', color: 'red' },
   };

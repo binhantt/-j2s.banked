@@ -3,14 +3,17 @@ package com.example.bankend_hovan_J2.presentation.cv;
 import com.example.bankend_hovan_J2.domain.cv.entity.UserCV;
 import com.example.bankend_hovan_J2.domain.cv.repository.UserCVRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/user-cvs")
+@CrossOrigin(originPatterns = "*")
 @RequiredArgsConstructor
 public class UserCVController {
     
@@ -41,7 +44,9 @@ public class UserCVController {
     // Get all CVs for a user
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<UserCV>> getUserCVs(@PathVariable Long userId) {
+        log.info("Getting CVs for user: {}", userId);
         List<UserCV> cvs = cvRepository.findByUserId(userId);
+        log.info("Found {} CVs for user {}", cvs.size(), userId);
         return ResponseEntity.ok(cvs);
     }
     
@@ -64,8 +69,10 @@ public class UserCVController {
     // Update CV (basic info only, NOT visibility)
     @PutMapping("/{id}")
     public ResponseEntity<UserCV> updateCV(@PathVariable Long id, @RequestBody Map<String, Object> request) {
+        log.info("Updating CV {} with data: {}", id, request);
         return cvRepository.findById(id)
                 .map(cv -> {
+                    log.info("Found CV to update: {}", cv);
                     if (request.containsKey("title")) {
                         cv.setTitle(getString(request, "title"));
                     }
@@ -78,9 +85,16 @@ public class UserCVController {
                     if (request.containsKey("fileSize")) {
                         cv.setFileSize(getLong(request, "fileSize"));
                     }
-                    // REMOVED: visibility update from here
-                    // Use dedicated endpoint /api/user-cvs/{id}/privacy instead
+                    // Handle visibility update here as well for convenience
+                    if (request.containsKey("visibility")) {
+                        String visibility = getString(request, "visibility");
+                        if (List.of("private", "public", "application_only").contains(visibility)) {
+                            cv.setVisibility(visibility);
+                            log.info("Updated visibility to: {}", visibility);
+                        }
+                    }
                     UserCV updated = cvRepository.save(cv);
+                    log.info("CV updated successfully: {}", updated);
                     return ResponseEntity.ok(updated);
                 })
                 .orElse(ResponseEntity.notFound().build());

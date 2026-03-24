@@ -124,7 +124,7 @@ export const CVUpload = ({ value, onChange }: CVUploadProps) => {
     if (lower.endsWith('.pdf')) {
       return <FilePdfOutlined style={{ fontSize: 28, color: '#ef4444' }} />;
     } else if (lower.endsWith('.doc') || lower.endsWith('.docx')) {
-      return <FileWordOutlined style={{ fontSize: 28, color: '#2563eb' }} />;
+      return <FileWordOutlined style={{ fontSize: 28, color: '#16a34a' }} />;
     }
     return <FileTextOutlined style={{ fontSize: 28, color: '#1890ff' }} />;
   };
@@ -222,7 +222,7 @@ export const CVUpload = ({ value, onChange }: CVUploadProps) => {
                 cursor: uploading ? 'not-allowed' : 'pointer',
                 }}
               >
-                <UploadOutlined style={{ fontSize: 34, color: '#2563eb', marginBottom: 8 }} />
+                <UploadOutlined style={{ fontSize: 34, color: '#16a34a', marginBottom: 8 }} />
                 <div style={{ fontSize: 15, fontWeight: 600, color: '#111827', marginBottom: 4 }}>
                   {uploading ? 'Đang upload CV...' : 'Chọn file CV để upload'}
                 </div>

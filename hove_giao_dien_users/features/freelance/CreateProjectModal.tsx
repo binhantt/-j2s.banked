@@ -65,6 +65,8 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         description: values.description,
         budget: values.budget,
         deadline: values.deadline ? values.deadline.format('YYYY-MM-DD') : undefined,
+        status: 'open' as const,
+        progress: 0,
       };
 
       const project = await freelanceApi.createProject(projectData);
@@ -117,7 +119,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         layout="vertical"
         onFinish={handleSubmit}
       >
-        <Divider orientation="left">Thông tin dự án</Divider>
+        <Divider>Thông tin dự án</Divider>
 
         <Form.Item
           name="title"
@@ -175,7 +177,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           />
         </Form.Item>
 
-        <Divider orientation="left">
+        <Divider>
           Các mốc quan trọng (Milestones)
           <span style={{ fontSize: '12px', color: '#8c8c8c', marginLeft: 8 }}>
             - Tùy chọn
@@ -216,7 +218,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                     placeholder="% dự án"
                     value={milestone.percentage}
                     onChange={(value) => handleMilestoneChange(index, 'percentage', value || 0)}
-                    addonAfter="%"
+                    suffix="%"
                   />
                   <DatePicker
                     style={{ flex: 1 }}
@@ -226,7 +228,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                     onChange={(date) => handleMilestoneChange(index, 'dueDate', date?.format('YYYY-MM-DD'))}
                     disabledDate={(current) => current && current < dayjs().startOf('day')}
                   />
-                </Space>
+                </SpWace>
               </Space>
             </Card>
           ))}
@@ -248,26 +250,6 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               </span>
             )}
           </div>
-        </div>
-
-        <Divider />
-
-        <div style={{ 
-          background: '#f0f2f5', 
-          padding: '12px 16px', 
-          borderRadius: '8px',
-          marginBottom: 16,
-          fontSize: '13px',
-          color: '#595959'
-        }}>
-          <div style={{ marginBottom: 4 }}>
-            💡 <strong>Lưu ý:</strong>
-          </div>
-          <ul style={{ margin: 0, paddingLeft: 20 }}>
-            <li>Tiền ứng trước mặc định là 20% ngân sách dự án</li>
-            <li>Dự án sẽ ở trạng thái "Nháp" cho đến khi bạn thanh toán tiền ứng</li>
-            <li>Bạn có thể thêm/sửa milestones sau khi tạo dự án</li>
-          </ul>
         </div>
 
         <Form.Item style={{ marginBottom: 0 }}>

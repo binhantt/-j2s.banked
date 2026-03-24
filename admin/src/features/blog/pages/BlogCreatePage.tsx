@@ -1,6 +1,7 @@
-import { Form, Input, Button, Card, Space, Typography, Select, message } from 'antd';
+import { Form, Input, Button, Card, Space, Typography, Select, App } from 'antd';
 import type { CreateBlogPostPayload } from '../types/blogTypes';
 import { blogApi } from '../api/blogApi';
+import { useBlogStore } from '../store/useBlogStore';
 
 const { Title } = Typography;
 
@@ -10,22 +11,34 @@ interface BlogCreatePageProps {
 
 export function BlogCreatePage({ onBackToList }: BlogCreatePageProps) {
   const [form] = Form.useForm<CreateBlogPostPayload>();
+  const loadPosts = useBlogStore((state) => state.loadPosts);
+  const { message } = App.useApp();
 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
+      
+      console.log('Submitting blog post:', values);
 
-      await blogApi.createPost({
+      const result = await blogApi.createPost({
         ...values,
         image: values.image || null,
       });
+      
+      console.log('Blog post created:', result);
 
       message.success('Tạo bài viết thành công');
       form.resetFields();
+      
+      // Reload posts list
+      await loadPosts();
+      
       onBackToList();
-    } catch {
+    } catch (error) {
+      console.error('Error creating blog post:', error);
       // validateFields đã hiển thị lỗi, chỉ báo lỗi khi call API fail
-      message.error('Không thể tạo bài viết');
+      const errorMessage = error instanceof Error ? error.message : 'Không thể tạo bài viết';
+      message.error(errorMessage);
     }
   };
 

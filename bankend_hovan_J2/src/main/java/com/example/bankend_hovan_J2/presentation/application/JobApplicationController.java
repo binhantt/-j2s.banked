@@ -122,14 +122,17 @@ public class JobApplicationController {
             
             return applicationRepository.findById(id)
                     .map(app -> {
-                        app.setStatus(request.getStatus());
-                        JobApplicationEntityJpa saved = applicationRepository.save(app);
-                        
-                        // Call UseCase for notification (only on final acceptance/rejection)
+                        JobApplicationEntityJpa saved;
+
+                        // Final statuses go through UseCase so notification is created correctly
                         if ("accepted".equals(request.getStatus()) || "rejected".equals(request.getStatus())) {
                             updateApplicationStatusUseCase.execute(id, request.getStatus());
+                            saved = applicationRepository.findById(id).orElse(app);
+                        } else {
+                            app.setStatus(request.getStatus());
+                            saved = applicationRepository.save(app);
                         }
-                        
+
                         System.out.println("Status updated successfully");
                         return ResponseEntity.ok(saved);
                     })
@@ -212,18 +215,13 @@ public class JobApplicationController {
                             return ResponseEntity.badRequest()
                                     .body(Map.of("error", "Chỉ có thể xác nhận khi đơn đã được chấp nhận"));
                         }
-                        
+
                         app.setUserConfirmed(true);
-                        applicationRepository.save(app);
-                        
-                        // Close job when user confirms
-                        jobPostingRepository.findById(app.getJobPostingId()).ifPresent(job -> {
-                            job.setStatus("closed");
-                            jobPostingRepository.save(job);
-                            System.out.println("=== Job closed: user confirmed ===");
-                        });
-                        
-                        return ResponseEntity.ok(app);
+                        JobApplicationEntityJpa confirmedApp = applicationRepository.save(app);
+
+                        System.out.println("=== User confirmed going to work. Application ID=" + id + " ===");
+
+                        return ResponseEntity.ok(confirmedApp);
                     })
                     .orElse(ResponseEntity.notFound().build());
         } catch (Exception e) {

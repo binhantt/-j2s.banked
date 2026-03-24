@@ -1,24 +1,61 @@
+import { useEffect, useState } from 'react';
 import { Select, Checkbox } from 'antd';
-import { JobFilters as JobFiltersType } from '../api/jobApi';
+import { JobFilters as JobFiltersType, jobApiService } from '../api/jobApi';
 
 interface JobFiltersProps {
   filters: JobFiltersType;
   onFilterChange: (filters: Partial<JobFiltersType>) => void;
 }
 
+const filterCardStyle = {
+  background: '#fff',
+  borderRadius: 14,
+  border: '1px solid #f0fdf4',
+  padding: 20,
+  marginBottom: 16,
+};
+
+const sectionTitleStyle = {
+  fontWeight: 700,
+  fontSize: 14,
+  color: '#0b1220',
+  marginBottom: 12,
+};
+
+const sectionSubStyle = {
+  fontSize: 12,
+  color: '#94a3b8',
+  marginBottom: 4,
+};
+
 export default function JobFilters({ filters, onFilterChange }: JobFiltersProps) {
+  const [experiences, setExperiences] = useState<string[]>([]);
+
+  useEffect(() => {
+    jobApiService.getExperiences().then((data) => {
+      if (data && data.length > 0) {
+        setExperiences(data);
+      }
+    });
+  }, []);
+
+  const experienceOptions = [
+    { value: 'all', label: 'Tất cả kinh nghiệm' },
+    ...experiences.map((exp) => ({ value: exp, label: exp })),
+  ];
+
   return (
     <aside>
-      <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-4">
-        <div className="font-semibold text-gray-800 mb-3">Bộ lọc nâng cao</div>
-        <div className="text-xs text-gray-500">Lọc theo nhu cầu của bạn</div>
+      <div style={{ ...filterCardStyle, marginBottom: 16 }}>
+        <div style={sectionTitleStyle}>Bộ lọc nâng cao</div>
+        <div style={sectionSubStyle}>Lọc theo nhu cầu của bạn</div>
       </div>
 
       {/* Job Type Filter */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-4">
-        <div className="font-semibold text-gray-800 mb-3">Loại hình công việc</div>
+      <div style={filterCardStyle}>
+        <div style={sectionTitleStyle}>Loại hình công việc</div>
         <Checkbox.Group
-          className="flex flex-col gap-2"
+          style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
           value={filters.jobType}
           onChange={(values) => onFilterChange({ jobType: values as string[] })}
           options={[
@@ -31,11 +68,11 @@ export default function JobFilters({ filters, onFilterChange }: JobFiltersProps)
       </div>
 
       {/* Salary Filter */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-4">
-        <div className="font-semibold text-gray-800 mb-3">Mức lương</div>
+      <div style={filterCardStyle}>
+        <div style={sectionTitleStyle}>Mức lương</div>
         <Select
           size="large"
-          className="w-full"
+          style={{ width: '100%', borderRadius: 10 }}
           value={filters.salaryRange}
           onChange={(value) => onFilterChange({ salaryRange: value })}
           options={[
@@ -49,19 +86,17 @@ export default function JobFilters({ filters, onFilterChange }: JobFiltersProps)
       </div>
 
       {/* Experience Filter */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-5">
-        <div className="font-semibold text-gray-800 mb-3">Kinh nghiệm</div>
+      <div style={filterCardStyle}>
+        <div style={sectionTitleStyle}>Kinh nghiệm</div>
         <Select
           size="large"
-          className="w-full"
+          style={{ width: '100%', borderRadius: 10 }}
           value={filters.experience}
           onChange={(value) => onFilterChange({ experience: value })}
-          options={[
-            { value: 'all', label: 'Tất cả kinh nghiệm' },
-            { value: 'junior', label: 'Junior' },
-            { value: 'middle', label: 'Middle' },
-            { value: 'senior', label: 'Senior' },
-          ]}
+          options={experienceOptions}
+          showSearch
+          optionFilterProp="label"
+          placeholder="Chọn kinh nghiệm"
         />
       </div>
     </aside>

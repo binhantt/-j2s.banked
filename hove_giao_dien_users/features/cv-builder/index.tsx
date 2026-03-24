@@ -267,9 +267,9 @@ const CVPreview = ({ data, onBack }: { data: any; onBack: () => void }) => {
 
         <Card className="shadow-2xl">
           <div className="bg-white p-8">
-            <div className="text-center mb-8 border-b-2 border-indigo-600 pb-6">
+            <div className="text-center mb-8 border-b-2 border-green-600 pb-6">
               <h1 className="text-4xl font-bold text-gray-900 mb-2">NGUYỄN VĂN A</h1>
-              <h2 className="text-xl text-indigo-600 font-semibold mb-4">FRONTEND DEVELOPER</h2>
+              <h2 className="text-xl text-green-600 font-semibold mb-4">FRONTEND DEVELOPER</h2>
               <div className="flex justify-center gap-6 text-sm text-gray-600">
                 <span>📧 email@example.com</span>
                 <span>📱 0123456789</span>
@@ -279,7 +279,7 @@ const CVPreview = ({ data, onBack }: { data: any; onBack: () => void }) => {
 
             <div className="space-y-6">
               <section>
-                <h3 className="text-xl font-bold text-gray-900 mb-3 border-l-4 border-indigo-600 pl-3">
+                <h3 className="text-xl font-bold text-gray-900 mb-3 border-l-4 border-green-600 pl-3">
                   MỤC TIÊU NGHỀ NGHIỆP
                 </h3>
                 <p className="text-gray-700 leading-relaxed">
@@ -288,7 +288,7 @@ const CVPreview = ({ data, onBack }: { data: any; onBack: () => void }) => {
               </section>
 
               <section>
-                <h3 className="text-xl font-bold text-gray-900 mb-3 border-l-4 border-indigo-600 pl-3">
+                <h3 className="text-xl font-bold text-gray-900 mb-3 border-l-4 border-green-600 pl-3">
                   KINH NGHIỆM LÀM VIỆC
                 </h3>
                 <div className="space-y-4">
@@ -296,7 +296,7 @@ const CVPreview = ({ data, onBack }: { data: any; onBack: () => void }) => {
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <h4 className="font-bold text-gray-900">Senior Developer</h4>
-                        <p className="text-indigo-600">ABC Company</p>
+                        <p className="text-green-600">ABC Company</p>
                       </div>
                       <span className="text-gray-600 text-sm">2022 - Hiện tại</span>
                     </div>
@@ -308,14 +308,14 @@ const CVPreview = ({ data, onBack }: { data: any; onBack: () => void }) => {
               </section>
 
               <section>
-                <h3 className="text-xl font-bold text-gray-900 mb-3 border-l-4 border-indigo-600 pl-3">
+                <h3 className="text-xl font-bold text-gray-900 mb-3 border-l-4 border-green-600 pl-3">
                   HỌC VẤN
                 </h3>
                 <div>
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <h4 className="font-bold text-gray-900">Cử nhân Công nghệ Thông tin</h4>
-                      <p className="text-indigo-600">Đại học ABC</p>
+                      <p className="text-green-600">Đại học ABC</p>
                     </div>
                     <span className="text-gray-600 text-sm">2018 - 2022</span>
                   </div>
@@ -324,7 +324,7 @@ const CVPreview = ({ data, onBack }: { data: any; onBack: () => void }) => {
               </section>
 
               <section>
-                <h3 className="text-xl font-bold text-gray-900 mb-3 border-l-4 border-indigo-600 pl-3">
+                <h3 className="text-xl font-bold text-gray-900 mb-3 border-l-4 border-green-600 pl-3">
                   KỸ NĂNG
                 </h3>
                 <div className="grid grid-cols-2 gap-2">

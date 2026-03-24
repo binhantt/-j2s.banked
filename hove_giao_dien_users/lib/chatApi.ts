@@ -1,20 +1,51 @@
 import { api } from './api';
+import { companyApi } from './companyApi';
+import { userApi } from './userApi';
+
+const enrichConversation = async (conversation: any) => {
+  const enriched = { ...conversation };
+
+  const [companyResult, jobSeekerResult] = await Promise.allSettled([
+    conversation?.hrId ? companyApi.getCompanyBasicInfoByHrId(conversation.hrId) : Promise.resolve(null),
+    conversation?.jobSeekerId ? userApi.getUser(conversation.jobSeekerId) : Promise.resolve(null),
+  ]);
+
+  if (companyResult.status === 'fulfilled' && companyResult.value) {
+    enriched.companyName = companyResult.value.name;
+    enriched.hrCompanyName = companyResult.value.name;
+  }
+
+  if (jobSeekerResult.status === 'fulfilled' && jobSeekerResult.value) {
+    enriched.jobSeekerName =
+      jobSeekerResult.value.fullName ||
+      jobSeekerResult.value.name ||
+      jobSeekerResult.value.username ||
+      conversation.jobSeekerName;
+    enriched.jobSeekerFullName = enriched.jobSeekerName;
+  }
+
+  return enriched;
+};
+
+const enrichConversations = async (conversations: any[]) => {
+  return Promise.all((conversations || []).map((conversation) => enrichConversation(conversation)));
+};
 
 export const chatApi = {
   // Get conversations
   getJobSeekerConversations: async (userId: number) => {
     const response = await api.get(`/api/chat/conversations/job-seeker/${userId}`);
-    return response.data;
+    return enrichConversations(response.data || []);
   },
 
   getHRConversations: async (userId: number) => {
     const response = await api.get(`/api/chat/conversations/hr/${userId}`);
-    return response.data;
+    return enrichConversations(response.data || []);
   },
 
   getAllConversations: async () => {
     const response = await api.get('/api/chat/conversations/all');
-    return response.data;
+    return enrichConversations(response.data || []);
   },
 
   // Create conversation

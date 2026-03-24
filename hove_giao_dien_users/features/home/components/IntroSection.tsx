@@ -1,50 +1,100 @@
 export const IntroSection = () => {
   return (
-    <section className="relative bg-white border-y border-gray-100 min-h-screen flex items-center">
-      {/* subtle background blocks */}
-      <div className="pointer-events-none absolute -left-10 top-16 h-40 w-40 rounded-3xl bg-cyan-50" />
-      <div className="pointer-events-none absolute -right-14 bottom-10 h-52 w-52 rounded-full bg-emerald-50" />
-
-      <div className="relative max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-        <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-4 py-1 text-xs font-medium text-gray-600 mb-8">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          Giới thiệu nền tảng
+    <section style={{
+      background: '#fff',
+      borderTop: '1px solid #f0fdf4',
+      borderBottom: '1px solid #f0fdf4',
+    }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '64px 24px' }}>
+        {/* Badge */}
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '4px 14px',
+          borderRadius: 100,
+          background: '#f0fdf4',
+          border: '1px solid #dcfce7',
+          marginBottom: 32,
+        }}>
+          <span style={{
+            width: 6, height: 6, borderRadius: '50%',
+            background: '#16a34a',
+          }} />
+          <span style={{
+            fontSize: 12, fontWeight: 600, color: '#16a34a',
+          }}>
+            Giới thiệu nền tảng
+          </span>
         </div>
 
-        <div className="grid gap-8 md:gap-10 md:grid-cols-3 rounded-2xl border border-gray-100 bg-white/70 shadow-sm p-6 sm:p-8">
-          <div className="border-r border-gray-100 pr-0 md:pr-6">
-            <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-3">
+        <div style={{
+          display: 'grid',
+          gap: 32,
+          borderRadius: 16,
+          background: '#fafffe',
+          border: '1px solid #f0fdf4',
+          padding: '32px',
+        }}>
+          {/* Left col */}
+          <div style={{ borderRight: 'none' }}>
+            <h2 style={{
+              fontSize: 'clamp(18px, 3vw, 24px)',
+              fontWeight: 700,
+              color: '#0b1220',
+              marginBottom: 12,
+            }}>
               Nền tảng tìm việc toàn diện
             </h2>
-            <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+            <p style={{ fontSize: 14, color: '#64748b', lineHeight: 1.8 }}>
               Website giúp bạn tìm việc fulltime, part-time và dự án freelance trên cùng một hệ thống,
               từ khâu tìm kiếm, ứng tuyển cho tới trao đổi với nhà tuyển dụng.
             </p>
           </div>
-          <div className="md:border-r md:border-gray-100 md:px-6">
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
-              Dành cho ứng viên
-            </h3>
-            <ul className="space-y-1.5 text-sm text-gray-600">
-              <li>• Tạo và lưu nhiều CV, chủ động bật/tắt hiển thị.</li>
-              <li>• Theo dõi trạng thái từng đơn ứng tuyển theo thời gian thực.</li>
-              <li>• Nhận gợi ý việc làm phù hợp với kỹ năng và kinh nghiệm.</li>
-            </ul>
-          </div>
-          <div className="md:pl-6">
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
-              Dành cho nhà tuyển dụng
-            </h3>
-            <ul className="space-y-1.5 text-sm text-gray-600">
-              <li>• Đăng tin tuyển dụng nhanh, quản lý ứng viên theo từng vị trí.</li>
-              <li>• Hệ thống chat giúp trao đổi trực tiếp với ứng viên.</li>
-              <li>• Thống kê lượt xem, số CV và hiệu quả chiến dịch tuyển dụng.</li>
-            </ul>
+
+          {/* Right cols */}
+          <div style={{ display: 'grid', gap: 24, gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
+            <div>
+              <h3 style={{
+                fontSize: 16, fontWeight: 700,
+                color: '#0b1220', marginBottom: 10,
+              }}>
+                Dành cho ứng viên
+              </h3>
+              <ul style={{ paddingLeft: 16, margin: 0 }}>
+                {[
+                  'Tạo và lưu nhiều CV, chủ động bật/tắt hiển thị.',
+                  'Theo dõi trạng thái từng đơn ứng tuyển theo thời gian thực.',
+                  'Nhận gợi ý việc làm phù hợp với kỹ năng và kinh nghiệm.',
+                ].map((item, i) => (
+                  <li key={i} style={{ fontSize: 13, color: '#64748b', marginBottom: 6, lineHeight: 1.6 }}>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 style={{
+                fontSize: 16, fontWeight: 700,
+                color: '#0b1220', marginBottom: 10,
+              }}>
+                Dành cho nhà tuyển dụng
+              </h3>
+              <ul style={{ paddingLeft: 16, margin: 0 }}>
+                {[
+                  'Đăng tin tuyển dụng nhanh, quản lý ứng viên theo từng vị trí.',
+                  'Hệ thống chat giúp trao đổi trực tiếp với ứng viên.',
+                  'Thống kê lượt xem, số CV và hiệu quả chiến dịch tuyển dụng.',
+                ].map((item, i) => (
+                  <li key={i} style={{ fontSize: 13, color: '#64748b', marginBottom: 6, lineHeight: 1.6 }}>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </div>
     </section>
   );
 };
-
-

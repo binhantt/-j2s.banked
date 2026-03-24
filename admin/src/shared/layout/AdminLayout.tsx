@@ -6,13 +6,13 @@ import {
   AppstoreOutlined,
   TeamOutlined,
   LineChartOutlined,
-  SettingOutlined,
   BellOutlined,
   UserOutlined,
   SearchOutlined,
   PlusOutlined,
   LogoutOutlined,
   FileTextOutlined,
+  TagsOutlined,
   MessageOutlined,
 } from '@ant-design/icons';
 
@@ -28,7 +28,6 @@ interface AdminLayoutProps {
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
-
 export function AdminLayout({
   children,
   currentView,
@@ -40,10 +39,9 @@ export function AdminLayout({
     () => [
       { key: 'dashboard', icon: <AppstoreOutlined />, label: 'Bảng điều khiển' },
       { key: 'users', icon: <TeamOutlined />, label: 'Người dùng' },
+      { key: 'domains', icon: <TagsOutlined />, label: 'Lĩnh vực' },
       { key: 'blog', icon: <FileTextOutlined />, label: 'Blog' },
       { key: 'chat', icon: <MessageOutlined />, label: 'Chat' },
-      { key: 'analytics', icon: <LineChartOutlined />, label: 'Phân tích' },
-      { key: 'settings', icon: <SettingOutlined />, label: 'Cài đặt' },
     ],
     [],
   );
@@ -51,7 +49,7 @@ export function AdminLayout({
   return (
     <Layout style={{ minHeight: '100vh', background: '#f3f6fb' }}>
       <Sider
-        width={300}
+        width={320}
         trigger={null}
         style={{
           background: 'linear-gradient(180deg, #0b1220 0%, #0a1530 100%)',
@@ -71,26 +69,61 @@ export function AdminLayout({
                 display: 'flex',
                 alignItems: 'center',
                 padding: '0 22px',
-                color: '#ffffff',
-                fontWeight: 700,
-                fontSize: 40,
-                gap: 12,
+                gap: 14,
                 flexShrink: 0,
               }}
             >
-              <div
-                style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: 8,
-                  background: '#16a34a',
-                  display: 'grid',
-                  placeItems: 'center',
-                }}
-              >
-                <AppstoreOutlined style={{ color: '#fff', fontSize: 18 }} />
+              {/* Stylized V logo */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+                  <path
+                    d="M5 8L13.5 28.5L19 15L24.5 28.5L33 8"
+                    stroke="#16a34a"
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    fill="none"
+                  />
+                  <path
+                    d="M5 8L13.5 28.5L19 15L24.5 28.5L33 8"
+                    stroke="url(#grad)"
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    fill="none"
+                  />
+                  <defs>
+                    <linearGradient id="grad" x1="5" y1="8" x2="33" y2="28.5" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#16a34a" />
+                      <stop offset="1" stopColor="#22c55e" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
+                  <span
+                    style={{
+                      color: '#ffffff',
+                      fontWeight: 700,
+                      fontSize: 22,
+                      letterSpacing: '-0.3px',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Việc Làm
+                  </span>
+                  <span
+                    style={{
+                      color: '#16a34a',
+                      fontWeight: 800,
+                      fontSize: 22,
+                      letterSpacing: '-0.3px',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    24h
+                  </span>
+                </div>
               </div>
-              <span style={{ fontSize: 38 }}>AdminPro</span>
             </div>
 
             <ConfigProvider

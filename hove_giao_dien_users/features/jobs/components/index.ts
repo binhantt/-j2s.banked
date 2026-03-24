@@ -1,6 +1,6 @@
 export { default as JobCard } from './JobCard';
-export { JobFilters } from './JobFilters';
-export { JobSearchBar } from './JobSearchBar';
+export { default as JobFilters } from './JobFilters';
+export { default as JobSearchBar } from './JobSearchBar';
 export { JobDetailHeader } from './JobDetailHeader';
 export { JobDescription } from './JobDescription';
 export { JobComments } from './JobComments';

@@ -16,14 +16,12 @@ export const CompanyBlogSection = () => {
   const loadBlogs = async () => {
     setLoading(true);
     try {
-      // Lấy tất cả blog và lọc theo trạng thái đã xuất bản
       const data = await companyBlogApi.getAllBlogs();
       const published = (data || []).filter(
         (blog: CompanyBlog) => blog.status === 'published'
       );
       setBlogs(published);
     } catch (error) {
-      console.error('Load company blogs error:', error);
       message.error('Không thể tải blog nhà tuyển dụng');
       setBlogs([]);
     } finally {
@@ -33,7 +31,7 @@ export const CompanyBlogSection = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-10">
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
         <Spin size="large" />
       </div>
     );
@@ -41,23 +39,28 @@ export const CompanyBlogSection = () => {
 
   if (!blogs.length) {
     return (
-      <div className="flex justify-center items-center py-10">
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
         <Empty description="Chưa có blog nhà tuyển dụng" />
       </div>
     );
   }
 
   return (
-    <div className="mt-16">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">
+    <div style={{ marginTop: 64 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+        <h2 style={{
+          fontSize: 22, fontWeight: 700, color: '#0b1220', margin: 0,
+        }}>
           Blog nhà tuyển dụng
         </h2>
         <button
-          className="text-sm text-blue-600 hover:text-blue-700 font-medium"
           onClick={() => router.push('/blogs')}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: '#16a34a', fontWeight: 500, fontSize: 14,
+          }}
         >
-          Xem tất cả
+          Xem tất cả →
         </button>
       </div>
 
@@ -72,44 +75,58 @@ export const CompanyBlogSection = () => {
                   <img
                     src={blog.imageUrl}
                     alt={blog.title}
-                    className="h-48 w-full object-cover"
+                    style={{ height: 192, width: '100%', objectFit: 'cover' }}
                   />
                 ) : (
-                  <div className="h-48 w-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-4xl">
+                  <div style={{
+                    height: 192, width: '100%',
+                    background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 36,
+                  }}>
                     📝
                   </div>
                 )
               }
-              className="h-full border border-gray-200 rounded-xl overflow-hidden"
+              style={{ height: '100%', borderRadius: 14, border: '1px solid #f0fdf4' }}
+              styles={{ body: { padding: 16 } }}
             >
-              <Card.Meta
-                title={
-                  <div className="font-semibold text-gray-900 mb-1 line-clamp-2">
-                    {blog.title}
-                  </div>
-                }
-                description={
-                  <div>
-                    <p className="text-gray-600 text-sm mb-3 line-clamp-3">
-                      {blog.content}
-                    </p>
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>
-                        <UserOutlined /> {blog.authorName}
-                      </span>
-                      <span>
-                        <EyeOutlined /> {blog.views || 0}
-                      </span>
-                    </div>
-                    {blog.createdAt && (
-                      <div className="mt-1 text-xs text-gray-400">
-                        <CalendarOutlined />{' '}
-                        {new Date(blog.createdAt).toLocaleDateString('vi-VN')}
-                      </div>
-                    )}
-                  </div>
-                }
-              />
+              <h3 style={{
+                fontSize: 15, fontWeight: 700,
+                color: '#0b1220', marginBottom: 8, lineHeight: 1.4,
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}>
+                {blog.title}
+              </h3>
+              <p style={{
+                fontSize: 13, color: '#64748b',
+                lineHeight: 1.6, marginBottom: 12,
+                display: '-webkit-box',
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}>
+                {blog.content}
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#94a3b8' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <UserOutlined style={{ color: '#16a34a' }} />
+                  {blog.authorName}
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <EyeOutlined style={{ color: '#16a34a' }} />
+                  {blog.views || 0}
+                </span>
+                {blog.createdAt && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <CalendarOutlined style={{ color: '#16a34a' }} />
+                    {new Date(blog.createdAt).toLocaleDateString('vi-VN')}
+                  </span>
+                )}
+              </div>
             </Card>
           </Col>
         ))}
@@ -117,4 +134,3 @@ export const CompanyBlogSection = () => {
     </div>
   );
 };
-

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, Table, Tag, Button, message, Select, Modal, Space, Progress } from 'antd';
 import { UserOutlined, MessageOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
@@ -6,10 +7,12 @@ import { applicationApi } from '@/lib/applicationApi';
 import { chatApi } from '@/lib/chatApi';
 import { useAuthStore } from '@/store/useAuthStore';
 import { CandidateProfileView } from './CandidateProfileView';
+import { HRCVAccessButton } from '@/components/HRCVAccessButton';
 import dayjs from 'dayjs';
 
+
 export default function JobApplicationsPage() {
-  const [applications, setApplications] = useState([]);
+  const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedApp, setSelectedApp] = useState<any>(null);
   const [jobInfo, setJobInfo] = useState<any>(null);
@@ -28,7 +31,35 @@ export default function JobApplicationsPage() {
     setLoading(true);
     try {
       const data = await applicationApi.getJobApplications(Number(jobId));
-      setApplications(data);
+      
+      // Enrich applications with CV information
+      const enrichedApplications = await Promise.all(
+        data.map(async (app: any) => {
+          if (app.cvUrl) {
+            try {
+              // Get CV details to find CV ID
+              const response = await fetch(`http://localhost:8080/api/user-cvs/user/${app.userId}`);
+              if (response.ok) {
+                const cvs = await response.json();
+                const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+                const cv = cvs.find((c: any) => 
+                  c.fileUrl === app.cvUrl || 
+                  `${baseUrl}${c.fileUrl}` === app.cvUrl
+                );
+                
+                if (cv) {
+                  app.cvId = cv.id;
+                }
+              }
+            } catch (error) {
+              console.error('Error loading CV details for user:', app.userId, error);
+            }
+          }
+          return app;
+        })
+      );
+      
+      setApplications(enrichedApplications);
     } catch (error) {
       message.error('Không thể tải danh sách ứng viên');
     } finally {
@@ -89,7 +120,7 @@ export default function JobApplicationsPage() {
 
   const statusMap: any = {
     'pending': { text: 'Chờ xét duyệt', color: 'blue' },
-    'reviewing': { text: 'Đang xem xét', color: 'orange' },
+    'reviewing': { text: 'Đang xem xét', color: 'green' },
     'accepted': { text: 'Đã chấp nhận', color: 'green' },
     'rejected': { text: 'Đã từ chối', color: 'red' },
   };
@@ -113,12 +144,36 @@ export default function JobApplicationsPage() {
       title: 'Ứng viên',
       dataIndex: 'userId',
       key: 'userId',
-      render: (id: number) => (
+      render: (id: number, record: any) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <UserOutlined />
           <span>User #{id}</span>
+          {record.name && <span>- {record.name}</span>}
         </div>
       ),
+    },
+    {
+      title: 'CV',
+      key: 'cv',
+      render: (_: any, record: any) => {
+        console.log('CV render for record:', record); // Debug log
+        
+        if (!record.cvUrl || !record.cvId) {
+          return <span style={{ color: '#999' }}>Chưa có CV</span>;
+        }
+        
+        return (
+          <HRCVAccessButton
+            cvId={record.cvId}
+            candidateUserId={record.userId}
+            hrId={user?.id || 0}
+            candidateName={record.name || `User #${record.userId}`}
+            buttonText="Xem CV"
+            size="small"
+            type="link"
+          />
+        );
+      },
     },
     {
       title: 'Vòng phỏng vấn',
@@ -136,7 +191,7 @@ export default function JobApplicationsPage() {
       render: (status: string) => {
         const statusMap: any = {
           'pending': { text: 'Chờ xét duyệt', color: 'blue' },
-          'reviewing': { text: 'Đang xem xét', color: 'orange' },
+          'reviewing': { text: 'Đang xem xét', color: 'green' },
           'accepted': { text: 'Đã chấp nhận', color: 'green' },
           'rejected': { text: 'Đã từ chối', color: 'red' },
         };
@@ -308,6 +363,7 @@ export default function JobApplicationsPage() {
             <CandidateProfileView 
               userId={selectedApp.userId} 
               cvUrl={selectedApp.cvUrl}
+              cvId={selectedApp.cvId}
             />
           </div>
         )}

@@ -11,35 +11,93 @@ const stats = [
 
 export const HeroSection = () => {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-cyan-50 via-white to-emerald-50 border-b border-gray-100">
-      {/* Decor gradient left */}
-      <div className="pointer-events-none absolute -left-32 sm:-left-40 top-0 bottom-1/3 w-80 sm:w-96 bg-cyan-100/70 blur-3xl" />
-      {/* Decor gradient right */}
-      <div className="pointer-events-none absolute -right-32 sm:-right-40 top-1/3 bottom-0 w-80 sm:w-96 bg-emerald-100/70 blur-3xl" />
-      {/* Soft glow bottom-center */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 sm:h-56 bg-gradient-to-t from-emerald-100/80 via-transparent to-transparent blur-3xl" />
+    <section style={{
+      position: 'relative',
+      overflow: 'hidden',
+      background: 'linear-gradient(180deg, #f0fdf4 0%, #ffffff 50%, #f0fdf4 100%)',
+      borderBottom: '1px solid #dcfce7',
+    }}>
+      {/* Decorative glow */}
+      <div style={{
+        position: 'absolute', top: '-100px', left: '-80px',
+        width: 500, height: 500,
+        background: 'radial-gradient(circle, rgba(22,163,74,0.12) 0%, transparent 70%)',
+        pointerEvents: 'none',
+      }} />
+      <div style={{
+        position: 'absolute', bottom: 0, right: '-80px',
+        width: 500, height: 400,
+        background: 'radial-gradient(circle, rgba(22,163,74,0.08) 0%, transparent 70%)',
+        pointerEvents: 'none',
+      }} />
 
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 min-h-screen flex flex-col items-center justify-center text-center pt-24 pb-20">
-        <p className="uppercase tracking-[0.18em] text-xs sm:text-sm text-gray-500 mb-4">
-          NỀN TẢNG TÌM VIỆC & FREELANCE CHO NGƯỜI VIỆT
-        </p>
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-gray-900 mb-4 leading-tight">
+      <div style={{
+        maxWidth: 1280,
+        margin: '0 auto',
+        padding: '0 24px',
+        minHeight: 'calc(100vh - 72px)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center',
+        paddingTop: 100,
+        paddingBottom: 80,
+        position: 'relative',
+      }}>
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '6px 16px',
+          borderRadius: 100,
+          background: 'rgba(22,163,74,0.08)',
+          border: '1px solid rgba(22,163,74,0.15)',
+          marginBottom: 24,
+        }}>
+          <span style={{
+            width: 6, height: 6, borderRadius: '50%', background: '#16a34a',
+          }} />
+          <span style={{
+            fontSize: 12, fontWeight: 600, color: '#16a34a',
+            letterSpacing: '0.1em', textTransform: 'uppercase',
+          }}>
+            Nền tảng tìm việc & freelance cho người việt
+          </span>
+        </div>
+
+        <h1 style={{
+          fontSize: 'clamp(28px, 5vw, 52px)',
+          fontWeight: 700, color: '#0b1220',
+          marginBottom: 20, lineHeight: 1.2, letterSpacing: '-0.02em',
+        }}>
           Tìm việc làm, dự án freelance
-          <br className="hidden sm:block" />
-          <span className="font-bold">trên một nền tảng duy nhất.</span>
+          <br />
+          trên một nền tảng duy nhất.
         </h1>
-        <p className="text-base sm:text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+
+        <p style={{
+          fontSize: 'clamp(15px, 2vw, 18px)',
+          color: '#64748b', marginBottom: 36,
+          maxWidth: 640, lineHeight: 1.7,
+        }}>
           Xây dựng hồ sơ chuyên nghiệp, kết nối với nhà tuyển dụng, quản lý toàn bộ quá trình ứng tuyển
           và thanh toán an toàn cho cả công việc fulltime lẫn freelance.
         </p>
 
-        <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mb-6">
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 24 }}>
           <Link href="/jobs">
             <Button
               type="primary"
               size="large"
               icon={<SearchOutlined />}
-              className="h-11 sm:h-12 px-6 sm:px-8 text-sm sm:text-base font-medium"
+              style={{
+                height: 48, borderRadius: 12,
+                background: '#16a34a', border: 'none',
+                fontWeight: 600, fontSize: 15,
+                paddingInline: 28,
+                boxShadow: '0 4px 14px rgba(22,163,74,0.35)',
+              }}
             >
               Bắt đầu tìm việc
             </Button>
@@ -47,34 +105,41 @@ export const HeroSection = () => {
           <Link href="/register">
             <Button
               size="large"
-              className="h-11 sm:h-12 px-6 sm:px-8 text-sm sm:text-base font-medium border-gray-300 text-gray-900"
+              style={{
+                height: 48, borderRadius: 12,
+                border: '1.5px solid #d1d5db',
+                color: '#374151', fontWeight: 600,
+                fontSize: 15, paddingInline: 28,
+              }}
             >
               Dành cho nhà tuyển dụng
             </Button>
           </Link>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-6 text-xs sm:text-sm text-gray-500">
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            Không thu phí ứng viên
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            Bảo mật hồ sơ & CV
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            Hỗ trợ 1-1 khi gặp vấn đề
-          </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 24, fontSize: 13, color: '#64748b' }}>
+          {[
+            'Không thu phí ứng viên',
+            'Bảo mật hồ sơ & CV',
+            'Hỗ trợ 1-1 khi gặp vấn đề',
+          ].map((item) => (
+            <span key={item} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#16a34a' }} />
+              {item}
+            </span>
+          ))}
         </div>
 
-        {/* Stats dưới hero */}
-        <div className="mt-10 flex flex-wrap justify-center gap-6 sm:gap-10">
+        {/* Stats */}
+        <div style={{ marginTop: 64, display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 'clamp(32px, 6vw, 80px)' }}>
           {stats.map((stat, index) => (
-            <div key={index} className="text-center min-w-[110px]">
-              <div className="text-2xl sm:text-3xl font-semibold text-gray-900">{stat.number}</div>
-              <div className="text-xs sm:text-sm text-gray-500 mt-1">{stat.label}</div>
+            <div key={index} style={{ textAlign: 'center', minWidth: 120 }}>
+              <div style={{ fontSize: 'clamp(24px, 3vw, 32px)', fontWeight: 700, color: '#0b1220', letterSpacing: '-0.02em' }}>
+                {stat.number}
+              </div>
+              <div style={{ fontSize: 14, color: '#64748b', marginTop: 4 }}>
+                {stat.label}
+              </div>
             </div>
           ))}
         </div>
@@ -82,4 +147,3 @@ export const HeroSection = () => {
     </section>
   );
 };
-

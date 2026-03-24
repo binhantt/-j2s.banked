@@ -31,15 +31,17 @@
   }
 }
 
-/* Card responsive spacing - Chuẩn Navbar */
+/* Card responsive spacing - Clean borders */
 .ant-card {
   border-radius: 0.75rem;
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
   transition: box-shadow 200ms;
+  border: 1px solid #f3f4f6;
 }
 
 .ant-card:hover {
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  border-color: #e5e7eb;
 }
 
 @media (max-width: 640px) {
@@ -171,6 +173,48 @@
 .ant-form-item-label > label {
   font-size: 14px;
   font-weight: 500;
+}
+
+/* Căn trái text trong input, gần icon */
+.ant-input,
+.ant-input-affix-wrapper input {
+  text-align: left;
+  padding-left: 4px !important;
+}
+
+/* Giảm khoảng cách giữa icon và input */
+.ant-input-prefix,
+.ant-input-affix-wrapper-prefix {
+  margin-right: 4px !important;
+}
+
+/* Đồng đều chiều cao input */
+.ant-form-item {
+  margin-bottom: 24px;
+}
+
+.ant-form-item-label {
+  padding-bottom: 8px !important;
+}
+
+.ant-form-item-label > label {
+  height: auto;
+  min-height: 22px;
+}
+
+/* Căn chỉnh input đều nhau */
+.ant-form-vertical .ant-form-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.ant-form-vertical .ant-form-item-label {
+  padding: 0 0 8px 0;
+  flex-shrink: 0;
+}
+
+.ant-form-vertical .ant-form-item-label-col {
+  flex-shrink: 0;
 }
 
 /* Responsive utilities */

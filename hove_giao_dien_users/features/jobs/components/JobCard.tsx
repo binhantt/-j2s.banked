@@ -37,91 +37,116 @@ export default function JobCard({ job, isSaved = false, onSaveToggle }: JobCardP
   return (
     <Card
       hoverable
-      style={{ borderRadius: 16, border: '1px solid #e5e7eb' }}
+      style={{ borderRadius: 14, border: '1px solid #f0fdf4' }}
       styles={{ body: { padding: 20 } }}
     >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        {/* Company Logo */}
-        <div
-          style={{
-            width: 56,
-            height: 56,
-            borderRadius: 12,
-            background: job.companyLogoUrl
-              ? 'transparent'
-              : 'linear-gradient(135deg, #0ea5e9 0%, #22d3ee 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 22,
-            fontWeight: 600,
-            color: '#fff',
-            overflow: 'hidden',
-            border: '1px solid #e5e7eb',
-          }}
-        >
-          {job.companyLogoUrl ? (
-            <img
-              src={job.companyLogoUrl}
-              alt={job.companyName || 'Company'}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-                e.currentTarget.parentElement!.style.background =
-                  'linear-gradient(135deg, #0ea5e9 0%, #22d3ee 100%)';
-                e.currentTarget.parentElement!.innerHTML =
-                  job.companyName?.charAt(0) || job.title.charAt(0);
-              }}
-            />
-          ) : (
-            job.companyName?.charAt(0) || job.title.charAt(0)
-          )}
-        </div>
-
-        {/* Job Info */}
-        <div className="flex-1 min-w-0">
-          <button
-            type="button"
-            onClick={() => router.push(`/jobs/${job.id}`)}
-            className="text-base sm:text-lg font-semibold text-gray-900 hover:text-blue-600"
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {/* Top row: logo + info */}
+        <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+          {/* Company Logo */}
+          <div
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: 12,
+              background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 22,
+              fontWeight: 700,
+              color: '#fff',
+              overflow: 'hidden',
+              border: '1px solid #f0fdf4',
+              flexShrink: 0,
+            }}
           >
-            {job.title}
-          </button>
-          <div className="text-sm text-gray-500">{job.companyName || 'Công ty tuyển dụng'}</div>
+            {job.companyLogoUrl ? (
+              <img
+                src={job.companyLogoUrl}
+                alt={job.companyName || 'Company'}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.parentElement!.style.background =
+                    'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)';
+                  e.currentTarget.parentElement!.innerHTML =
+                    job.companyName?.charAt(0) || job.title.charAt(0);
+                }}
+              />
+            ) : (
+              job.companyName?.charAt(0) || job.title.charAt(0)
+            )}
+          </div>
 
-          <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-500">
-            <span className="flex items-center gap-1">
-              <EnvironmentOutlined /> {job.location}
-            </span>
-            <span className="flex items-center gap-1 text-orange-500">
-              <DollarOutlined /> {job.salaryMin} - {job.salaryMax}
-            </span>
-            <span className="flex items-center gap-1">
-              <ClockCircleOutlined /> {getTimeAgo(job.createdAt)}
-            </span>
+          {/* Job Info */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <button
+              type="button"
+              onClick={() => router.push(`/jobs/${job.id}`)}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                padding: 0, textAlign: 'left',
+                fontSize: 16,
+                fontWeight: 700,
+                color: '#0b1220',
+                display: 'block',
+                width: '100%',
+                lineHeight: 1.3,
+              }}
+            >
+              {job.title}
+            </button>
+            <div style={{ fontSize: 14, color: '#64748b', marginTop: 4 }}>
+              {job.companyName || 'Công ty tuyển dụng'}
+            </div>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 8, fontSize: 13, color: '#64748b' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <EnvironmentOutlined style={{ color: '#16a34a' }} />
+                {job.location}
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#f59e0b' }}>
+                <DollarOutlined style={{ color: '#f59e0b' }} />
+                {job.salaryMin} - {job.salaryMax}
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <ClockCircleOutlined style={{ color: '#16a34a' }} />
+                {getTimeAgo(job.createdAt)}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex flex-col items-end gap-2">
-          <Tag color="orange" className="rounded-full px-3 py-1">
+        {/* Bottom row: tags + actions */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+          <Tag style={{ borderRadius: 6, border: '1px solid #dcfce7', color: '#16a34a', background: '#f0fdf4' }}>
             {jobTypeMap[job.jobType]}
           </Tag>
-          <Button
-            type="primary"
-            className="!bg-orange-500"
-            onClick={() => router.push(`/jobs/${job.id}`)}
-          >
-            Ứng tuyển
-          </Button>
-          {onSaveToggle && (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {onSaveToggle && (
+              <Button
+                type="default"
+                shape="circle"
+                icon={isSaved ? <HeartFilled style={{ color: '#16a34a' }} /> : <HeartOutlined style={{ color: '#16a34a' }} />}
+                onClick={() => onSaveToggle(job.id)}
+                style={{ borderColor: '#16a34a', color: '#16a34a' }}
+              />
+            )}
             <Button
-              type="default"
-              shape="circle"
-              icon={isSaved ? <HeartFilled /> : <HeartOutlined />}
-              onClick={() => onSaveToggle(job.id)}
-            />
-          )}
+              type="primary"
+              onClick={() => router.push(`/jobs/${job.id}`)}
+              style={{
+                background: '#16a34a',
+                border: 'none',
+                borderRadius: 8,
+                fontWeight: 600,
+                boxShadow: '0 2px 8px rgba(22,163,74,0.3)',
+              }}
+            >
+              Ứng tuyển
+            </Button>
+          </div>
         </div>
       </div>
     </Card>

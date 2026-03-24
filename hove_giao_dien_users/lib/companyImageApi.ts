@@ -1,41 +1,51 @@
 import { api } from './api';
 
 export interface CompanyImage {
-  id?: number;
+  id: number;
   companyId: number;
   imageUrl: string;
+  title?: string;
   description?: string;
+  type: 'OFFICE' | 'TEAM' | 'ACTIVITY' | 'GENERAL';
+  displayOrder: number;
+  createdAt: string;
+}
+
+export interface AddCompanyImageRequest {
+  companyId: number;
+  imageUrl: string;
+  title?: string;
+  description?: string;
+  type?: 'OFFICE' | 'TEAM' | 'ACTIVITY' | 'GENERAL';
   displayOrder?: number;
-  createdAt?: string;
-  updatedAt?: string;
 }
 
 export const companyImageApi = {
-  // Get images by company
-  getImagesByCompany: async (companyId: number): Promise<CompanyImage[]> => {
+  // Get all images for a company
+  getCompanyImages: async (companyId: number): Promise<CompanyImage[]> => {
     const response = await api.get(`/api/company-images/company/${companyId}`);
     return response.data;
   },
 
-  // Get single image
-  getImage: async (id: number): Promise<CompanyImage> => {
-    const response = await api.get(`/api/company-images/${id}`);
+  // Get images by type
+  getCompanyImagesByType: async (companyId: number, type: string): Promise<CompanyImage[]> => {
+    const response = await api.get(`/api/company-images/company/${companyId}/type/${type}`);
     return response.data;
   },
 
-  // Create image
-  createImage: async (data: CompanyImage): Promise<CompanyImage> => {
-    const response = await api.post('/api/company-images', data);
+  // Add new image
+  addCompanyImage: async (request: AddCompanyImageRequest): Promise<CompanyImage> => {
+    const response = await api.post('/api/company-images', request);
     return response.data;
   },
 
-  // Delete image
-  deleteImage: async (id: number): Promise<void> => {
-    await api.delete(`/api/company-images/${id}`);
+  // Delete image by ID
+  deleteCompanyImage: async (imageId: number): Promise<void> => {
+    await api.delete(`/api/company-images/${imageId}`);
   },
 
-  // Delete all images by company
-  deleteImagesByCompany: async (companyId: number): Promise<void> => {
-    await api.delete(`/api/company-images/company/${companyId}`);
+  // Delete image by URL
+  deleteCompanyImageByUrl: async (companyId: number, imageUrl: string): Promise<void> => {
+    await api.delete(`/api/company-images/company/${companyId}/url?imageUrl=${encodeURIComponent(imageUrl)}`);
   },
 };

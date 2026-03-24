@@ -33,17 +33,14 @@ export const useCompanyStore = create<CompanyStore>((set, get) => ({
         const searchLower = filters.search.toLowerCase();
         filtered = filtered.filter(company => 
           company.name?.toLowerCase().includes(searchLower) ||
-          company.industry?.toLowerCase().includes(searchLower) ||
           company.address?.toLowerCase().includes(searchLower)
         );
       }
-      
-      if (filters.industry) {
-        filtered = filtered.filter(company => 
-          company.industry?.toLowerCase().includes(filters.industry!.toLowerCase())
-        );
+
+      if (filters.domainId) {
+        filtered = filtered.filter(company => company.domainId === filters.domainId);
       }
-      
+
       if (filters.companySize) {
         filtered = filtered.filter(company => 
           company.companySize?.includes(filters.companySize!)

@@ -1,6 +1,6 @@
 package com.example.bankend_hovan_J2.infrastructure.persistence.company;
 
-import com.example.bankend_hovan_J2.domain.company.entity.CompanyImage;
+import com.example.bankend_hovan_J2.domain.company.CompanyImage;
 import com.example.bankend_hovan_J2.domain.company.repository.CompanyImageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -47,7 +47,6 @@ public class CompanyImageRepositoryImpl implements CompanyImageRepository {
                 .description(entity.getDescription())
                 .displayOrder(entity.getDisplayOrder())
                 .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 
@@ -59,7 +58,6 @@ public class CompanyImageRepositoryImpl implements CompanyImageRepository {
                 .description(domain.getDescription())
                 .displayOrder(domain.getDisplayOrder())
                 .createdAt(domain.getCreatedAt())
-                .updatedAt(domain.getUpdatedAt())
                 .build();
     }
 }

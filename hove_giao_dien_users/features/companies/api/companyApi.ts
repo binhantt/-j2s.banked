@@ -3,7 +3,7 @@ import { api } from '@/lib/api';
 export interface Company {
   id: number;
   name: string;
-  industry?: string;
+  domainId?: number;
   companySize?: string;
   address?: string;
   website?: string;
@@ -22,7 +22,7 @@ export interface Company {
 
 export interface CompanyFilters {
   search?: string;
-  industry?: string;
+  domainId?: number;
   companySize?: string;
   location?: string;
 }

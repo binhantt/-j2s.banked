@@ -5,7 +5,7 @@ export interface Company {
   hrId: number;
   name: string;
   logoUrl?: string;
-  industry?: string;
+  domainId?: number;
   companySize?: string;
   foundedYear?: number;
   website?: string;
@@ -23,10 +23,38 @@ export interface Company {
   updatedAt?: string;
 }
 
+export interface Domain {
+  id: number;
+  name: string;
+  description?: string;
+  isActive: boolean;
+  jobCount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CompanyWithDomain extends Company {
+  domain?: Domain;
+}
+
+export interface CompanyBasicInfo {
+  id: number;
+  name: string;
+  logoUrl?: string;
+  domainId?: number;
+  domain?: Domain;
+}
+
 export const companyApi = {
   // Get all companies
   getAllCompanies: async () => {
     const response = await api.get('/api/companies');
+    return response.data;
+  },
+
+  // Get all companies with domain information
+  getAllCompaniesWithDomain: async (): Promise<CompanyWithDomain[]> => {
+    const response = await api.get('/api/companies/with-domain');
     return response.data;
   },
 
@@ -36,10 +64,50 @@ export const companyApi = {
     return response.data;
   },
 
+  // Get company with domain by ID
+  getCompanyWithDomain: async (id: number): Promise<CompanyWithDomain> => {
+    const response = await api.get(`/api/companies/${id}/with-domain`);
+    return response.data;
+  },
+
   // Get company by HR ID
   getCompanyByHrId: async (hrId: number) => {
     try {
       const response = await api.get(`/api/companies/hr/${hrId}`);
+      return response.data;
+    } catch (error: any) {
+      // If 404, return null instead of throwing - company doesn't exist yet
+      if (error.response?.status === 404) {
+        return null;
+      }
+      throw error;
+    }
+  },
+
+  // Get company with domain by HR ID
+  getCompanyWithDomainByHrId: async (hrId: number): Promise<CompanyWithDomain | null> => {
+    try {
+      const response = await api.get(`/api/companies/hr/${hrId}/with-domain`);
+      return response.data;
+    } catch (error: any) {
+      // If 404, return null instead of throwing - company doesn't exist yet
+      if (error.response?.status === 404) {
+        return null;
+      }
+      throw error;
+    }
+  },
+
+  // Get company basic info (lighter payload)
+  getCompanyBasicInfo: async (id: number): Promise<CompanyBasicInfo> => {
+    const response = await api.get(`/api/companies/${id}/basic-info`);
+    return response.data;
+  },
+
+  // Get company basic info by HR ID
+  getCompanyBasicInfoByHrId: async (hrId: number): Promise<CompanyBasicInfo | null> => {
+    try {
+      const response = await api.get(`/api/companies/hr/${hrId}/basic-info`);
       return response.data;
     } catch (error: any) {
       // If 404, return null instead of throwing - company doesn't exist yet

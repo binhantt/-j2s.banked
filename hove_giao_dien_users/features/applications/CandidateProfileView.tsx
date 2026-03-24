@@ -3,20 +3,26 @@ import { Card, Descriptions, List, Tag, Spin, Empty, Button, message } from 'ant
 import { UserOutlined, PhoneOutlined, EnvironmentOutlined, ToolOutlined, BookOutlined, FileTextOutlined } from '@ant-design/icons';
 import { api } from '@/lib/api';
 import { cvApi } from '@/lib/cvApi';
+import CVAccessButton from '@/components/CVAccessButton';
 
 interface CandidateProfileViewProps {
   userId: number;
   cvUrl?: string;
+  cvId?: number; // Add CV ID prop
 }
 
-export const CandidateProfileView = ({ userId, cvUrl }: CandidateProfileViewProps) => {
+export const CandidateProfileView = ({ userId, cvUrl, cvId }: CandidateProfileViewProps) => {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
-  console.log('CandidateProfileView props:', { userId, cvUrl });
+  console.log('CandidateProfileView props:', { userId, cvUrl, cvId });
 
   useEffect(() => {
     loadProfile();
+    // Get current user from localStorage
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    setCurrentUser(user);
   }, [userId]);
 
   const loadProfile = async () => {
@@ -73,51 +79,63 @@ export const CandidateProfileView = ({ userId, cvUrl }: CandidateProfileViewProp
       {/* CV */}
       {cvUrl && (
         <Card title={<><FileTextOutlined /> CV</>}>
-          <Button
-            type="primary"
-            icon={<FileTextOutlined />}
-            onClick={async () => {
-              try {
-                // Get current user
-                const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                if (!currentUser.id) {
-                  message.error('Vui lòng đăng nhập');
-                  return;
+          {cvId && currentUser?.id ? (
+            <CVAccessButton
+              cvId={cvId}
+              candidateUserId={userId}
+              hrId={currentUser.id}
+              candidateName={profile?.userInfo?.name || `User #${userId}`}
+              buttonText="Xem CV ứng tuyển"
+              type="primary"
+            />
+          ) : (
+            <Button
+              type="primary"
+              icon={<FileTextOutlined />}
+              onClick={async () => {
+                try {
+                  // Get current user
+                  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                  if (!currentUser.id) {
+                    message.error('Vui lòng đăng nhập');
+                    return;
+                  }
+                  
+                  // Find CV ID from cvUrl
+                  const response = await api.get(`/api/user-cvs/user/${userId}`);
+                  const cvs = response.data;
+                  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+                  const cv = cvs.find((c: any) => c.fileUrl === cvUrl || 
+                                                `${baseUrl}${c.fileUrl}` === cvUrl);
+                  
+                  if (!cv) {
+                    message.error('Không tìm thấy CV');
+                    return;
+                  }
+                  
+                  // Check if CV is private and viewer is not owner
+                  if (cv.visibility === 'private') {
+                    message.warning('CV này ở chế độ riêng tư và không thể xem qua link trực tiếp.');
+                    return;
+                  }
+                  
+                  // Generate secure token
+                  const { token } = await cvApi.generateViewToken(cv.id, currentUser.id);
+                  
+                  // Open CV with token (secure, no userId exposed)
+                  // Call backend directly, not through Next.js
+                  const viewUrl = `${baseUrl}/api/cv/view/${token}`;
+                  window.open(viewUrl, '_blank');
+                } catch (error: any) {
+                  console.error('View CV error:', error);
+                  message.error(error.response?.data?.error || 'Không thể xem CV');
                 }
-                
-                // Find CV ID from cvUrl
-                const response = await api.get(`/api/user-cvs/user/${userId}`);
-                const cvs = response.data;
-                const cv = cvs.find((c: any) => c.fileUrl === cvUrl || 
-                                              `http://localhost:8080${c.fileUrl}` === cvUrl);
-                
-                if (!cv) {
-                  message.error('Không tìm thấy CV');
-                  return;
-                }
-                
-                // Check if CV is private and viewer is not owner
-                if (cv.visibility === 'private' && currentUser.id !== userId) {
-                  message.warning('CV này ở chế độ riêng tư. Chỉ chủ nhân mới có thể xem.');
-                  return;
-                }
-                
-                // Generate secure token
-                const { token } = await cvApi.generateViewToken(cv.id, currentUser.id);
-                
-                // Open CV with token (secure, no userId exposed)
-                // Call backend directly, not through Next.js
-                const viewUrl = `http://localhost:8080/api/cv/view/${token}`;
-                window.open(viewUrl, '_blank');
-              } catch (error: any) {
-                console.error('View CV error:', error);
-                message.error(error.response?.data?.error || 'Không thể xem CV');
-              }
-            }}
-            block
-          >
-            Xem CV
-          </Button>
+              }}
+              block
+            >
+              Xem CV (Legacy)
+            </Button>
+          )}
         </Card>
       )}
 

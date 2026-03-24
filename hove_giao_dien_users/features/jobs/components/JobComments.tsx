@@ -89,8 +89,8 @@ export const JobComments = ({ jobId }: JobCommentsProps) => {
       await jobCommentApi.createComment({
         jobPostingId: jobId,
         userId: user.id,
-        userName: user.fullName || user.email,
-        userAvatar: user.avatar,
+        userName: user.name || user.email,
+        userAvatar: user.avatarUrl,
         content: newComment,
       });
       setNewComment('');
@@ -120,8 +120,8 @@ export const JobComments = ({ jobId }: JobCommentsProps) => {
       await jobCommentApi.createComment({
         jobPostingId: jobId,
         userId: user.id,
-        userName: user.fullName || user.email,
-        userAvatar: user.avatar,
+        userName: user.name || user.email,
+        userAvatar: user.avatarUrl,
         content: replyContent,
         parentId,
       });

@@ -9,6 +9,7 @@ import {
   HeartOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
+  MessageOutlined,
 } from '@ant-design/icons';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -23,27 +24,27 @@ export const Navbar = () => {
   const router = useRouter();
   const { isAuthenticated, logout, user } = useAuthStore();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [chatUnreadCount, setChatUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [savedItemsCount, setSavedItemsCount] = useState(0);
 
   useEffect(() => {
     if (isAuthenticated && user?.id) {
-      console.log('User authenticated, loading notifications for userId:', user.id);
       loadUnreadCount();
       loadNotifications();
       loadSavedItemsCount();
-      
-      // Poll for new notifications every 2 minutes (reduced from 30 seconds to avoid rate limit)
+
+      // Poll nhanh hon (5 giay) de phat hien thong bao moi kip thoi
       const interval = setInterval(() => {
         loadUnreadCount();
         loadNotifications();
         loadSavedItemsCount();
-      }, 120000); // 2 minutes
-      
+      }, 5000);
+
       return () => clearInterval(interval);
     } else {
-      console.log('User not authenticated or no userId');
+      setSavedItemsCount(0);
     }
   }, [isAuthenticated, user?.id]);
 
@@ -54,7 +55,7 @@ export const Navbar = () => {
         fetch(`http://localhost:8080/api/saved-companies/user/${user.id}`),
         fetch(`http://localhost:8080/api/saved-jobs/user/${user.id}`)
       ]);
-      
+
       let total = 0;
       if (companiesRes.ok) {
         const companies = await companiesRes.json();
@@ -64,10 +65,9 @@ export const Navbar = () => {
         const jobs = await jobsRes.json();
         total += jobs.length;
       }
-      
+
       setSavedItemsCount(total);
     } catch (error) {
-      console.error('Error loading saved items count:', error);
       setSavedItemsCount(0);
     }
   };
@@ -75,39 +75,22 @@ export const Navbar = () => {
   const loadUnreadCount = async () => {
     if (!user?.id) return;
     try {
-      console.log('Loading unread count for userId:', user.id);
-      const count = await notificationApi.getUnreadCount(user.id);
-      console.log('Unread count:', count);
-      setUnreadCount(count);
-    } catch (error: any) {
-      console.error('Error loading unread count:', error);
-      
-      // If rate limited (429), stop polling temporarily
-      if (error.response?.status === 429) {
-        console.warn('Rate limited - will retry later');
-      }
-      
-      // Silently fail - don't show error to user
+      // Lay tong hop thong bao + tin nhan chua doc cho navbar
+      const navbarData = await notificationApi.getNavbarCount(user.id);
+      setUnreadCount(navbarData.notificationCount);
+      setChatUnreadCount(navbarData.chatCount);
+    } catch {
       setUnreadCount(0);
+      setChatUnreadCount(0);
     }
   };
 
   const loadNotifications = async () => {
     if (!user?.id) return;
     try {
-      console.log('Loading notifications for userId:', user.id);
       const data = await notificationApi.getUnreadNotifications(user.id);
-      console.log('Notifications loaded:', data);
-      setNotifications(data.slice(0, 5)); // Show only 5 most recent
-    } catch (error: any) {
-      console.error('Error loading notifications:', error);
-      
-      // If rate limited (429), stop polling temporarily
-      if (error.response?.status === 429) {
-        console.warn('Rate limited - will retry later');
-      }
-      
-      // Silently fail - don't show error to user
+      setNotifications(data.slice(0, 5));
+    } catch {
       setNotifications([]);
     }
   };
@@ -115,17 +98,20 @@ export const Navbar = () => {
   const handleNotificationClick = async (notification: Notification) => {
     try {
       await notificationApi.markAsRead(notification.id);
+      setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
+      setUnreadCount((prev) => Math.max(0, prev - 1));
       loadUnreadCount();
       loadNotifications();
-      
-      // Navigate based on notification type
+
       if (notification.relatedEntityType === 'job_application') {
         router.push('/applications/my-applications');
+      } else if (notification.type === 'new_message' && notification.relatedEntityType === 'chat_conversation') {
+        router.push('/chat');
       }
-      
+
       setNotificationOpen(false);
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
+    } catch {
+      // silent fail
     }
   };
 
@@ -135,23 +121,23 @@ export const Navbar = () => {
       await notificationApi.markAllAsRead(user.id);
       loadUnreadCount();
       loadNotifications();
-    } catch (error) {
-      console.error('Error marking all as read:', error);
+    } catch {
+      // silent fail
     }
   };
 
   const notificationContent = (
-    <div style={{ width: 350, maxHeight: 400, overflow: 'auto' }}>
-      <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontWeight: 600 }}>Thông báo</span>
+    <div style={{ width: 350, maxHeight: 400, overflow: 'auto', background: '#fff', borderRadius: 14, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+      <div style={{ padding: '14px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontWeight: 700, color: '#0b1220', fontSize: 15 }}>Thông báo</span>
         {unreadCount > 0 && (
-          <Button type="link" size="small" onClick={handleMarkAllAsRead}>
+          <Button type="link" size="small" onClick={handleMarkAllAsRead} style={{ color: '#16a34a', fontSize: 12 }}>
             Đánh dấu đã đọc tất cả
           </Button>
         )}
       </div>
       {notifications.length === 0 ? (
-        <div style={{ padding: 40, textAlign: 'center', color: '#999' }}>
+        <div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>
           Không có thông báo mới
         </div>
       ) : (
@@ -165,20 +151,22 @@ export const Navbar = () => {
               <List.Item.Meta
                 avatar={
                   item.type === 'application_accepted' ? (
-                    <CheckCircleOutlined style={{ fontSize: 24, color: '#52c41a' }} />
+                    <CheckCircleOutlined style={{ fontSize: 24, color: '#16a34a' }} />
                   ) : item.type === 'application_rejected' ? (
-                    <CloseCircleOutlined style={{ fontSize: 24, color: '#ff4d4f' }} />
+                    <CloseCircleOutlined style={{ fontSize: 24, color: '#ef4444' }} />
+                  ) : item.type === 'new_message' ? (
+                    <MessageOutlined style={{ fontSize: 24, color: '#3b82f6' }} />
                   ) : (
-                    <BellOutlined style={{ fontSize: 24, color: '#1890ff' }} />
+                    <BellOutlined style={{ fontSize: 24, color: '#16a34a' }} />
                   )
                 }
-                title={<span style={{ fontWeight: 500 }}>{item.title}</span>}
+                title={<span style={{ fontWeight: 500, color: '#0b1220' }}>{item.title}</span>}
                 description={
                   <div>
-                    <div style={{ fontSize: 13, color: '#666', marginBottom: 4 }}>
+                    <div style={{ fontSize: 13, color: '#64748b', marginBottom: 4 }}>
                       {item.message}
                     </div>
-                    <div style={{ fontSize: 12, color: '#999' }}>
+                    <div style={{ fontSize: 12, color: '#94a3b8' }}>
                       {new Date(item.createdAt).toLocaleString('vi-VN')}
                     </div>
                   </div>
@@ -190,8 +178,12 @@ export const Navbar = () => {
       )}
       {notifications.length > 0 && (
         <div style={{ padding: '12px 16px', borderTop: '1px solid #f0f0f0', textAlign: 'center' }}>
-          <Button type="link" onClick={() => { setNotificationOpen(false); router.push('/applications/my-applications'); }}>
-            Xem tất cả
+          <Button
+            type="link"
+            onClick={() => { setNotificationOpen(false); router.push('/applications/my-applications'); }}
+            style={{ color: '#16a34a', fontSize: 13 }}
+          >
+            Xem tất cả thông báo
           </Button>
         </div>
       )}
@@ -199,18 +191,18 @@ export const Navbar = () => {
   );
 
   const userMenuItems: MenuProps['items'] = [
-    { 
-      key: '1', 
+    {
+      key: '1',
       label: 'Hồ sơ của tôi',
       onClick: () => router.push('/profile')
     },
-    { 
-      key: 'settings', 
+    {
+      key: 'settings',
       label: 'Cài đặt tài khoản',
       onClick: () => router.push('/settings/profile')
     },
-    { 
-      key: '2', 
+    {
+      key: '2',
       label: 'Tạo CV Online',
       icon: <FileTextOutlined />,
       onClick: () => router.push('/cv-builder')
@@ -220,165 +212,214 @@ export const Navbar = () => {
   ];
 
   const mobileMenuItems: MenuProps['items'] = [
-    {
-      key: '/',
-      icon: <HomeOutlined />,
-      label: 'Trang chủ',
-      onClick: () => router.push('/'),
-    },
-    {
-      key: '/jobs',
-      icon: <SearchOutlined />,
-      label: 'Tìm việc làm',
-      onClick: () => router.push('/jobs'),
-    },
-    {
-      key: '/saved',
-      icon: <HeartOutlined />,
-      label: 'Việc đã lưu',
-    },
-    {
-      key: '/blog',
-      icon: <FileTextOutlined />,
-      label: 'Blog',
-      onClick: () => router.push('/blog'),
-    },
+    { key: '/', icon: <HomeOutlined />, label: 'Trang chủ', onClick: () => router.push('/') },
+    { key: '/jobs', icon: <SearchOutlined />, label: 'Tìm việc làm', onClick: () => router.push('/jobs') },
+    { key: '/saved-items', icon: <HeartOutlined />, label: 'Thư mục đã lưu', onClick: () => router.push('/saved-items') },
+    { key: '/blog', icon: <FileTextOutlined />, label: 'Blog', onClick: () => router.push('/blog') },
   ];
 
   return (
-    <Header className="bg-white border-b border-gray-100 flex items-center justify-between fixed w-full z-50 h-16 shadow-sm">
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 via-cyan-500 to-teal-500 rounded-xl flex items-center justify-center shadow-md">
-              <span className="text-white font-bold text-xl">V</span>
-            </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent hidden sm:block">
-              ViệcLàm24h
-            </span>
-          </Link>
-
-          {/* Desktop Menu */}
-          <nav className="hidden lg:flex items-center gap-6">
-            <Link
-              href="/"
-              className={`text-base font-medium transition-colors ${
-                router.pathname === '/'
-                  ? 'text-black'
-                  : 'text-black'
-              }`}
-            >
-              Trang chủ
-            </Link>
-            <Link
-              href="/jobs"
-              className={`text-base font-medium transition-colors ${
-                router.pathname === '/jobs'
-                  ? 'text-black'
-                  : 'text-black'
-              }`}
-            >
-              Tìm việc làm
-            </Link>
-            <Link
-              href="/freelance"
-              className={`text-base font-medium transition-colors ${
-                router.pathname === '/freelance'
-                  ? 'text-black'
-                  : 'text-black'
-              }`}
-            >
-              Freelance
-            </Link>
-            <Link
-              href="/companies"
-              className="text-base font-medium text-black transition-colors"
-            >
-              Công ty
-            </Link>
-            {isAuthenticated && (
-              <Link
-                href="/saved-items"
-                className={`text-base font-medium transition-colors flex items-center gap-1 ${
-                  router.pathname === '/saved-items'
-                    ? 'text-black'
-                    : 'text-black'
-                }`}
-              >
-                Thư mục lưu
-                {savedItemsCount > 0 && (
-                  <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-indigo-600 rounded-full">
-                    {savedItemsCount}
-                  </span>
-                )}
-              </Link>
-            )}
-            <Link
-              href="/blog"
-              className="text-base font-medium text-black transition-colors"
-            >
-              Blog
-            </Link>
-            {isAuthenticated && (
-              <Link
-                href="/chat"
-                className={`text-base font-medium transition-colors ${
-                  router.pathname === '/chat'
-                    ? ''
-                    : 'text-black'
-                }`}
-              >
-                Tin nhắn
-              </Link>
-            )}
-          </nav>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Mobile Menu */}
-          <Dropdown
-            menu={{ items: mobileMenuItems }}
-            placement="bottomRight"
-            className="lg:hidden"
+    <Header
+      style={{
+        background: '#0b1220',
+        borderBottom: '1px solid rgba(22,163,74,0.2)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'fixed',
+        width: '100%',
+        zIndex: 50,
+        height: 72,
+        padding: '0 24px',
+        lineHeight: '72px',
+      }}
+    >
+      <div style={{ maxWidth: 1280, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        {/* Logo */}
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+          <div
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 10,
+              background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+              display: 'grid',
+              placeItems: 'center',
+              boxShadow: '0 4px 12px rgba(22,163,74,0.3)',
+            }}
           >
-            <Button type="text" icon={<MenuOutlined className="text-lg" />} />
-          </Dropdown>
+            <span style={{ color: '#fff', fontWeight: 700, fontSize: 18 }}>V</span>
+          </div>
+          <span style={{
+            fontSize: 22,
+            fontWeight: 700,
+            color: '#f8fafc',
+            display: 'none',
+          }}
+            className="logo-text"
+          >
+            ViệcLàm24h
+          </span>
+        </Link>
 
-          {/* Show Login/Register buttons when NOT authenticated */}
-          {!isAuthenticated ? (
-            <div className="flex items-center gap-2">
+        {/* Desktop Nav */}
+        <nav style={{ display: 'flex', alignItems: 'center', gap: 28 }} className="desktop-nav">
+          {[
+            { href: '/', label: 'Trang chủ' },
+            { href: '/jobs', label: 'Tìm việc làm' },
+            { href: '/freelance', label: 'Freelance' },
+            { href: '/companies', label: 'Công ty' },
+            { href: '/blog', label: 'Blog' },
+          ].map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              style={{
+                color: '#94a3b8',
+                fontWeight: 500,
+                fontSize: 14,
+                textDecoration: 'none',
+                transition: 'color 0.2s',
+              }}
+            >
+              {item.label}
+            </Link>
+          ))}
+          {isAuthenticated && (
+            <Link
+              href="/saved-items"
+              style={{
+                color: '#94a3b8',
+                fontWeight: 500,
+                fontSize: 14,
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+              }}
+            >
+              Thư mục đã lưu
+              {savedItemsCount > 0 && (
+                <span style={{
+                  minWidth: 20,
+                  height: 20,
+                  borderRadius: 10,
+                  background: '#16a34a',
+                  color: '#fff',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0 6px',
+                }}>
+                  {savedItemsCount}
+                </span>
+              )}
+            </Link>
+          )}
+          {isAuthenticated && (
+            <Link
+              href="/chat"
+              style={{
+                color: '#94a3b8',
+                fontWeight: 500,
+                fontSize: 14,
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+              }}
+            >
+              <MessageOutlined style={{ fontSize: 14 }} />
+              Tin nhắn
+              {chatUnreadCount > 0 && (
+                <span style={{
+                  minWidth: 20,
+                  height: 20,
+                  borderRadius: 10,
+                  background: '#ef4444',
+                  color: '#fff',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0 6px',
+                }}>
+                  {chatUnreadCount > 99 ? '99+' : chatUnreadCount}
+                </span>
+              )}
+            </Link>
+          )}
+        </nav>
+
+        {/* Right Section */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {/* Mobile Menu */}
+          <div className="mobile-menu">
+            <Dropdown menu={{ items: mobileMenuItems }} placement="bottomRight">
               <Button
-                type="primary"
-                size="large"
-                className="font-medium"
-                onClick={() => router.push('/login')}
-              >
-                Đăng nhập
-              </Button>
-            </div>
+                type="text"
+                icon={<MenuOutlined style={{ fontSize: 18, color: '#f8fafc' }} />}
+                style={{ width: 40, height: 40 }}
+              />
+            </Dropdown>
+          </div>
+
+          {/* Not authenticated - Login button */}
+          {!isAuthenticated ? (
+            <Button
+              type="primary"
+              size="large"
+              onClick={() => router.push('/login')}
+              style={{
+                height: 40,
+                borderRadius: 10,
+                background: '#16a34a',
+                border: 'none',
+                fontWeight: 600,
+                fontSize: 14,
+                boxShadow: '0 4px 12px rgba(22,163,74,0.3)',
+              }}
+            >
+              Đăng nhập
+            </Button>
           ) : (
-            /* Show Avatar and Notifications when authenticated */
             <>
+              {/* Notifications */}
               <Dropdown
-                dropdownRender={() => <div>{notificationContent}</div>}
+                dropdownRender={() => notificationContent}
                 trigger={['click']}
                 open={notificationOpen}
                 onOpenChange={setNotificationOpen}
               >
-                <Badge count={unreadCount} size="small" className="hidden sm:inline-block">
+                <Badge count={unreadCount} size="small" offset={[-2, 2]}>
                   <Button
                     type="text"
-                    icon={<BellOutlined className="text-lg" />}
-                    className="hover:bg-gray-50 rounded-full w-10 h-10"
+                    icon={<BellOutlined style={{ fontSize: 18, color: '#94a3b8' }} />}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 10,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
                   />
                 </Badge>
               </Dropdown>
 
+              {/* User Avatar */}
               <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
                 <Avatar
                   src={user?.avatarUrl}
                   icon={!user?.avatarUrl && <UserOutlined />}
-                  className="bg-indigo-600 cursor-pointer"
+                  style={{
+                    background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(22,163,74,0.3)',
+                  }}
                   size={40}
                 />
               </Dropdown>
@@ -386,6 +427,19 @@ export const Navbar = () => {
           )}
         </div>
       </div>
+
+      <style>{`
+        @media (min-width: 768px) {
+          .logo-text { display: block !important; }
+        }
+        @media (max-width: 767px) {
+          .desktop-nav { display: none !important; }
+          .mobile-menu { display: flex !important; }
+        }
+        .desktop-nav a:hover {
+          color: #16a34a !important;
+        }
+      `}</style>
     </Header>
   );
 };

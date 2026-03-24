@@ -55,7 +55,7 @@ export const DepositPaymentCard = ({
   return (
     <Card
       style={{
-        background: 'linear-gradient(to right, #2563eb, #0891b2, #14b8a6)',
+        background: 'linear-gradient(to right, #16a34a, #0891b2, #22c55e)',
         border: 'none',
         borderRadius: '16px',
         boxShadow: '0 8px 32px rgba(37, 99, 235, 0.3)'
@@ -134,7 +134,7 @@ export const DepositPaymentCard = ({
                 fontSize: '16px',
                 fontWeight: 600,
                 background: 'white',
-                color: '#2563eb',
+                color: '#16a34a',
                 border: 'none',
                 borderRadius: '12px',
                 marginBottom: 16,

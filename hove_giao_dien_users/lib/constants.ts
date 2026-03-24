@@ -1,62 +1,52 @@
-// Layout constants - Chuẩn từ Navbar
+// Layout constants
 export const LAYOUT = {
-  // Container
   maxWidth: 'max-w-7xl',
   padding: 'px-4 sm:px-6 lg:px-8',
   paddingY: 'py-4',
-  
-  // Navbar
   navbarHeight: 'h-16',
   navbarPaddingTop: 'pt-16',
-  
-  // Spacing
   sectionGap: 'mb-4',
   cardGap: 'gap-4',
-  
-  // Full container class
   container: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8',
   pageWrapper: 'min-h-screen bg-gray-50 pt-16',
 };
 
-// Color constants - Bảng màu đầy đủ cho UI
+// Color constants - Đồng bộ màu xanh lá #16a34a với admin
 export const COLORS = {
-  // 1. Xanh dương/Xanh ngọc (Primary) - 3 sắc độ
-  primary: '#3b82f6',           // Blue - Màu chính
-  primaryLight: '#60a5fa',      // Blue nhạt - Hover
-  primaryDark: '#2563eb',       // Blue đậm
-  
-  secondary: '#06b6d4',         // Cyan - Màu phụ
-  accent: '#14b8a6',            // Teal - Màu nhấn
-  
-  // Gradient 3 màu cho logo, buttons
-  gradient: 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #14b8a6 100%)',
-  
+  // 1. Xanh lá chính (Primary) - Đồng bộ với admin
+  primary: '#16a34a',
+  primaryLight: '#22c55e',
+  primaryDark: '#15803d',
+
+  // Gradient 3 màu xanh lá
+  gradient: 'linear-gradient(135deg, #16a34a 0%, #22c55e 50%, #4ade80 100%)',
+
   // 2. Trắng
-  white: '#FFFFFF',             // Nền chính
-  
+  white: '#FFFFFF',
+
   // 3. Xám rất nhạt
-  grayBg: '#F5F6F7',           // Nền khung chat, list
-  grayBgAlt: '#FAFAFA',        // Nền phụ
-  
+  grayBg: '#F5F6F7',
+  grayBgAlt: '#FAFAFA',
+
   // 4. Xám trung
-  grayText: '#9CA3AF',         // Chữ phụ, timestamp
-  grayTextAlt: '#B0B0B0',      // Chữ phụ nhạt hơn
-  
+  grayText: '#9CA3AF',
+  grayTextAlt: '#B0B0B0',
+
   // 5. Xám đậm/Đen
-  textPrimary: '#1F2937',      // Tiêu đề, text chính
-  textDark: '#333333',         // Text đậm
-  
-  // 6. Xanh lá (Online status)
-  online: '#10b981',           // Chấm "Đang hoạt động"
-  
-  // 7. Xanh dương nhạt (Hover/Active)
-  hoverBg: '#EFF6FF',          // Item đang chọn bên trái
-  activeBg: '#DBEAFE',         // Active state
-  
+  textPrimary: '#1F2937',
+  textDark: '#333333',
+
+  // 6. Xanh lá nhạt (Online status)
+  online: '#16a34a',
+
+  // 7. Xanh lá nhạt (Hover/Active)
+  hoverBg: '#f0fdf4',
+  activeBg: '#dcfce7',
+
   // Tailwind classes tương ứng
-  primaryClass: 'blue-600',
-  secondaryClass: 'cyan-600',
-  accentClass: 'teal-600',
+  primaryClass: 'green-600',
+  secondaryClass: 'green-500',
+  accentClass: 'green-700',
 };
 
 // Typography

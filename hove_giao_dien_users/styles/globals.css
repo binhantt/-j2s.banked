@@ -88,22 +88,22 @@ body {
 }
 
 .ant-message-success .anticon {
-  color: #52c41a !important;
+  color: #16a34a !important;
   font-size: 18px;
 }
 
 .ant-message-error .anticon {
-  color: #ff4d4f !important;
+  color: #ef4444 !important;
   font-size: 18px;
 }
 
 .ant-message-warning .anticon {
-  color: #faad14 !important;
+  color: #f59e0b !important;
   font-size: 18px;
 }
 
 .ant-message-info .anticon {
-  color: #1890ff !important;
+  color: #16a34a !important;
   font-size: 18px;
 }
 
@@ -168,13 +168,106 @@ body {
   background: #ffffff !important;
 }
 
-/* Ưu tiên màu đen cho các link có class text-black (ví dụ navbar) */
-/* Chỉ override màu link trong header (navbar), không ảnh hưởng chỗ khác */
-.ant-layout-header a {
-  color: #000000 !important;
+/* Fix border issues - Remove unwanted borders */
+* {
+  box-sizing: border-box;
 }
 
-.ant-layout-header a:hover,
-.ant-layout-header a:focus {
-  color: #000000 !important;
+/* Complete border reset */
+*,
+*::before,
+*::after {
+  border: none !important;
+}
+
+/* Only add back necessary borders */
+.ant-card {
+  border: 1px solid #f0f0f0 !important;
+  border-radius: 8px !important;
+}
+ant-input,
+.ant-input-affix-wrapper,
+.ant-select-selector,
+.ant-input-number {
+  border: 1px solid #d9d9d9 !important;
+  border-radius: 6px !important;
+}
+.ant-input:focus,
+.ant-input-affix-wrapper:focus,
+.ant-input-affix-wrapper-focused,
+.ant-select-focused .ant-select-selector,
+.ant-input-number:focus {
+  border-color: #16a34a !important;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2) !important;
+}
+
+.ant-btn {
+  border: 1px solid #d9d9d9 !important;
+  border-radius: 6px !important;
+}
+
+/* Màu xanh lá chính cho primary button - đồng bộ với admin */
+.ant-btn-primary {
+  border: none !important;
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%) !important;
+}
+
+.ant-btn-default:hover {
+  border-color: #16a34a !important;
+  color: #16a34a !important;
+}
+
+/* Table borders if needed */
+.ant-table {
+  border: 1px solid #f0f0f0 !important;
+}
+
+.ant-table-tbody > tr > td,
+.ant-table-thead > tr > th {
+  border-bottom: 1px solid #f0f0f0 !important;
+}
+
+/* Modal borders */
+.ant-modal-content {
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Remove any weird outline or focus borders */
+*:focus,
+*:focus-visible {
+  outline: none !important;
+}
+
+/* Chat search input: force remove wrapper border (normal/hover/focus) */
+.chat-search-input.ant-input-affix-wrapper,
+.chat-search-input.ant-input-affix-wrapper:hover,
+.chat-search-input.ant-input-affix-wrapper:focus,
+.chat-search-input.ant-input-affix-wrapper-focused {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.chat-search-input .ant-input,
+.chat-search-input .ant-input:focus {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Fix any layout border issues */
+.ant-layout,
+.ant-layout-content,
+.ant-layout-header,
+.ant-layout-footer {
+  border: none !important;
+}
+
+/* Ẩn thanh cuộn nhưng vẫn cuộn được (chat messages) */
+.chat-messages-scroll::-webkit-scrollbar {
+  display: none !important;
+}
+.chat-messages-scroll {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }

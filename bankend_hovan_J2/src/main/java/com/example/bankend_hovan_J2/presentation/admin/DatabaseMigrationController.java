@@ -13,7 +13,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/admin/migration")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(originPatterns = "http://localhost:3000")
 public class DatabaseMigrationController {
 
     private final JdbcTemplate jdbcTemplate;

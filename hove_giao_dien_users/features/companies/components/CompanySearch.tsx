@@ -1,84 +1,108 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Input, Button, Tag } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
 import { useCompanyStore } from '../store/useCompanyStore';
-
-const INDUSTRIES = [
-  { label: 'Tất cả ngành', value: '' },
-  { label: 'IT/Software', value: 'IT' },
-  { label: 'Tài chính', value: 'Finance' },
-  { label: 'Marketing', value: 'Marketing' },
-  { label: 'Giáo dục', value: 'Education' },
-];
-
-const COMPANY_SIZES = [
-  { label: '1-50', value: '1-50' },
-  { label: '51-200', value: '51-200' },
-  { label: '201-500', value: '201-500' },
-  { label: '500+', value: '500+' },
-];
+import { domainApi, Domain } from '@/lib/domainApi';
 
 export const CompanySearch = () => {
   const { filters, setFilters } = useCompanyStore();
   const [searchInput, setSearchInput] = useState(filters.search || '');
+  const [domains, setDomains] = useState<Domain[]>([]);
+  const [selectedDomainId, setSelectedDomainId] = useState<number | undefined>(filters.domainId);
+
+  useEffect(() => {
+    const loadDomains = async () => {
+      try {
+        const data = await domainApi.getActiveDomains();
+        setDomains(data || []);
+      } catch {
+        setDomains([]);
+      }
+    };
+    loadDomains();
+  }, []);
 
   const handleSearch = () => {
     setFilters({ ...filters, search: searchInput });
   };
 
-  const handleIndustryClick = (industry: string) => {
-    setFilters({ ...filters, industry: industry || undefined });
-  };
-
-  const handleSizeClick = (size: string) => {
-    setFilters({ ...filters, companySize: size });
+  const handleIndustryClick = (domainId?: number) => {
+    setSelectedDomainId(domainId);
+    setFilters({ ...filters, domainId });
   };
 
   return (
     <div>
-      {/* Hero Search Section */}
-      <div 
+      {/* Hero Section — Professional dark header */}
+      <div
         style={{
-          background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
-          padding: '48px 24px',
-          marginBottom: 24,
+          background: 'linear-gradient(135deg, #0b1220 0%, #1e3a5f 100%)',
+          borderRadius: '0 0 24px 24px',
+          padding: '48px 40px 56px',
+          marginBottom: 28,
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
-        <div style={{ maxWidth: 800, margin: '0 auto' }}>
-          <h1 
-            style={{
-              fontSize: 36,
-              fontWeight: 700,
-              color: '#fff',
-              textAlign: 'center',
-              marginBottom: 12,
-            }}
-          >
-            Khám phá các công ty hàng đầu
+        {/* Decorative circles */}
+        <div style={{
+          position: 'absolute', top: 16, right: 24,
+          width: 80, height: 80,
+          display: 'flex', justifyContent: 'center', alignItems: 'center',
+          background: 'rgba(22,163,74,0.12)',
+          borderRadius: '50%',
+        }} />
+        <div style={{
+          position: 'absolute', bottom: 10, right: 60,
+          width: 40, height: 40,
+          background: 'rgba(22,163,74,0.08)',
+          borderRadius: '50%',
+        }} />
+
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          {/* Badge */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            background: 'rgba(22,163,74,0.15)',
+            color: '#4ade80',
+            padding: '4px 14px', borderRadius: 100,
+            fontSize: 12, fontWeight: 600,
+            marginBottom: 16, border: '1px solid rgba(22,163,74,0.25)',
+          }}>
+            <span>🏢</span> Mạng lưới doanh nghiệp
+          </div>
+
+          {/* Heading */}
+          <h1 style={{
+            fontSize: 32, fontWeight: 800,
+            color: '#f8fafc', lineHeight: 1.2, marginBottom: 12,
+          }}>
+            Khám phá các{' '}
+            <span style={{ color: '#4ade80' }}>công ty hàng đầu</span>
           </h1>
-          <p 
-            style={{
-              fontSize: 16,
-              color: '#cbd5e1',
-              textAlign: 'center',
-              marginBottom: 32,
-            }}
-          >
-            Tìm kiếm môi trường làm việc và cơ hội nghề nghiệp phù hợp với bạn nhất với hàng ngàn công ty hàng đầu
+
+          <p style={{
+            fontSize: 15, color: '#94a3b8',
+            marginBottom: 28, maxWidth: 560,
+          }}>
+            Tìm kiếm môi trường làm việc lý tưởng và cơ hội nghề nghiệp phù hợp với bạn từ hàng ngàn doanh nghiệp uy tín.
           </p>
-          
-          <div style={{ display: 'flex', gap: 12 }}>
+
+          {/* Search bar */}
+          <div style={{ display: 'flex', gap: 10, maxWidth: 580 }}>
             <Input
               size="large"
-              placeholder="Tìm tên công ty, lĩ vực, ngành nghề..."
-              prefix={<SearchOutlined style={{ color: '#94a3b8', fontSize: 18 }} />}
+              placeholder="Tìm tên công ty, lĩnh vực hoạt động..."
+              prefix={<SearchOutlined className="text-gray-400" />}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onPressEnter={handleSearch}
               style={{
-                borderRadius: 8,
+                height: 48, borderRadius: 12,
+                border: '1px solid rgba(255,255,255,0.15)',
+                background: 'rgba(255,255,255,0.08)',
+                color: '#fff',
                 fontSize: 15,
-                flex: 1,
               }}
             />
             <Button
@@ -86,13 +110,13 @@ export const CompanySearch = () => {
               size="large"
               onClick={handleSearch}
               style={{
-                borderRadius: 8,
-                background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
-                borderColor: 'transparent',
+                height: 48, borderRadius: 12,
+                background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+                border: 'none',
                 fontWeight: 600,
-                padding: '0 32px',
+                fontSize: 15,
+                paddingLeft: 24, paddingRight: 24,
               }}
-              className="hover:opacity-90"
             >
               Tìm kiếm
             </Button>
@@ -100,68 +124,65 @@ export const CompanySearch = () => {
         </div>
       </div>
 
-      {/* Filters Section */}
-      <div 
+      {/* Industry Filter Bar */}
+      <div
         style={{
           background: '#fff',
-          borderRadius: 12,
-          padding: 20,
+          borderRadius: 16,
+          padding: '16px 20px',
+          marginBottom: 28,
           border: '1px solid #e5e7eb',
-          marginBottom: 24,
+          boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
         }}
       >
-        {/* Industry Tags */}
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 12 }}>
-            NGÀNH NGHỀ
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {INDUSTRIES.map((industry) => (
-              <Tag
-                key={industry.value}
-                onClick={() => handleIndustryClick(industry.value)}
-                style={{
-                  cursor: 'pointer',
-                  padding: '6px 16px',
-                  fontSize: 13,
-                  borderRadius: 20,
-                  border: filters.industry === industry.value ? '2px solid #06b6d4' : '1px solid #e5e7eb',
-                  background: filters.industry === industry.value ? '#cffafe' : '#fff',
-                  color: filters.industry === industry.value ? '#0e7490' : '#64748b',
-                  fontWeight: filters.industry === industry.value ? 600 : 400,
-                }}
-              >
-                {industry.label}
-              </Tag>
-            ))}
-          </div>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          marginBottom: 14,
+        }}>
+          <FilterOutlined style={{ color: '#16a34a', fontSize: 14 }} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>
+            Lọc theo ngành nghề
+          </span>
         </div>
 
-        {/* Company Size Tags */}
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 12 }}>
-            QUY MÔ
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {COMPANY_SIZES.map((size) => (
-              <Tag
-                key={size.value}
-                onClick={() => handleSizeClick(size.value)}
-                style={{
-                  cursor: 'pointer',
-                  padding: '6px 16px',
-                  fontSize: 13,
-                  borderRadius: 20,
-                  border: filters.companySize === size.value ? '2px solid #06b6d4' : '1px solid #e5e7eb',
-                  background: filters.companySize === size.value ? '#cffafe' : '#fff',
-                  color: filters.companySize === size.value ? '#0e7490' : '#64748b',
-                  fontWeight: filters.companySize === size.value ? 600 : 400,
-                }}
-              >
-                {size.label}
-              </Tag>
-            ))}
-          </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <Tag
+            onClick={() => handleIndustryClick(undefined)}
+            style={{
+              cursor: 'pointer',
+              borderRadius: 100,
+              border: selectedDomainId === undefined ? 'none' : '1px solid #e5e7eb',
+              background: selectedDomainId === undefined ? 'linear-gradient(135deg, #16a34a, #22c55e)' : '#f9fafb',
+              color: selectedDomainId === undefined ? '#fff' : '#6b7280',
+              fontWeight: selectedDomainId === undefined ? 600 : 500,
+              fontSize: 13,
+              padding: '4px 14px',
+              transition: 'all 0.2s',
+            }}
+          >
+            Tất cả ngành
+          </Tag>
+          {domains.map((domain) => (
+            <Tag
+              key={domain.id}
+              onClick={() => handleIndustryClick(domain.id)}
+              style={{
+                cursor: 'pointer',
+                borderRadius: 100,
+                border: selectedDomainId === domain.id ? 'none' : '1px solid #e5e7eb',
+                background: selectedDomainId === domain.id
+                  ? 'linear-gradient(135deg, #16a34a, #22c55e)'
+                  : '#f9fafb',
+                color: selectedDomainId === domain.id ? '#fff' : '#6b7280',
+                fontWeight: selectedDomainId === domain.id ? 600 : 500,
+                fontSize: 13,
+                padding: '4px 14px',
+                transition: 'all 0.2s',
+              }}
+            >
+              {domain.name}
+            </Tag>
+          ))}
         </div>
       </div>
     </div>

@@ -16,6 +16,8 @@ function ChatListPageContent() {
   }, [user?.id]);
 
   const loadAndRedirect = async () => {
+    if (!user?.id) return;
+    
     try {
       let data;
       if (user?.userType === 'hr') {

@@ -22,10 +22,10 @@ public class JobPostingEntityJpa {
     private String location;
     
     @Column(name = "salary_min")
-    private String salaryMin;
+    private Long salaryMin;
     
     @Column(name = "salary_max")
-    private String salaryMax;
+    private Long salaryMax;
     
     @Column(name = "job_type")
     private String jobType;
@@ -116,19 +116,19 @@ public class JobPostingEntityJpa {
         this.location = location;
     }
 
-    public String getSalaryMin() {
+    public Long getSalaryMin() {
         return salaryMin;
     }
 
-    public void setSalaryMin(String salaryMin) {
+    public void setSalaryMin(Long salaryMin) {
         this.salaryMin = salaryMin;
     }
 
-    public String getSalaryMax() {
+    public Long getSalaryMax() {
         return salaryMax;
     }
 
-    public void setSalaryMax(String salaryMax) {
+    public void setSalaryMax(Long salaryMax) {
         this.salaryMax = salaryMax;
     }
 

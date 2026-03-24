@@ -50,9 +50,9 @@ export const useBlogStore = create<BlogState>((set) => ({
 
   closeDetail: () => set({ detailVisible: false }),
 
-  removePostById: (id: string) =>
+  removePostById: (id: string | number) =>
     set((state) => ({
-      posts: state.posts.filter((post) => post.id !== id),
+      posts: state.posts.filter((post) => String(post.id) !== String(id)),
     })),
 }));
 

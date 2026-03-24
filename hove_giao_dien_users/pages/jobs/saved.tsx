@@ -1,10 +1,12 @@
-import SavedJobsPage from '@/features/jobs/SavedJobsPage';
-import { MainLayout } from '@/components/layout/MainLayout';
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
 
-export default function SavedJobsPageWithLayout() {
-  return (
-    <MainLayout>
-      <SavedJobsPage />
-    </MainLayout>
-  );
+export default function SavedJobsRedirect() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace('/saved-items');
+  }, [router]);
+
+  return null;
 }

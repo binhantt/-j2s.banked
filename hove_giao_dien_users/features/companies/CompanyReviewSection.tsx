@@ -82,7 +82,7 @@ export const CompanyReviewSection = ({ companyId }: CompanyReviewSectionProps) =
         userId: user.id,
         rating,
         comment: comment.trim(),
-        userName: user.fullName || user.email,
+        userName: user.name || user.email,
       };
 
       await companyReviewApi.createOrUpdateReview(reviewData);

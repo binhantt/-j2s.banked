@@ -1,26 +1,28 @@
 import { useState, useEffect } from 'react';
-import { Card, Row, Col, Tag, Empty, Spin, Input } from 'antd';
-import { EyeOutlined, CalendarOutlined, UserOutlined } from '@ant-design/icons';
+import { Card, Row, Col, Tag, Empty, Spin, Input, Tabs, Avatar } from 'antd';
+import { EyeOutlined, CalendarOutlined, UserOutlined, GlobalOutlined, BankOutlined } from '@ant-design/icons';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { companyBlogApi, CompanyBlog } from '@/lib/companyBlogApi';
+import { blogApi, PlatformBlog } from '@/lib/blogApi';
 import { useRouter } from 'next/router';
 
 const { Search } = Input;
 
 export default function BlogsPage() {
-  const [blogs, setBlogs] = useState<CompanyBlog[]>([]);
-  const [filteredBlogs, setFilteredBlogs] = useState<CompanyBlog[]>([]);
+  const [blogs, setBlogs] = useState<PlatformBlog[]>([]);
+  const [filteredBlogs, setFilteredBlogs] = useState<PlatformBlog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'all' | 'platform' | 'company'>('all');
   const router = useRouter();
 
   useEffect(() => {
     loadBlogs();
-  }, []);
+  }, [activeTab]);
 
   const loadBlogs = async () => {
     setLoading(true);
     try {
-      const data = await companyBlogApi.getBlogsByStatus('published');
+      const source = activeTab === 'all' ? undefined : activeTab;
+      const data = await blogApi.getAllBlogs(source);
       setBlogs(data);
       setFilteredBlogs(data);
     } catch (error) {
@@ -37,13 +39,14 @@ export default function BlogsPage() {
     }
     const filtered = blogs.filter(blog =>
       blog.title.toLowerCase().includes(value.toLowerCase()) ||
-      blog.content.toLowerCase().includes(value.toLowerCase())
+      blog.content.toLowerCase().includes(value.toLowerCase()) ||
+      (blog.excerpt && blog.excerpt.toLowerCase().includes(value.toLowerCase()))
     );
     setFilteredBlogs(filtered);
   };
 
-  const handleBlogClick = (id: number) => {
-    router.push(`/blogs/${id}`);
+  const handleBlogClick = (id: string) => {
+    router.push(`/blog/${id}`);
   };
 
   if (loading) {
@@ -61,8 +64,40 @@ export default function BlogsPage() {
       <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ marginBottom: '32px' }}>
           <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '16px' }}>
-            Blog Công ty
+            Blog & Tin tức
           </h1>
+          <p style={{ color: '#6b7280', marginBottom: '24px' }}>
+            Khám phá kiến thức và tin tức mới nhất từ nền tảng và các công ty
+          </p>
+
+          <Tabs
+            activeKey={activeTab}
+            onChange={(key) => setActiveTab(key as 'all' | 'platform' | 'company')}
+            items={[
+              {
+                key: 'all',
+                label: 'Tất cả',
+              },
+              {
+                key: 'platform',
+                label: (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <GlobalOutlined /> Blog nền tảng
+                  </span>
+                ),
+              },
+              {
+                key: 'company',
+                label: (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <BankOutlined /> Blog công ty
+                  </span>
+                ),
+              },
+            ]}
+            style={{ marginBottom: '24px' }}
+          />
+
           <Search
             placeholder="Tìm kiếm blog..."
             onSearch={handleSearch}
@@ -81,17 +116,36 @@ export default function BlogsPage() {
                 <Card
                   hoverable
                   cover={
-                    blog.imageUrl ? (
-                      <img
-                        alt={blog.title}
-                        src={blog.imageUrl}
-                        style={{ height: '200px', objectFit: 'cover' }}
-                      />
+                    blog.image ? (
+                      <div style={{ position: 'relative' }}>
+                        <img
+                          alt={blog.title}
+                          src={blog.image}
+                          style={{ height: '200px', objectFit: 'cover', width: '100%' }}
+                          onError={(e) => {
+                            e.currentTarget.src = 'https://via.placeholder.com/400x200/e5e7eb/64748b?text=Blog';
+                          }}
+                        />
+                        <Tag
+                          color={blog.source === 'platform' ? 'cyan' : 'green'}
+                          style={{
+                            position: 'absolute',
+                            top: 12,
+                            right: 12,
+                            borderRadius: 12,
+                          }}
+                          icon={blog.source === 'platform' ? <GlobalOutlined /> : <BankOutlined />}
+                        >
+                          {blog.source === 'platform' ? 'Nền tảng' : 'Công ty'}
+                        </Tag>
+                      </div>
                     ) : (
                       <div
                         style={{
                           height: '200px',
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          background: blog.source === 'platform'
+                            ? 'linear-gradient(135deg, #16a34a 0%, #16a34a 100%)'
+                            : 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -99,21 +153,29 @@ export default function BlogsPage() {
                           fontSize: '48px',
                         }}
                       >
-                        📝
+                        {blog.source === 'platform' ? '📝' : '🏢'}
                       </div>
                     )
                   }
-                  onClick={() => handleBlogClick(blog.id!)}
+                  onClick={() => handleBlogClick(blog.id)}
                 >
+                  <div style={{ marginBottom: '12px' }}>
+                    <Tag color={blog.source === 'platform' ? 'cyan' : 'green'}>
+                      {blog.category}
+                    </Tag>
+                  </div>
+
                   <Card.Meta
                     title={
-                      <div style={{ 
+                      <div style={{
                         fontSize: '18px',
                         fontWeight: 'bold',
                         marginBottom: '8px',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
                       }}>
                         {blog.title}
                       </div>
@@ -129,24 +191,34 @@ export default function BlogsPage() {
                           WebkitLineClamp: 3,
                           WebkitBoxOrient: 'vertical',
                         }}>
-                          {blog.content}
+                          {blog.excerpt || blog.content}
                         </p>
-                        <div style={{ 
+                        <div style={{
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                          fontSize: '12px',
-                          color: '#9ca3af'
+                          paddingTop: '12px',
+                          borderTop: '1px solid #f3f4f6',
                         }}>
-                          <span>
-                            <UserOutlined /> {blog.authorName}
-                          </span>
-                          <span>
-                            <EyeOutlined /> {blog.views || 0}
-                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Avatar
+                              size="small"
+                              src={blog.authorAvatar}
+                              icon={<UserOutlined />}
+                              style={{ background: blog.source === 'platform' ? '#16a34a' : '#f59e0b' }}
+                            />
+                            <span style={{ fontSize: '13px', color: '#6b7280' }}>
+                              {blog.author}
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', gap: 12, fontSize: '12px', color: '#9ca3af' }}>
+                            <span>
+                              <EyeOutlined /> {blog.views || 0}
+                            </span>
+                          </div>
                         </div>
                         <div style={{ marginTop: '8px', fontSize: '12px', color: '#9ca3af' }}>
-                          <CalendarOutlined /> {new Date(blog.createdAt!).toLocaleDateString('vi-VN')}
+                          <CalendarOutlined /> {blog.date}
                         </div>
                       </div>
                     }

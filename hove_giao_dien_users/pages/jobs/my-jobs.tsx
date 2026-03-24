@@ -42,6 +42,16 @@ export default function MyJobsPage() {
     }
   };
 
+  const handleToggleStatus = async (id: number, currentStatus: string) => {
+    try {
+      await jobApi.toggleStatus(id);
+      message.success(currentStatus === 'active' ? 'Đã dừng tuyển dụng' : 'Đã mở lại tuyển dụng');
+      loadJobs();
+    } catch (error) {
+      message.error('Không thể cập nhật trạng thái tuyển dụng');
+    }
+  };
+
   const columns = [
     {
       title: 'Tiêu đề',
@@ -67,6 +77,11 @@ export default function MyJobsPage() {
       title: 'Ứng tuyển',
       dataIndex: 'applications',
       key: 'applications',
+      render: (applications: number) => (
+        <span style={{ fontWeight: 'bold', color: applications > 0 ? '#1890ff' : '#999' }}>
+          {applications || 0} ứng viên
+        </span>
+      ),
     },
     {
       title: 'Thao tác',
@@ -78,7 +93,15 @@ export default function MyJobsPage() {
             icon={<EyeOutlined />}
             onClick={() => router.push(`/jobs/${record.id}`)}
           >
-            Xem
+            Xem tin
+          </Button>
+          <Button
+            type="primary"
+            size="small"
+            onClick={() => router.push(`/applications/job/${record.id}`)}
+            disabled={!record.applications || record.applications === 0}
+          >
+            Xem ứng viên ({record.applications || 0})
           </Button>
           <Button
             type="link"
@@ -87,6 +110,14 @@ export default function MyJobsPage() {
           >
             Sửa
           </Button>
+          <Popconfirm
+            title={record.status === 'active' ? 'Dừng tuyển dụng tin này?' : 'Mở lại tuyển dụng tin này?'}
+            onConfirm={() => handleToggleStatus(record.id, record.status)}
+          >
+            <Button type="link" style={{ color: record.status === 'active' ? '#fa8c16' : '#52c41a' }}>
+              {record.status === 'active' ? 'Dừng tuyển dụng' : 'Mở lại tuyển'}
+            </Button>
+          </Popconfirm>
           <Popconfirm
             title="Bạn có chắc muốn xóa?"
             onConfirm={() => handleDelete(record.id)}

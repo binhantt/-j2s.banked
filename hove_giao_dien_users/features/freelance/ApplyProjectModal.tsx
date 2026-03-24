@@ -311,7 +311,7 @@ export const ApplyProjectModal = ({
               disabled={!hasCertificate}
               style={{
                 background: hasCertificate 
-                  ? 'linear-gradient(to right, #2563eb, #0891b2, #14b8a6)'
+                  ? 'linear-gradient(to right, #16a34a, #0891b2, #22c55e)'
                   : undefined,
                 border: 'none',
               }}

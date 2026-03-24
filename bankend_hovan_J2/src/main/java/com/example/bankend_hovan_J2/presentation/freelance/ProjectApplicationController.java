@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/freelance/applications")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(originPatterns = "http://localhost:3000")
 public class ProjectApplicationController {
     private final ProjectApplicationRepository applicationRepository;
     private final FreelanceProjectRepository projectRepository;

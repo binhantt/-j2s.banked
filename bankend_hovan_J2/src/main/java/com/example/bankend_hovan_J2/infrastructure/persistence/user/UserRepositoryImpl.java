@@ -48,9 +48,21 @@ public class UserRepositoryImpl implements UserRepository {
         entity.setProvider(user.getProvider());
         entity.setProviderId(user.getProviderId());
         entity.setUserType(user.getUserType());
+        entity.setCurrentPosition(user.getCurrentPosition());
+        entity.setHometown(user.getHometown());
+        entity.setCurrentLocation(user.getCurrentLocation());
+        entity.setCurrentLatitude(user.getCurrentLatitude());
+        entity.setCurrentLongitude(user.getCurrentLongitude());
+        entity.setLocationUpdatedAt(user.getLocationUpdatedAt());
+        entity.setCvUrl(user.getCvUrl());
+        entity.setCertificateImages(user.getCertificateImages());
+        entity.setPhone(user.getPhone());
+        entity.setBio(user.getBio());
+        entity.setDomainId(user.getDomainId());
         entity.setCreatedAt(user.getCreatedAt());
         entity.setUpdatedAt(user.getUpdatedAt());
         entity.setEncryptedPassword(user.getEncryptedPassword());
+        entity.setIsActive(user.getIsActive());
         return entity;
     }
 
@@ -64,9 +76,21 @@ public class UserRepositoryImpl implements UserRepository {
         );
         user.setId(entity.getId());
         user.setAvatarUrl(entity.getAvatarUrl());
+        user.setCurrentPosition(entity.getCurrentPosition());
+        user.setHometown(entity.getHometown());
+        user.setCurrentLocation(entity.getCurrentLocation());
+        user.setCurrentLatitude(entity.getCurrentLatitude());
+        user.setCurrentLongitude(entity.getCurrentLongitude());
+        user.setLocationUpdatedAt(entity.getLocationUpdatedAt());
+        user.setCvUrl(entity.getCvUrl());
+        user.setCertificateImages(entity.getCertificateImages());
+        user.setPhone(entity.getPhone());
+        user.setBio(entity.getBio());
+        user.setDomainId(entity.getDomainId());
         user.setCreatedAt(entity.getCreatedAt());
         user.setUpdatedAt(entity.getUpdatedAt());
         user.setEncryptedPassword(entity.getEncryptedPassword());
+        user.setIsActive(entity.getIsActive());
         return user;
     }
 }

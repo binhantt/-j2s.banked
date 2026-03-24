@@ -71,7 +71,13 @@ public class AuthController {
             AuthResponseDTO response = passwordLoginUseCase.execute(request.getEmail(), request.getPassword());
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(401).body(java.util.Map.of("message", e.getMessage()));
+            String message = e.getMessage();
+            // Tài khoản bị khóa → trả 403 để frontend nhận biết riêng
+            if (message != null && message.contains("bị khóa")) {
+                return ResponseEntity.status(403)
+                    .body(java.util.Map.of("banned", true, "message", message));
+            }
+            return ResponseEntity.status(401).body(java.util.Map.of("message", message));
         }
     }
 
@@ -88,6 +94,15 @@ public class AuthController {
 
             com.example.bankend_hovan_J2.domain.user.entity.User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // Check if account is active (skip check for admin users)
+            boolean isAdmin = "admin".equalsIgnoreCase(user.getUserType()) || 
+                             "super_admin".equalsIgnoreCase(user.getUserType());
+            
+            if (!isAdmin && user.getIsActive() != null && !user.getIsActive()) {
+                return ResponseEntity.status(403)
+                    .body(new AuthResponseDTO(null, null, null, null, null, null, null));
+            }
 
             String newAccessToken = jwtProvider.generateAccessToken(
                     user.getId(),

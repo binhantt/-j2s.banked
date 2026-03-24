@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Button, Card, Modal, Space, Table, Tag, Typography, message } from 'antd';
+import { Button, Card, Modal, Space, Table, Tag, Typography, App } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { EyeOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { BlogPostSummary } from '../types/blogTypes';
@@ -10,12 +10,13 @@ const { Title, Text, Paragraph } = Typography;
 export function BlogManagementPage() {
   const { posts, loading, error, detail, detailVisible, loadPosts, loadDetail, closeDetail, removePostById } =
     useBlogStore();
+  const { message } = App.useApp();
 
   useEffect(() => {
     void loadPosts().catch(() => {
       message.error('Không tải được danh sách blog');
     });
-  }, [loadPosts]);
+  }, [loadPosts, message]);
 
   useEffect(() => {
     if (error) {
@@ -95,14 +96,14 @@ export function BlogManagementPage() {
       width: 170,
       render: (_, record) => (
         <Space>
-          <Button size="small" icon={<EyeOutlined />} onClick={() => void handleViewDetail(record.id)}>
+          <Button size="small" icon={<EyeOutlined />} onClick={() => void handleViewDetail(String(record.id))}>
             Xem
           </Button>
           <Button
             size="small"
             danger
             icon={<DeleteOutlined />}
-            onClick={() => void handleDelete(record.id)}
+            onClick={() => void handleDelete(String(record.id))}
           >
             Xóa
           </Button>
@@ -143,7 +144,7 @@ export function BlogManagementPage() {
         onCancel={closeDetail}
         footer={null}
         width={900}
-        bodyStyle={{ maxHeight: '70vh', overflowY: 'auto' }}
+        styles={{ body: { maxHeight: '70vh', overflowY: 'auto' } }}
       >
         {detail && (
           <Space direction="vertical" style={{ width: '100%' }} size="middle">

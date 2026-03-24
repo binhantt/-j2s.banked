@@ -25,6 +25,14 @@ public class PasswordLoginUseCase {
         User user = userRepository.findByEmail(new Email(email))
                 .orElseThrow(() -> new RuntimeException("Email hoặc mật khẩu không đúng"));
 
+        // Check if account is active (skip check for admin users)
+        boolean isAdmin = "admin".equalsIgnoreCase(user.getUserType()) || 
+                         "super_admin".equalsIgnoreCase(user.getUserType());
+        
+        if (!isAdmin && user.getIsActive() != null && !user.getIsActive()) {
+            throw new RuntimeException("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.");
+        }
+
         if (user.getEncryptedPassword() == null || user.getEncryptedPassword().isBlank()) {
             throw new RuntimeException("Tài khoản chưa được thiết lập mật khẩu");
         }

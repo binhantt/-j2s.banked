@@ -8,8 +8,8 @@ public class JobPosting {
     private Long userId; // HR user who posted
     private String title;
     private String location;
-    private String salaryMin;
-    private String salaryMax;
+    private Long salaryMin;
+    private Long salaryMax;
     private String jobType; // full-time, part-time, contract, internship
     private String level; // junior, mid, senior, lead
     private String experience; // 0-1, 1-3, 3-5, 5+
@@ -19,6 +19,8 @@ public class JobPosting {
     private LocalDate deadline;
     private String status; // active, inactive, closed
     private Integer applications;
+    private Integer maxApplicants; // NULL = không giới hạn
+    private Integer interviewRounds; // Số vòng phỏng vấn
     private Integer views;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -26,7 +28,7 @@ public class JobPosting {
     public JobPosting() {
     }
 
-    public JobPosting(Long userId, String title, String location, String salaryMin, String salaryMax,
+    public JobPosting(Long userId, String title, String location, Long salaryMin, Long salaryMax,
                      String jobType, String level, String experience, String description,
                      String requirements, String benefits, LocalDate deadline) {
         this.userId = userId;
@@ -81,19 +83,19 @@ public class JobPosting {
         this.location = location;
     }
 
-    public String getSalaryMin() {
+    public Long getSalaryMin() {
         return salaryMin;
     }
 
-    public void setSalaryMin(String salaryMin) {
+    public void setSalaryMin(Long salaryMin) {
         this.salaryMin = salaryMin;
     }
 
-    public String getSalaryMax() {
+    public Long getSalaryMax() {
         return salaryMax;
     }
 
-    public void setSalaryMax(String salaryMax) {
+    public void setSalaryMax(Long salaryMax) {
         this.salaryMax = salaryMax;
     }
 
@@ -167,6 +169,22 @@ public class JobPosting {
 
     public void setApplications(Integer applications) {
         this.applications = applications;
+    }
+
+    public Integer getMaxApplicants() {
+        return maxApplicants;
+    }
+
+    public void setMaxApplicants(Integer maxApplicants) {
+        this.maxApplicants = maxApplicants;
+    }
+
+    public Integer getInterviewRounds() {
+        return interviewRounds;
+    }
+
+    public void setInterviewRounds(Integer interviewRounds) {
+        this.interviewRounds = interviewRounds;
     }
 
     public Integer getViews() {

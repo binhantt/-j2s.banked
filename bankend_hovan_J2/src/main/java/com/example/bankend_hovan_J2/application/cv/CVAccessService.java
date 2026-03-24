@@ -30,10 +30,15 @@ public class CVAccessService {
         UserCV cv = cvRepository.findById(cvId)
                 .orElseThrow(() -> new RuntimeException("CV not found"));
         
-        // Check permission
+        // Check if CV is private - KHÔNG AI có thể tạo token, kể cả chủ nhân
+        if ("private".equals(cv.getVisibility())) {
+            throw new RuntimeException("Access denied: Private CV cannot be accessed via token link");
+        }
+        
+        // Check permission for non-private CVs
         String viewerType;
         if (cv.getUserId().equals(viewerId)) {
-            // Owner viewing own CV
+            // Owner viewing own CV (only for non-private CVs)
             viewerType = "owner";
         } else {
             // Check if HR has permission
@@ -65,7 +70,7 @@ public class CVAccessService {
     }
     
     private boolean canHRViewCV(Long hrId, Long candidateUserId, String visibility) {
-        // Private CV - HR cannot view
+        // Private CV - KHÔNG AI có thể xem qua link, kể cả chủ nhân
         if ("private".equals(visibility)) {
             return false;
         }

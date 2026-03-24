@@ -3,7 +3,9 @@ import {
   Avatar,
   Button,
   Card,
+  Form,
   Input,
+  Modal,
   Popconfirm,
   Segmented,
   Select,
@@ -14,7 +16,15 @@ import {
   Typography,
   message,
 } from 'antd';
-import { SearchOutlined, ReloadOutlined, UserOutlined, LockOutlined, UnlockOutlined } from '@ant-design/icons';
+import {
+  SearchOutlined,
+  ReloadOutlined,
+  UserOutlined,
+  LockOutlined,
+  UnlockOutlined,
+  PlusOutlined,
+  EditOutlined,
+} from '@ant-design/icons';
 
 const { Title, Text } = Typography;
 
@@ -41,26 +51,28 @@ const roleColor: Record<AccountRole, string> = {
   support: 'blue',
 };
 
-const userRoleOptions = [
-  { value: 'all', label: 'Tất cả vai trò User' },
-  { value: 'job_seeker', label: roleLabel.job_seeker },
-  { value: 'freelancer', label: roleLabel.freelancer },
-  { value: 'hr', label: roleLabel.hr },
-  { value: 'admin', label: roleLabel.admin },
-];
-
-const backendRoleOptions = [
-  { value: 'all', label: 'Tất cả vai trò Backend' },
-  { value: 'super_admin', label: roleLabel.super_admin },
-  { value: 'moderator', label: roleLabel.moderator },
-  { value: 'support', label: roleLabel.support },
-];
-
 export function UserManagementPage() {
   const [search, setSearch] = useState('');
   const [groupFilter, setGroupFilter] = useState<AccountGroup>('user');
   const [roleFilter, setRoleFilter] = useState<'all' | AccountRole>('all');
-  const { users, loading, error, fetchUsers, setUserActive } = useUsersStore();
+  const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [roleModalVisible, setRoleModalVisible] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserAdminRow | null>(null);
+  const [createForm] = Form.useForm();
+  const [editForm] = Form.useForm();
+  const [roleForm] = Form.useForm();
+
+  const {
+    users,
+    loading,
+    error,
+    fetchUsers,
+    setUserActive,
+    createBackendUser,
+    updateUserRole,
+    updateUserCredentials,
+  } = useUsersStore();
 
   useEffect(() => {
     void fetchUsers().catch(() => {
@@ -96,19 +108,91 @@ export function UserManagementPage() {
     };
   }, [users]);
 
-  const toggleActive = (id: number, checked: boolean) => {
-    setUserActive(id, checked);
-    message.success(checked ? 'Đã mở tài khoản' : 'Đã khóa tài khoản');
+  const toggleActive = async (id: number, checked: boolean) => {
+    try {
+      await setUserActive(id, checked);
+      message.success(checked ? 'Đã mở tài khoản' : 'Đã khóa tài khoản');
+    } catch {
+      message.error('Không thể thay đổi trạng thái');
+    }
   };
 
-  const resetPassword = (record: UserAdminRow) => {
-    message.success(`Đã gửi yêu cầu đặt lại mật khẩu cho ${record.email}`);
+  const handleCreateUser = async () => {
+    try {
+      const values = await createForm.validateFields();
+      await createBackendUser(values);
+      message.success('Tạo tài khoản thành công');
+      createForm.resetFields();
+      setCreateModalVisible(false);
+    } catch {
+      message.error('Không thể tạo tài khoản');
+    }
+  };
+
+  const handleEditCredentials = async () => {
+    if (!selectedUser) return;
+    try {
+      const values = await editForm.validateFields();
+      await updateUserCredentials(selectedUser.id, values);
+      message.success('Cập nhật thông tin thành công');
+      editForm.resetFields();
+      setEditModalVisible(false);
+    } catch {
+      message.error('Không thể cập nhật thông tin');
+    }
+  };
+
+  const handleUpdateRole = async () => {
+    if (!selectedUser) return;
+    try {
+      const values = await roleForm.validateFields();
+      await updateUserRole(selectedUser.id, values.role);
+      message.success('Cập nhật vai trò thành công');
+      roleForm.resetFields();
+      setRoleModalVisible(false);
+    } catch {
+      message.error('Không thể cập nhật vai trò');
+    }
+  };
+
+  const openEditModal = (record: UserAdminRow) => {
+    setSelectedUser(record);
+    editForm.setFieldsValue({ email: record.email });
+    setEditModalVisible(true);
+  };
+
+  const openRoleModal = (record: UserAdminRow) => {
+    setSelectedUser(record);
+    roleForm.setFieldsValue({ role: record.role });
+    setRoleModalVisible(true);
   };
 
   const handleGroupChange = (value: string | number) => {
     setGroupFilter(value as AccountGroup);
     setRoleFilter('all');
   };
+
+  const userRoleOptions = [
+    { value: 'all', label: 'Tất cả vai trò User' },
+    { value: 'job_seeker', label: roleLabel.job_seeker },
+    { value: 'freelancer', label: roleLabel.freelancer },
+    { value: 'hr', label: roleLabel.hr },
+  ];
+
+  const backendRoleOptions = [
+    { value: 'all', label: 'Tất cả vai trò Backend' },
+    { value: 'admin', label: roleLabel.admin },
+    { value: 'super_admin', label: roleLabel.super_admin },
+    { value: 'moderator', label: roleLabel.moderator },
+    { value: 'support', label: roleLabel.support },
+  ];
+
+  const backendRoleCreateOptions = [
+    { value: 'admin', label: roleLabel.admin },
+    { value: 'super_admin', label: roleLabel.super_admin },
+    { value: 'moderator', label: roleLabel.moderator },
+    { value: 'support', label: roleLabel.support },
+  ];
 
   return (
     <div>
@@ -147,9 +231,21 @@ export function UserManagementPage() {
               options={groupFilter === 'user' ? userRoleOptions : backendRoleOptions}
             />
           </Space>
-          <Button icon={<ReloadOutlined />} onClick={() => void fetchUsers()}>
-            Làm mới
-          </Button>
+          <Space>
+            {groupFilter === 'backend' && (
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => setCreateModalVisible(true)}
+                style={{ background: '#16a34a' }}
+              >
+                Tạo tài khoản Backend
+              </Button>
+            )}
+            <Button icon={<ReloadOutlined />} onClick={() => void fetchUsers()}>
+              Làm mới
+            </Button>
+          </Space>
         </Space>
       </Card>
 
@@ -157,19 +253,27 @@ export function UserManagementPage() {
         <Space size={32} wrap>
           <div>
             <Text type="secondary">Tổng tài khoản User</Text>
-            <Title level={4} style={{ margin: 0 }}>{stats.userTotal}</Title>
+            <Title level={4} style={{ margin: 0 }}>
+              {stats.userTotal}
+            </Title>
           </div>
           <div>
             <Text type="secondary">User đang hoạt động</Text>
-            <Title level={4} style={{ margin: 0, color: '#16a34a' }}>{stats.userActive}</Title>
+            <Title level={4} style={{ margin: 0, color: '#16a34a' }}>
+              {stats.userActive}
+            </Title>
           </div>
           <div>
             <Text type="secondary">Tổng tài khoản Backend</Text>
-            <Title level={4} style={{ margin: 0 }}>{stats.backendTotal}</Title>
+            <Title level={4} style={{ margin: 0 }}>
+              {stats.backendTotal}
+            </Title>
           </div>
           <div>
             <Text type="secondary">Backend đang hoạt động</Text>
-            <Title level={4} style={{ margin: 0, color: '#16a34a' }}>{stats.backendActive}</Title>
+            <Title level={4} style={{ margin: 0, color: '#16a34a' }}>
+              {stats.backendActive}
+            </Title>
           </div>
         </Space>
       </Card>
@@ -180,20 +284,24 @@ export function UserManagementPage() {
           dataSource={filteredUsers}
           loading={loading}
           pagination={{
-            pageSize: 3,
-            showSizeChanger: false,
+            pageSize: 10,
+            showSizeChanger: true,
+            showTotal: (total) => `Tổng ${total} tài khoản`,
           }}
           columns={[
             { title: 'ID', dataIndex: 'id', key: 'id', width: 70 },
             {
               title: 'Tài khoản',
               key: 'user',
+              width: 300,
               render: (_: unknown, record: UserAdminRow) => (
                 <Space>
                   <Avatar icon={<UserOutlined />} style={{ background: '#16a34a' }} />
-                  <Space direction="vertical" size={0}>
-                    <Text strong>{record.fullName}</Text>
-                    <Text type="secondary" style={{ fontSize: 12 }}>
+                  <Space direction="vertical" size={0} style={{ minWidth: 0, flex: 1 }}>
+                    <Text strong ellipsis={{ tooltip: record.fullName }} style={{ maxWidth: 220 }}>
+                      {record.fullName}
+                    </Text>
+                    <Text type="secondary" ellipsis={{ tooltip: record.email }} style={{ fontSize: 12, maxWidth: 220 }}>
                       {record.email}
                     </Text>
                   </Space>
@@ -220,7 +328,11 @@ export function UserManagementPage() {
               key: 'isActive',
               width: 130,
               render: (_: boolean, record: UserAdminRow) => (
-                <Switch checked={record.isActive} onChange={(checked) => toggleActive(record.id, checked)} />
+                <Switch
+                  checked={record.isActive}
+                  onChange={(checked) => void toggleActive(record.id, checked)}
+                  disabled={record.role === 'super_admin'}
+                />
               ),
             },
             { title: 'Lần đăng nhập cuối', dataIndex: 'lastLogin', key: 'lastLogin', width: 170 },
@@ -228,22 +340,27 @@ export function UserManagementPage() {
             {
               title: 'Thao tác',
               key: 'actions',
-              width: 180,
+              width: 250,
               render: (_: unknown, record: UserAdminRow) => (
                 <Space>
-                  <Button size="small" onClick={() => resetPassword(record)}>
-                    Reset pass
+                  <Button size="small" icon={<EditOutlined />} onClick={() => openEditModal(record)}>
+                    Sửa TK
+                  </Button>
+                  <Button size="small" onClick={() => openRoleModal(record)}>
+                    Đổi vai trò
                   </Button>
                   <Popconfirm
                     title={record.isActive ? 'Khóa tài khoản này?' : 'Mở lại tài khoản này?'}
                     okText="Xác nhận"
                     cancelText="Hủy"
-                    onConfirm={() => toggleActive(record.id, !record.isActive)}
+                    onConfirm={() => void toggleActive(record.id, !record.isActive)}
+                    disabled={record.role === 'super_admin'}
                   >
                     <Button
                       size="small"
                       icon={record.isActive ? <LockOutlined /> : <UnlockOutlined />}
                       danger={record.isActive}
+                      disabled={record.role === 'super_admin'}
                     >
                       {record.isActive ? 'Khóa' : 'Mở'}
                     </Button>
@@ -254,6 +371,104 @@ export function UserManagementPage() {
           ]}
         />
       </Card>
+
+      {/* Create Backend User Modal */}
+      <Modal
+        title="Tạo tài khoản Backend"
+        open={createModalVisible}
+        onOk={() => void handleCreateUser()}
+        onCancel={() => {
+          createForm.resetFields();
+          setCreateModalVisible(false);
+        }}
+        okText="Tạo tài khoản"
+        cancelText="Hủy"
+      >
+        <Form form={createForm} layout="vertical">
+          <Form.Item name="name" label="Tên" rules={[{ required: true, message: 'Vui lòng nhập tên' }]}>
+            <Input placeholder="Tên người dùng" />
+          </Form.Item>
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[
+              { required: true, message: 'Vui lòng nhập email' },
+              { type: 'email', message: 'Email không hợp lệ' },
+            ]}
+          >
+            <Input placeholder="email@example.com" />
+          </Form.Item>
+          <Form.Item
+            name="password"
+            label="Mật khẩu"
+            rules={[
+              { required: true, message: 'Vui lòng nhập mật khẩu' },
+              { min: 6, message: 'Mật khẩu tối thiểu 6 ký tự' },
+            ]}
+          >
+            <Input.Password placeholder="Mật khẩu" />
+          </Form.Item>
+          <Form.Item name="userType" label="Vai trò" rules={[{ required: true, message: 'Vui lòng chọn vai trò' }]}>
+            <Select placeholder="Chọn vai trò" options={backendRoleCreateOptions} />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Edit Credentials Modal */}
+      <Modal
+        title="Chỉnh sửa thông tin đăng nhập"
+        open={editModalVisible}
+        onOk={() => void handleEditCredentials()}
+        onCancel={() => {
+          editForm.resetFields();
+          setEditModalVisible(false);
+        }}
+        okText="Cập nhật"
+        cancelText="Hủy"
+      >
+        <Form form={editForm} layout="vertical">
+          <Form.Item
+            name="email"
+            label="Email mới"
+            rules={[{ type: 'email', message: 'Email không hợp lệ' }]}
+          >
+            <Input placeholder="email@example.com" />
+          </Form.Item>
+          <Form.Item name="password" label="Mật khẩu mới" rules={[{ min: 6, message: 'Mật khẩu tối thiểu 6 ký tự' }]}>
+            <Input.Password placeholder="Để trống nếu không đổi" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Update Role Modal */}
+      <Modal
+        title="Thay đổi vai trò"
+        open={roleModalVisible}
+        onOk={() => void handleUpdateRole()}
+        onCancel={() => {
+          roleForm.resetFields();
+          setRoleModalVisible(false);
+        }}
+        okText="Cập nhật"
+        cancelText="Hủy"
+      >
+        <Form form={roleForm} layout="vertical">
+          <Form.Item name="role" label="Vai trò mới" rules={[{ required: true, message: 'Vui lòng chọn vai trò' }]}>
+            <Select
+              placeholder="Chọn vai trò"
+              options={
+                selectedUser?.group === 'backend'
+                  ? backendRoleCreateOptions
+                  : [
+                      { value: 'job_seeker', label: roleLabel.job_seeker },
+                      { value: 'freelancer', label: roleLabel.freelancer },
+                      { value: 'hr', label: roleLabel.hr },
+                    ]
+              }
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

@@ -2,7 +2,6 @@ import { Layout } from 'antd';
 import { ReactNode } from 'react';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
-import { LAYOUT } from '@/lib/constants';
 
 const { Content } = Layout;
 
@@ -14,13 +13,13 @@ interface MainLayoutProps {
 
 export const MainLayout = ({ children, className = '', fullWidth = false }: MainLayoutProps) => {
   return (
-    <Layout className="min-h-screen bg-gray-50">
+    <Layout style={{ minHeight: '100vh', background: '#f3f6fb' }}>
       <Navbar />
-      <Content className={`pt-16 ${className}`}>
+      <Content className={`pt-[72px] ${className}`}>
         {fullWidth ? (
           children
         ) : (
-          <div className={`${LAYOUT.container} ${LAYOUT.paddingY}`}>
+          <div style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 24px' }}>
             {children}
           </div>
         )}

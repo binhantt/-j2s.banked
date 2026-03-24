@@ -1,3 +1,5 @@
+
+
 import { useState, useEffect } from 'react';
 import { Card, Tag, Avatar, Row, Col, Spin, Empty, message, Tabs, Divider, Rate } from 'antd';
 import {
@@ -17,6 +19,7 @@ import { companyReviewApi, CompanyStats } from '@/lib/companyReviewApi';
 import { JobCard } from '../jobs/components';
 import { CompanyReviewSection } from './CompanyReviewSection';
 import SaveCompanyButton from '@/components/SaveCompanyButton';
+import { DomainDisplay } from '@/components/DomainDisplay';
 import { useRouter } from 'next/router';
 import type { Job } from '@/store/useJobStore';
 
@@ -49,7 +52,7 @@ export const CompanyDetailFeature = ({ companyId }: CompanyDetailFeatureProps) =
     setLoadingImages(true);
     try {
       const { companyImageApi } = await import('@/lib/companyImageApi');
-      const data = await companyImageApi.getImagesByCompany(Number(companyId));
+      const data = await companyImageApi.getCompanyImages(Number(companyId));
       setCompanyImages(data);
     } catch (error) {
       console.error('Error loading images:', error);
@@ -155,7 +158,7 @@ export const CompanyDetailFeature = ({ companyId }: CompanyDetailFeatureProps) =
             <ul className="space-y-3">
               {cultureList.map((item, index) => (
                 <li key={index} className="flex items-start">
-                  <CheckCircleOutlined className="text-blue-600 mr-3 mt-1 text-lg" />
+                  <CheckCircleOutlined className="text-green-600 mr-3 mt-1 text-lg" />
                   <span className="text-gray-700">{item}</span>
                 </li>
               ))}
@@ -175,7 +178,7 @@ export const CompanyDetailFeature = ({ companyId }: CompanyDetailFeatureProps) =
         <Row gutter={[24, 24]}>
           {jobs.map((job) => (
             <Col key={job.id} xs={24} md={12} lg={8}>
-              <JobCard job={job} />
+              <JobCard job={job as any} />
             </Col>
           ))}
         </Row>
@@ -190,8 +193,8 @@ export const CompanyDetailFeature = ({ companyId }: CompanyDetailFeatureProps) =
           <Row gutter={[16, 16]}>
             {benefitsList.map((benefit, index) => (
               <Col key={index} xs={24} sm={12}>
-                <div className="flex items-start p-4 bg-blue-50 rounded-lg">
-                  <CheckCircleOutlined className="text-blue-600 mr-3 mt-1 text-lg flex-shrink-0" />
+                <div className="flex items-start p-4 bg-green-50 rounded-lg">
+                  <CheckCircleOutlined className="text-green-600 mr-3 mt-1 text-lg flex-shrink-0" />
                   <span className="text-gray-700">{benefit}</span>
                 </div>
               </Col>
@@ -255,7 +258,7 @@ export const CompanyDetailFeature = ({ companyId }: CompanyDetailFeatureProps) =
                   blog.imageUrl ? (
                     <img alt={blog.title} src={blog.imageUrl} style={{ height: '200px', objectFit: 'cover' }} />
                   ) : (
-                    <div style={{ height: '200px', background: 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #14b8a6 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '48px' }}>
+                    <div style={{ height: '200px', background: 'linear-gradient(135deg, #16a34a 0%, #16a34a 50%, #22c55e 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '48px' }}>
                       📝
                     </div>
                   )
@@ -293,10 +296,10 @@ export const CompanyDetailFeature = ({ companyId }: CompanyDetailFeatureProps) =
     <div className="w-full">
       <div
         className="h-64 bg-cover bg-center relative"
-        style={{ 
-          backgroundImage: company.logoUrl 
-            ? `url(${company.logoUrl})` 
-            : 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #14b8a6 100%)'
+        style={{
+          backgroundImage: company.logoUrl
+            ? `url(${company.logoUrl})`
+            : 'linear-gradient(135deg, #16a34a 0%, #16a34a 50%, #22c55e 100%)'
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -324,47 +327,49 @@ export const CompanyDetailFeature = ({ companyId }: CompanyDetailFeatureProps) =
                         {reviewStats.averageRating.toFixed(1)} ({reviewStats.reviewCount} đánh giá)
                       </span>
                     </div>
-                    <Tag color="blue" className="text-base px-4 py-1">
-                      {company.industry || 'Chưa cập nhật'}
-                    </Tag>
+                    <div className="flex flex-wrap items-center gap-3 mb-3">
+                      {company.domainId && (
+                        <DomainDisplay domainId={company.domainId} size="default" />
+                      )}
+                    </div>
                   </div>
                   <div>
-                    <SaveCompanyButton companyId={company.id} size="large" />
+                    {company.id && <SaveCompanyButton companyId={company.id} size="large" />}
                   </div>
                 </div>
 
                 <Row gutter={[24, 16]}>
                   <Col xs={24} sm={12} md={8}>
                     <div className="flex items-center text-gray-700">
-                      <EnvironmentOutlined className="text-lg mr-2 text-blue-600" />
+                      <EnvironmentOutlined className="text-lg mr-2 text-green-600" />
                       <span>{company.address || 'Chưa cập nhật'}</span>
                     </div>
                   </Col>
                   <Col xs={24} sm={12} md={8}>
                     <div className="flex items-center text-gray-700">
-                      <TeamOutlined className="text-lg mr-2 text-cyan-600" />
+                      <TeamOutlined className="text-lg mr-2 text-green-600" />
                       <span>{company.companySize || 'Chưa cập nhật'}</span>
                     </div>
                   </Col>
                   <Col xs={24} sm={12} md={8}>
                     <div className="flex items-center text-gray-700">
-                      <GlobalOutlined className="text-lg mr-2 text-teal-600" />
-                      <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700">
+                      <GlobalOutlined className="text-lg mr-2 text-green-600" />
+                      <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700">
                         {company.website}
                       </a>
                     </div>
                   </Col>
                   <Col xs={24} sm={12} md={8}>
                     <div className="flex items-center text-gray-700">
-                      <MailOutlined className="text-lg mr-2 text-blue-600" />
-                      <a href={`mailto:${company.email}`} className="text-blue-600 hover:text-blue-700">
+                      <MailOutlined className="text-lg mr-2 text-green-600" />
+                      <a href={`mailto:${company.email}`} className="text-green-600 hover:text-green-700">
                         {company.email}
                       </a>
                     </div>
                   </Col>
                   <Col xs={24} sm={12} md={8}>
                     <div className="flex items-center text-gray-700">
-                      <PhoneOutlined className="text-lg mr-2 text-cyan-600" />
+                      <PhoneOutlined className="text-lg mr-2 text-green-600" />
                       <span>{company.phone}</span>
                     </div>
                   </Col>

@@ -61,7 +61,7 @@ export const FreelanceCard = ({ project }: FreelanceCardProps) => {
             <span className="font-bold text-green-600 text-lg">{project.budget}</span>
           </div>
           <div className="flex items-center text-gray-600">
-            <ClockCircleOutlined className="mr-2 text-blue-600" />
+            <ClockCircleOutlined className="mr-2 text-green-600" />
             <span className="font-medium">{project.duration}</span>
           </div>
         </div>

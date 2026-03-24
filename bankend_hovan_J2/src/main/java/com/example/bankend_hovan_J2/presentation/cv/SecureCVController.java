@@ -23,7 +23,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/api/cv")
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = "*")
 @RequiredArgsConstructor
 public class SecureCVController {
     

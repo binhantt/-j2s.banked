@@ -28,6 +28,7 @@ import { freelanceApi } from '@/lib/freelanceApi';
 import { FreelancerProfileView } from './FreelancerProfileView';
 import { api } from '@/lib/api';
 import { cvApi } from '@/lib/cvApi';
+import { HRCVAccessButton } from '@/components/HRCVAccessButton';
 
 const { Text, Title, Paragraph } = Typography;
 
@@ -42,6 +43,7 @@ interface Applicant {
   currentLocation?: string;
   location?: string; // alias for currentLocation
   cvUrl?: string;
+  cvId?: number; // Add CV ID for secure access
   certificateImages?: string;
   phone?: string;
   bio?: string;
@@ -72,7 +74,33 @@ export default function ApplicantsList({ projectId, isOwner }: ApplicantsListPro
     try {
       setLoading(true);
       const data = await freelanceApi.getProjectApplicants(projectId);
-      setApplicants(data);
+      
+      // Enrich applicants with CV IDs for secure access
+      const enrichedApplicants = await Promise.all(
+        data.map(async (applicant: Applicant) => {
+          if (applicant.cvUrl) {
+            try {
+              // Get CV details to find CV ID
+              const response = await api.get(`/api/user-cvs/user/${applicant.freelancerId}`);
+              const cvs = response.data;
+              const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+              const cv = cvs.find((c: any) => 
+                c.fileUrl === applicant.cvUrl || 
+                `${baseUrl}${c.fileUrl}` === applicant.cvUrl
+              );
+              
+              if (cv) {
+                applicant.cvId = cv.id;
+              }
+            } catch (error) {
+              console.error('Error loading CV details for applicant:', applicant.freelancerId, error);
+            }
+          }
+          return applicant;
+        })
+      );
+      
+      setApplicants(enrichedApplicants);
     } catch (error) {
       console.error('Error loading applicants:', error);
     } finally {
@@ -218,38 +246,26 @@ export default function ApplicantsList({ projectId, isOwner }: ApplicantsListPro
                     Xem chi tiết
                   </Button>
 
-                  {applicant.cvUrl && (
+                  {applicant.cvUrl && applicant.cvId && (
+                    <HRCVAccessButton
+                      cvId={applicant.cvId}
+                      candidateUserId={applicant.freelancerId}
+                      hrId={JSON.parse(localStorage.getItem('user') || '{}').id || 0}
+                      candidateName={applicant.freelancerName}
+                      buttonText="Xem CV"
+                      size="small"
+                      type="primary"
+                    />
+                  )}
+
+                  {applicant.cvUrl && !applicant.cvId && (
                     <Button
                       size="small"
                       type="primary"
                       icon={<FileTextOutlined />}
-                      onClick={async () => {
-                        try {
-                          const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                          if (!currentUser.id) {
-                            message.error('Vui lòng đăng nhập');
-                            return;
-                          }
-                          
-                          // Find CV ID from cvUrl
-                          const response = await api.get(`/api/user-cvs/user/${applicant.freelancerId}`);
-                          const cvs = response.data;
-                          const cv = cvs.find((c: any) => c.fileUrl === applicant.cvUrl || 
-                                                          `http://localhost:8080${c.fileUrl}` === applicant.cvUrl);
-                          
-                          if (!cv) {
-                            message.error('Không tìm thấy CV');
-                            return;
-                          }
-                          
-                          // Generate secure token
-                          const { token } = await cvApi.generateViewToken(cv.id, currentUser.id);
-                          const viewUrl = `http://localhost:8080/api/cv/view/${token}`;
-                          window.open(viewUrl, '_blank');
-                        } catch (error: any) {
-                          console.error('View CV error:', error);
-                          message.error(error.response?.data?.error || 'Không thể xem CV');
-                        }
+                      onClick={() => {
+                        message.warning('Đang tải thông tin CV...');
+                        loadApplicants(); // Reload to get CV ID
                       }}
                     >
                       Xem CV ứng tuyển

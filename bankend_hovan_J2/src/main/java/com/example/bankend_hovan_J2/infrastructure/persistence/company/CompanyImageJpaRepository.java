@@ -7,5 +7,10 @@ import java.util.List;
 
 @Repository
 public interface CompanyImageJpaRepository extends JpaRepository<CompanyImageEntityJpa, Long> {
+    
     List<CompanyImageEntityJpa> findByCompanyIdOrderByDisplayOrderAsc(Long companyId);
+    
+    void deleteByCompanyIdAndImageUrl(Long companyId, String imageUrl);
+    
+    long countByCompanyId(Long companyId);
 }

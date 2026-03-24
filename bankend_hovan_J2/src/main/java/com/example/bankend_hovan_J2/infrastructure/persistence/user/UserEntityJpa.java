@@ -56,8 +56,14 @@ public class UserEntityJpa {
     @Column(columnDefinition = "TEXT")
     private String bio;
 
+    @Column(name = "domain_id")
+    private Long domainId;
+
     @Column(name = "encrypted_password", length = 1024)
     private String encryptedPassword;
+
+    @Column(name = "is_active")
+    private Boolean isActive = true;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -120,6 +126,12 @@ public class UserEntityJpa {
     public String getBio() { return bio; }
     public void setBio(String bio) { this.bio = bio; }
 
+    public Long getDomainId() { return domainId; }
+    public void setDomainId(Long domainId) { this.domainId = domainId; }
+
     public String getEncryptedPassword() { return encryptedPassword; }
     public void setEncryptedPassword(String encryptedPassword) { this.encryptedPassword = encryptedPassword; }
+
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
 }

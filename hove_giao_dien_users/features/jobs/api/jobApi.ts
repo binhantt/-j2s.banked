@@ -8,8 +8,10 @@ export interface Job {
   companyName: string;
   companyLogoUrl?: string;
   location: string;
-  salaryMin: string;
-  salaryMax: string;
+  salaryMin: number;
+  salaryMax: number;
+  experience: string;
+  level: string;
   jobType: 'full-time' | 'part-time' | 'contract' | 'internship';
   description: string;
   requirements: string;
@@ -55,59 +57,54 @@ class JobApiService {
   }
 
   /**
-   * Search jobs with filters
+   * Search jobs with filters (server-side)
    */
   async searchJobs(filters: JobFilters): Promise<Job[]> {
     try {
-      // Get all jobs first
-      const response = await axios.get(`${API_URL}/api/jobs`);
-      let jobs = response.data;
-      
-      // Filter locally
-      if (filters.searchText) {
-        const searchLower = filters.searchText.toLowerCase();
-        jobs = jobs.filter((job: Job) => 
-          job.title?.toLowerCase().includes(searchLower) ||
-          job.description?.toLowerCase().includes(searchLower) ||
-          job.companyName?.toLowerCase().includes(searchLower)
-        );
-      }
-      
-      if (filters.location && filters.location !== 'all') {
-        jobs = jobs.filter((job: Job) => 
-          job.location?.toLowerCase().includes(filters.location!.toLowerCase())
-        );
-      }
-      
-      if (filters.jobType && filters.jobType.length > 0) {
-        jobs = jobs.filter((job: Job) => 
-          filters.jobType!.includes(job.jobType)
-        );
-      }
-      
+      const params: Record<string, string> = {};
+
+      if (filters.searchText) params.searchText = filters.searchText;
+      if (filters.location && filters.location !== 'all') params.location = filters.location;
+      if (filters.jobType && filters.jobType.length > 0) params.jobType = filters.jobType.join(',');
+      if (filters.experience && filters.experience !== 'all') params.experience = filters.experience;
+
+      // Parse salary range to min/max
       if (filters.salaryRange && filters.salaryRange !== 'all') {
-        // Parse salary range like "10-20" or "20+"
-        const [min, max] = filters.salaryRange.split('-').map(s => parseInt(s.replace('+', '')));
-        jobs = jobs.filter((job: Job) => {
-          const jobMin = parseInt(job.salaryMin?.toString() || '0');
-          if (max) {
-            return jobMin >= min && jobMin <= max;
-          } else {
-            return jobMin >= min;
+        if (filters.salaryRange.startsWith('under-')) {
+          // "under-10" → salaryMax = 10 (jobs with max salary <= 10)
+          const val = filters.salaryRange.replace('under-', '').replace(/,/g, '');
+          params.salaryMax = val;
+        } else if (filters.salaryRange.startsWith('over-')) {
+          // "over-50" → salaryMin = 50 (jobs with min salary >= 50)
+          const val = filters.salaryRange.replace('over-', '').replace(/,/g, '');
+          params.salaryMin = val;
+        } else {
+          // "10-20" → salaryMin = 10, salaryMax = 20
+          const parts = filters.salaryRange.split('-');
+          if (parts.length === 2) {
+            const [minStr, maxStr] = parts;
+            if (!maxStr.includes('+')) {
+              params.salaryMin = minStr.replace(/,/g, '');
+              params.salaryMax = maxStr.replace(/,/g, '');
+            } else {
+              params.salaryMin = minStr.replace(/,/g, '');
+            }
+          } else if (filters.salaryRange.includes('+')) {
+            params.salaryMin = filters.salaryRange.replace(/,/g, '').replace('+', '');
           }
-        });
+        }
       }
-      
-      if (filters.experience && filters.experience !== 'all') {
-        jobs = jobs.filter((job: Job) => 
-          job.experience?.toLowerCase().includes(filters.experience!.toLowerCase())
-        );
-      }
-      
-      return jobs;
-    } catch (error) {
+
+      const response = await axios.get(`${API_URL}/api/jobs/search`, { params });
+      return response.data;
+    } catch (error: any) {
       console.error('Search jobs error:', error);
-      return [];
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data ||
+        error?.message ||
+        'Search failed';
+      throw new Error(message);
     }
   }
 
@@ -185,6 +182,32 @@ class JobApiService {
     } catch (error) {
       console.error('Get recommended jobs error:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Get unique locations from active jobs (server-side)
+   */
+  async getLocations(): Promise<string[]> {
+    try {
+      const response = await axios.get(`${API_URL}/api/jobs/locations`);
+      return response.data;
+    } catch (error) {
+      console.error('Get locations error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get unique experience levels from active jobs (server-side)
+   */
+  async getExperiences(): Promise<string[]> {
+    try {
+      const response = await axios.get(`${API_URL}/api/jobs/experiences`);
+      return response.data;
+    } catch (error) {
+      console.error('Get experiences error:', error);
+      return [];
     }
   }
 }

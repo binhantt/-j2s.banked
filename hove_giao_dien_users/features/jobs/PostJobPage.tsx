@@ -27,6 +27,20 @@ export default function PostJobPage() {
     }
   }, [mounted, isAuthenticated, router]);
 
+  const loadJob = async (id: number) => {
+     try {
+       const job = await jobApi.getJob(id);
+       form.setFieldsValue({
+         ...job,
+         maxApplicants: job.maxApplicants ?? null,
+         interviewRounds: job.interviewRounds ?? 1,
+         deadline: job.deadline ? dayjs(job.deadline) : null,
+       });
+     } catch (error) {
+       message.error('Không thể tải thông tin bài đăng');
+     }
+   };
+
   useEffect(() => {
     if (router.query.id) {
       setEditMode(true);
@@ -38,18 +52,6 @@ export default function PostJobPage() {
   if (!mounted || !isAuthenticated) {
     return null;
   }
-
-  const loadJob = async (id: number) => {
-    try {
-      const job = await jobApi.getJob(id);
-      form.setFieldsValue({
-        ...job,
-        deadline: job.deadline ? dayjs(job.deadline) : null,
-      });
-    } catch (error) {
-      message.error('Không thể tải thông tin bài đăng');
-    }
-  };
 
   const onFinish = async (values: any) => {
     setLoading(true);
@@ -110,15 +112,59 @@ export default function PostJobPage() {
             <Form.Item
               label="Mức lương tối thiểu"
               name="salaryMin"
+              rules={[
+                { 
+                  validator: (_, value) => {
+                    if (value !== undefined && value !== null) {
+                      if (!Number.isInteger(value)) {
+                        return Promise.reject(new Error('Nhập sai định dạng chữ, không phải số nguyên (int), vui lòng nhập lại!'));
+                      }
+                      if (value < 0) {
+                        return Promise.reject(new Error('Mức lương không thể âm, vui lòng nhập lại!'));
+                      }
+                    }
+                    return Promise.resolve();
+                  }
+                }
+              ]}
             >
-              <Input placeholder="VD: 15000000" size="large" />
+              <InputNumber 
+                placeholder="VD: 15000000" 
+                size="large" 
+                min={0}
+                style={{ width: '100%' }}
+                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                parser={(value) => Number(value!.replace(/\$\s?|(,*)/g, '')) as any}
+              />
             </Form.Item>
 
             <Form.Item
               label="Mức lương tối đa"
               name="salaryMax"
+              rules={[
+                { 
+                  validator: (_, value) => {
+                    if (value !== undefined && value !== null) {
+                      if (!Number.isInteger(value)) {
+                        return Promise.reject(new Error('Nhập sai định dạng chữ, không phải số nguyên (int), vui lòng nhập lại!'));
+                      }
+                      if (value < 0) {
+                        return Promise.reject(new Error('Mức lương không thể âm, vui lòng nhập lại!'));
+                      }
+                    }
+                    return Promise.resolve();
+                  }
+                }
+              ]}
             >
-              <Input placeholder="VD: 25000000" size="large" />
+              <InputNumber 
+                placeholder="VD: 25000000" 
+                size="large" 
+                min={0}
+                style={{ width: '100%' }}
+                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                parser={(value) => Number(value!.replace(/\$\s?|(,*)/g, '')) as any}
+              />
             </Form.Item>
           </div>
 

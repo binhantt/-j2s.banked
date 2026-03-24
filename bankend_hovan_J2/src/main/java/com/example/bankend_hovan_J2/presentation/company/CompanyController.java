@@ -2,6 +2,9 @@ package com.example.bankend_hovan_J2.presentation.company;
 
 import com.example.bankend_hovan_J2.application.company.CreateCompanyUseCase;
 import com.example.bankend_hovan_J2.application.company.UpdateCompanyUseCase;
+import com.example.bankend_hovan_J2.application.company.CompanyService;
+import com.example.bankend_hovan_J2.application.company.CompanyWithDomainResponse;
+import com.example.bankend_hovan_J2.application.company.CompanyBasicInfoResponse;
 import com.example.bankend_hovan_J2.domain.company.entity.Company;
 import com.example.bankend_hovan_J2.domain.company.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +21,7 @@ public class CompanyController {
     private final CompanyRepository companyRepository;
     private final CreateCompanyUseCase createCompanyUseCase;
     private final UpdateCompanyUseCase updateCompanyUseCase;
+    private final CompanyService companyService;
 
     @PostMapping
     public ResponseEntity<Company> createCompany(@RequestBody Map<String, Object> request) {
@@ -53,6 +57,72 @@ public class CompanyController {
         return ResponseEntity.ok(companies);
     }
 
+    // New endpoints with domain information
+    @GetMapping("/with-domain")
+    public ResponseEntity<List<CompanyWithDomainResponse>> getAllCompaniesWithDomain() {
+        List<CompanyWithDomainResponse> companies = companyService.getAllCompaniesWithDomain();
+        return ResponseEntity.ok(companies);
+    }
+
+    @GetMapping("/{id}/with-domain")
+    public ResponseEntity<CompanyWithDomainResponse> getCompanyWithDomain(@PathVariable Long id) {
+        return companyService.getCompanyWithDomain(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/hr/{hrId}/with-domain")
+    public ResponseEntity<CompanyWithDomainResponse> getCompanyWithDomainByHrId(@PathVariable Long hrId) {
+        return companyService.getCompanyWithDomainByHrId(hrId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Basic info endpoints (lighter payload)
+    @GetMapping("/{id}/basic-info")
+    public ResponseEntity<CompanyBasicInfoResponse> getCompanyBasicInfo(@PathVariable Long id) {
+        return companyService.getCompanyBasicInfo(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/hr/{hrId}/basic-info")
+    public ResponseEntity<CompanyBasicInfoResponse> getCompanyBasicInfoByHrId(@PathVariable Long hrId) {
+        return companyService.getCompanyBasicInfoByHrId(hrId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Debug endpoint to check company data
+    @GetMapping("/debug/{hrId}")
+    public ResponseEntity<Map<String, Object>> debugCompanyByHrId(@PathVariable Long hrId) {
+        try {
+            Company company = companyRepository.findByHrId(hrId).orElse(null);
+            Map<String, Object> debug = Map.of(
+                "found", company != null,
+                "company", company != null ? company : "Not found",
+                "hrId", hrId
+            );
+            return ResponseEntity.ok(debug);
+        } catch (Exception e) {
+            Map<String, Object> error = Map.of(
+                "error", e.getMessage(),
+                "hrId", hrId
+            );
+            return ResponseEntity.ok(error);
+        }
+    }
+
+    // Simple test endpoint
+    @GetMapping("/test")
+    public ResponseEntity<Map<String, Object>> testEndpoint() {
+        return ResponseEntity.ok(Map.of(
+            "status", "OK",
+            "message", "Company API is working",
+            "timestamp", System.currentTimeMillis()
+        ));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCompany(@PathVariable Long id) {
         try {
@@ -80,7 +150,7 @@ public class CompanyController {
                 .hrId(getLong(request, "hrId"))
                 .name(getString(request, "name"))
                 .logoUrl(getString(request, "logoUrl"))
-                .industry(getString(request, "industry"))
+                .domainId(getLong(request, "domainId"))
                 .companySize(getString(request, "companySize"))
                 .foundedYear(getInteger(request, "foundedYear"))
                 .website(getString(request, "website"))

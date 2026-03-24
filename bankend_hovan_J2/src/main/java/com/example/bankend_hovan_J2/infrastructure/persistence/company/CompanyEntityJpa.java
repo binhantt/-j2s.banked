@@ -28,7 +28,8 @@ public class CompanyEntityJpa {
     @Column(name = "logo_url")
     private String logoUrl;
 
-    private String industry;
+    @Column(name = "domain_id")
+    private Long domainId;
 
     @Column(name = "company_size")
     private String companySize;

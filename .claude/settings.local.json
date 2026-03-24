@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"D:\\\\DOANJ2\\\\bankend_hovan_J2\\\\skills\")",
+      "Bash(xargs grep:*)",
+      "Bash(./gradlew build:*)",
+      "Bash(./mvnw compile:*)",
+      "Bash(Get-ChildItem -Path \"d:\\\\DOANJ2\\\\bankend_hovan_J2\\\\skills\" -Force -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object Name, Mode, LastWriteTime)",
+      "Bash(grep -rn jobPostingId d:/DOANJ2/hove_giao_dien_users --include=*.tsx --include=*.ts)",
+      "WebSearch"
+    ]
+  }
+}

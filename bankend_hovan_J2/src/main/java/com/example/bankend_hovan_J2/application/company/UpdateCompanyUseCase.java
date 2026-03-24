@@ -19,7 +19,7 @@ public class UpdateCompanyUseCase {
         // Update fields
         existing.setName(company.getName());
         existing.setLogoUrl(company.getLogoUrl());
-        existing.setIndustry(company.getIndustry());
+        existing.setDomainId(company.getDomainId());
         existing.setCompanySize(company.getCompanySize());
         existing.setFoundedYear(company.getFoundedYear());
         existing.setWebsite(company.getWebsite());

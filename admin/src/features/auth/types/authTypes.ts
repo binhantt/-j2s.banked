@@ -3,6 +3,11 @@ export interface LoginPayload {
   password: string;
 }
 
+export interface BannedError {
+  banned: true;
+  message: string;
+}
+
 export interface AuthResponse {
   token: string;
   refreshToken: string;

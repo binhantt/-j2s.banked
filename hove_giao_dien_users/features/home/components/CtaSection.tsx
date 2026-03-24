@@ -4,21 +4,48 @@ import Link from 'next/link';
 
 export const CtaSection = () => {
   return (
-    <section className="bg-white border-b border-gray-100 min-h-screen flex items-center">
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div className="bg-gray-50 border border-gray-100 rounded-2xl p-8 sm:p-12 md:p-14 text-center">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-900 mb-4 sm:mb-5">
+    <section style={{ background: '#fff' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '64px 24px' }}>
+        <div style={{
+          background: '#f0fdf4',
+          border: '1px solid #dcfce7',
+          borderRadius: 16,
+          padding: 'clamp(32px, 6vw, 56px)',
+          textAlign: 'center',
+        }}>
+          <h2 style={{
+            fontSize: 'clamp(20px, 4vw, 36px)',
+            fontWeight: 700,
+            color: '#0b1220',
+            marginBottom: 16,
+          }}>
             Sẵn sàng cho bước tiếp theo trong sự nghiệp?
           </h2>
-          <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto">
+          <p style={{
+            fontSize: 16,
+            color: '#64748b',
+            marginBottom: 32,
+            maxWidth: 600,
+            margin: '0 auto 32px',
+            lineHeight: 1.7,
+          }}>
             Tạo hồ sơ một lần, theo dõi toàn bộ quá trình ứng tuyển và trao đổi trực tiếp với nhà tuyển dụng.
           </p>
           <Link href="/jobs">
             <Button
               type="primary"
               size="large"
-              className="h-11 sm:h-12 px-6 sm:px-10 text-sm sm:text-base font-medium"
               icon={<ArrowRightOutlined />}
+              style={{
+                height: 48,
+                borderRadius: 12,
+                background: '#16a34a',
+                border: 'none',
+                fontWeight: 600,
+                fontSize: 15,
+                paddingInline: 32,
+                boxShadow: '0 4px 14px rgba(22,163,74,0.35)',
+              }}
             >
               Khám phá việc làm phù hợp
             </Button>
@@ -28,4 +55,3 @@ export const CtaSection = () => {
     </section>
   );
 };
-
