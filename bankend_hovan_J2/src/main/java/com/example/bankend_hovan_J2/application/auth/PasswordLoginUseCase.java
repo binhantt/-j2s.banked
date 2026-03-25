@@ -47,11 +47,11 @@ public class PasswordLoginUseCase {
                 user.getEmail().getValue(),
                 user.getUserType()
         );
-        String refreshToken = jwtProvider.generateRefreshToken(user.getId());
 
+        // Refresh token được tạo và lưu bởi RefreshTokenService trong AuthController
         return new AuthResponseDTO(
                 accessToken,
-                refreshToken,
+                null, // refreshToken — sẽ được set bởi AuthController sau khi lưu vào DB
                 user.getId(),
                 user.getEmail().getValue(),
                 user.getName(),

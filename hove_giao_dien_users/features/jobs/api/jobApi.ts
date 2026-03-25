@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+import { api } from '@/lib/api';
 
 export interface Job {
   id: number;
@@ -35,7 +33,7 @@ class JobApiService {
    */
   async getActiveJobs(): Promise<Job[]> {
     try {
-      const response = await axios.get(`${API_URL}/api/jobs/active`);
+      const response = await api.get('/api/jobs/active');
       return response.data;
     } catch (error) {
       console.error('Get active jobs error:', error);
@@ -48,7 +46,7 @@ class JobApiService {
    */
   async getJobById(id: number): Promise<Job> {
     try {
-      const response = await axios.get(`${API_URL}/api/jobs/${id}`);
+      const response = await api.get(`/api/jobs/${id}`);
       return response.data;
     } catch (error) {
       console.error('Get job by ID error:', error);
@@ -95,7 +93,7 @@ class JobApiService {
         }
       }
 
-      const response = await axios.get(`${API_URL}/api/jobs/search`, { params });
+      const response = await api.get('/api/jobs/search', { params });
       return response.data;
     } catch (error: any) {
       console.error('Search jobs error:', error);
@@ -113,7 +111,7 @@ class JobApiService {
    */
   async getJobsByCompany(companyId: number): Promise<Job[]> {
     try {
-      const response = await axios.get(`${API_URL}/api/jobs/company/${companyId}`);
+      const response = await api.get(`/api/jobs/company/${companyId}`);
       return response.data;
     } catch (error) {
       console.error('Get jobs by company error:', error);
@@ -126,7 +124,7 @@ class JobApiService {
    */
   async getJobsByUser(userId: number): Promise<Job[]> {
     try {
-      const response = await axios.get(`${API_URL}/api/jobs/user/${userId}`);
+      const response = await api.get(`/api/jobs/user/${userId}`);
       return response.data;
     } catch (error) {
       console.error('Get jobs by user error:', error);
@@ -139,7 +137,7 @@ class JobApiService {
    */
   async createJob(jobData: Partial<Job>): Promise<Job> {
     try {
-      const response = await axios.post(`${API_URL}/api/jobs`, jobData);
+      const response = await api.post('/api/jobs', jobData);
       return response.data;
     } catch (error) {
       console.error('Create job error:', error);
@@ -152,7 +150,7 @@ class JobApiService {
    */
   async updateJob(id: number, jobData: Partial<Job>): Promise<Job> {
     try {
-      const response = await axios.put(`${API_URL}/api/jobs/${id}`, jobData);
+      const response = await api.put(`/api/jobs/${id}`, jobData);
       return response.data;
     } catch (error) {
       console.error('Update job error:', error);
@@ -165,7 +163,7 @@ class JobApiService {
    */
   async deleteJob(id: number): Promise<void> {
     try {
-      await axios.delete(`${API_URL}/api/jobs/${id}`);
+      await api.delete(`/api/jobs/${id}`);
     } catch (error) {
       console.error('Delete job error:', error);
       throw error;
@@ -177,7 +175,7 @@ class JobApiService {
    */
   async getRecommendedJobs(userId: number): Promise<Job[]> {
     try {
-      const response = await axios.get(`${API_URL}/api/jobs/recommended/${userId}`);
+      const response = await api.get(`/api/jobs/recommended/${userId}`);
       return response.data;
     } catch (error) {
       console.error('Get recommended jobs error:', error);
@@ -190,7 +188,7 @@ class JobApiService {
    */
   async getLocations(): Promise<string[]> {
     try {
-      const response = await axios.get(`${API_URL}/api/jobs/locations`);
+      const response = await api.get('/api/jobs/locations');
       return response.data;
     } catch (error) {
       console.error('Get locations error:', error);
@@ -203,7 +201,7 @@ class JobApiService {
    */
   async getExperiences(): Promise<string[]> {
     try {
-      const response = await axios.get(`${API_URL}/api/jobs/experiences`);
+      const response = await api.get('/api/jobs/experiences');
       return response.data;
     } catch (error) {
       console.error('Get experiences error:', error);

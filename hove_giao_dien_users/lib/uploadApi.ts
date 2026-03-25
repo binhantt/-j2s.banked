@@ -10,7 +10,12 @@ export interface UploadResponse {
 
 export const uploadApi = {
   // Upload CV file - TỰ ĐỘNG lưu vào database
-  uploadCV: async (file: File, userId: number, title?: string): Promise<UploadResponse> => {
+  uploadCV: (
+    file: File,
+    userId: number,
+    title?: string,
+    onProgress?: (percent: number) => void,
+  ): Promise<UploadResponse> => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('userId', userId.toString());
@@ -23,15 +28,23 @@ export const uploadApi = {
     console.log('UserId:', userId);
     console.log('Title:', title);
 
-    const response = await api.post('/api/upload/cv', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data', // This will be removed by interceptor
-      },
-      timeout: 30000, // 30 seconds for file upload
-    });
-    
-    console.log('Upload response:', response.data);
-    return response.data;
+    return api
+      .post('/api/upload/cv', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        timeout: 60000,
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total && onProgress) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(percent);
+          }
+        },
+      })
+      .then((response) => {
+        console.log('Upload response:', response.data);
+        return response.data;
+      });
   },
 
   // Delete CV file
@@ -42,22 +55,33 @@ export const uploadApi = {
   },
 
   // Upload image (for gallery, avatar, etc.)
-  uploadImage: async (file: File): Promise<string> => {
+  uploadImage: (
+    file: File,
+    onProgress?: (percent: number) => void,
+  ): Promise<string> => {
     const formData = new FormData();
     formData.append('file', file);
 
     console.log('=== Uploading Image ===');
     console.log('File:', file.name, file.type, file.size);
 
-    const response = await api.post('/api/upload/image', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      timeout: 30000,
-    });
-    
-    console.log('Upload image response:', response.data);
-    return response.data.url || response.data;
+    return api
+      .post('/api/upload/image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        timeout: 30000,
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total && onProgress) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(percent);
+          }
+        },
+      })
+      .then((response) => {
+        console.log('Upload image response:', response.data);
+        return response.data.url || response.data;
+      });
   },
 
   // Get full URL for uploaded file

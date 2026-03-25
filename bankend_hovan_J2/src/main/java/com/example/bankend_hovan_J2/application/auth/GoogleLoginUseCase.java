@@ -58,16 +58,15 @@ public class GoogleLoginUseCase {
 
         // Generate JWT toke
         String accessToken = jwtProvider.generateAccessToken(
-            user.getId(), 
+            user.getId(),
             user.getEmail().getValue(),
             user.getUserType()
         );
-        
-        String refreshToken = jwtProvider.generateRefreshToken(user.getId());
 
+        // Refresh token được tạo và lưu bởi RefreshTokenService trong AuthController
         return new AuthResponseDTO(
             accessToken,
-            refreshToken,
+            null,
             user.getId(),
             user.getEmail().getValue(),
             user.getName(),

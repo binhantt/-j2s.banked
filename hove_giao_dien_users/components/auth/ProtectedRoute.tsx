@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useAuthStore } from '@/store/useAuthStore';
 import { message } from 'antd';
@@ -18,9 +18,22 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   redirectTo = '/login',
 }) => {
   const router = useRouter();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, _hasHydrated } = useAuthStore();
+  // Chờ Zustand rehydrate xong trước khi check auth
+  // Nếu không có check này → F5 reload → isAuthenticated=false (chưa đọc localStorage)
+  // → redirect /login ngay lập tức → user bị đẩy ra ngoài ý muốn
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    // Đợi Zustand persist rehydrate xong
+    if (_hasHydrated) {
+      setHydrated(true);
+    }
+  }, [_hasHydrated]);
+
+  useEffect(() => {
+    if (!hydrated) return; // Chưa rehydrate xong → đừng làm gì
+
     if (requireAuth && !isAuthenticated) {
       message.warning('Vui lòng đăng nhập để tiếp tục');
       router.push(redirectTo);
@@ -31,7 +44,12 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       message.error('Bạn không có quyền truy cập trang này');
       router.push('/');
     }
-  }, [isAuthenticated, user, requireAuth, allowedUserTypes, redirectTo, router]);
+  }, [hydrated, isAuthenticated, user, requireAuth, allowedUserTypes, redirectTo, router]);
+
+  // Loading state — đợi rehydrate thay vì redirect nhầm sang /login
+  if (!hydrated) {
+    return null;
+  }
 
   if (requireAuth && !isAuthenticated) {
     return null;

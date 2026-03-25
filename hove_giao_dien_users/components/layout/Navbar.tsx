@@ -15,154 +15,170 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import type { MenuProps } from 'antd';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { notificationApi, Notification } from '@/lib/notificationApi';
+import { savedJobApi } from '@/lib/savedJobApi';
+import { savedCompanyApi } from '@/lib/savedCompanyApi';
+import { api } from '@/lib/api';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/queryClient';
 
 const { Header } = Layout;
 const { Text } = Typography;
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+
+// ──────────────────────────────────────────────────────────────
+// HELPER: Notification icon theo type
+// ──────────────────────────────────────────────────────────────
+const NotificationIcon = ({ type }: { type: string }) => {
+  switch (type) {
+    case 'application_accepted':
+      return <CheckCircleOutlined style={{ fontSize: 24, color: '#16a34a' }} />;
+    case 'application_rejected':
+      return <CloseCircleOutlined style={{ fontSize: 24, color: '#ef4444' }} />;
+    case 'new_message':
+      return <MessageOutlined style={{ fontSize: 24, color: '#3b82f6' }} />;
+    default:
+      return <BellOutlined style={{ fontSize: 24, color: '#16a34a' }} />;
+  }
+};
 
 export const Navbar = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { isAuthenticated, logout, user, _hasHydrated } = useAuthStore();
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [chatUnreadCount, setChatUnreadCount] = useState(0);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const [savedItemsCount, setSavedItemsCount] = useState(0);
 
-  useEffect(() => {
-    console.log('[Navbar] _hasHydrated:', _hasHydrated, '| isAuthenticated:', isAuthenticated, '| user:', user, '| user.id:', user?.id);
-    if (_hasHydrated && isAuthenticated && user?.id) {
-      loadUnreadCount();
-      loadNotifications();
-      loadSavedItemsCount();
+  // ──────────────────────────────────────────────────────────────
+  // REACT QUERY: Lấy số lượng thông báo + chat chưa đọc
+  // ──────────────────────────────────────────────────────────────
+  // Thay setInterval 5s → refetchInterval 60s
+  // Hiệu năng: 1 req/phút thay vì 12 req/phút (5s × 12 = 60s)
+  // Nếu 50K users × 12 req/min = 600K req/h → giảm còn 50K req/h
+  const {
+    data: navbarCount = { notificationCount: 0, chatCount: 0, total: 0 },
+  } = useQuery({
+    queryKey: queryKeys.notifications.navbar(user?.id ?? 0),
+    queryFn: () => notificationApi.getNavbarCount(user!.id),
+    // Chỉ fetch khi đã đăng nhập
+    enabled: Boolean(_hasHydrated && isAuthenticated && user?.id),
+    // Refetch mỗi 60 giây — đủ nhanh để thấy thông báo mới
+    // NHANH hơn setInterval 5s → giảm 92% requests
+    refetchInterval: 60 * 1000,
+    // KHÔNG refetch khi tab ở background (tiết kiệm server)
+    refetchOnWindowFocus: false,
+    // Retry 1 lần nếu fail
+    retry: 1,
+  });
 
-      // Poll nhanh hon (5 giay) de phat hien thong bao moi kip thoi
-      const interval = setInterval(() => {
-        loadUnreadCount();
-        loadNotifications();
-        loadSavedItemsCount();
-      }, 5000);
+  // ──────────────────────────────────────────────────────────────
+  // REACT QUERY: Lấy 5 thông báo chưa đọc gần nhất
+  // ──────────────────────────────────────────────────────────────
+  const { data: unreadNotifications = [] } = useQuery({
+    queryKey: queryKeys.notifications.unread(user?.id ?? 0),
+    queryFn: () => notificationApi.getUnreadNotifications(user!.id),
+    enabled: Boolean(_hasHydrated && isAuthenticated && user?.id),
+    refetchInterval: 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 1,
+  });
 
-      return () => clearInterval(interval);
-    } else {
-      setSavedItemsCount(0);
-    }
-  }, [_hasHydrated, isAuthenticated, user?.id]);
-
-  const loadSavedItemsCount = async () => {
-    if (!user?.id) return;
-    try {
+  // ──────────────────────────────────────────────────────────────
+  // REACT QUERY: Lấy số lượng saved items
+  // ──────────────────────────────────────────────────────────────
+  // Cache trong 5 phút — không cần refetch thường xuyên
+  const { data: savedItemsTotal = 0 } = useQuery({
+    queryKey: ['saved', 'total', user?.id ?? 0],
+    queryFn: async () => {
+      if (!user?.id) return 0;
+      // Dùng API có interceptor → tự động refresh token khi hết hạn
       const [companiesRes, jobsRes] = await Promise.all([
-        fetch(`${API_URL}/api/saved-companies/user/${user.id}`),
-        fetch(`${API_URL}/api/saved-jobs/user/${user.id}`)
+        savedCompanyApi.getUserSavedCompanies(user.id).catch(() => []),
+        savedJobApi.getUserSavedJobs(user.id).catch(() => []),
       ]);
+      return (Array.isArray(companiesRes) ? companiesRes.length : 0)
+           + (Array.isArray(jobsRes) ? jobsRes.length : 0);
+    },
+    enabled: Boolean(_hasHydrated && isAuthenticated && user?.id),
+    // Lưu cache 5 phút — user quay lại sau 5 phút mới refetch
+    staleTime: 5 * 60 * 1000,
+    // Giữ cache 10 phút — không xóa quá sớm
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 1,
+  });
 
-      let total = 0;
-      if (companiesRes.ok) {
-        const companies = await companiesRes.json();
-        total += companies.length;
-      }
-      if (jobsRes.ok) {
-        const jobs = await jobsRes.json();
-        total += jobs.length;
-      }
-
-      setSavedItemsCount(total);
-    } catch (error) {
-      setSavedItemsCount(0);
-    }
-  };
-
-  const loadUnreadCount = async () => {
-    if (!user?.id) return;
-    try {
-      // Lay tong hop thong bao + tin nhan chua doc cho navbar
-      const navbarData = await notificationApi.getNavbarCount(user.id);
-      setUnreadCount(navbarData.notificationCount);
-      setChatUnreadCount(navbarData.chatCount);
-    } catch {
-      setUnreadCount(0);
-      setChatUnreadCount(0);
-    }
-  };
-
-  const loadNotifications = async () => {
-    if (!user?.id) return;
-    try {
-      const data = await notificationApi.getUnreadNotifications(user.id);
-      setNotifications(data.slice(0, 5));
-    } catch {
-      setNotifications([]);
-    }
-  };
-
+  // ──────────────────────────────────────────────────────────────
+  // HANDLERS
+  // ──────────────────────────────────────────────────────────────
   const handleNotificationClick = async (notification: Notification) => {
     try {
       await notificationApi.markAsRead(notification.id);
-      setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
-      setUnreadCount((prev) => Math.max(0, prev - 1));
-      loadUnreadCount();
-      loadNotifications();
-
-      if (notification.relatedEntityType === 'job_application') {
-        router.push('/applications/my-applications');
-      } else if (notification.type === 'new_message' && notification.relatedEntityType === 'chat_conversation') {
-        router.push('/chat');
-      }
-
-      setNotificationOpen(false);
+      // Invalidate cache → tự động refetch
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.navbar(user!.id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.unread(user!.id) });
     } catch {
       // silent fail
     }
+
+    if (notification.relatedEntityType === 'job_application') {
+      router.push('/applications/my-applications');
+    } else if (notification.type === 'new_message' && notification.relatedEntityType === 'chat_conversation') {
+      router.push('/chat');
+    }
+    setNotificationOpen(false);
   };
 
   const handleMarkAllAsRead = async () => {
     if (!user?.id) return;
     try {
       await notificationApi.markAllAsRead(user.id);
-      loadUnreadCount();
-      loadNotifications();
+      // Invalidate cache → tự động refetch
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.navbar(user.id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.unread(user.id) });
     } catch {
       // silent fail
     }
   };
 
+  // ──────────────────────────────────────────────────────────────
+  // NOTIFICATION DROPDOWN CONTENT
+  // ──────────────────────────────────────────────────────────────
   const notificationContent = (
-    <div style={{ width: 350, maxHeight: 400, overflow: 'auto', background: '#fff', borderRadius: 14, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
-      <div style={{ padding: '14px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div style={{
+      width: 350, maxHeight: 400, overflow: 'auto',
+      background: '#fff', borderRadius: 14,
+      boxShadow: '0 8px 24px rgba(0,0,0,0.12)'
+    }}>
+      <div style={{
+        padding: '14px 16px', borderBottom: '1px solid #f0f0f0',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+      }}>
         <span style={{ fontWeight: 700, color: '#0b1220', fontSize: 15 }}>Thông báo</span>
-        {unreadCount > 0 && (
-          <Button type="link" size="small" onClick={handleMarkAllAsRead} style={{ color: '#16a34a', fontSize: 12 }}>
+        {navbarCount.notificationCount > 0 && (
+          <Button
+            type="link" size="small" onClick={handleMarkAllAsRead}
+            style={{ color: '#16a34a', fontSize: 12 }}
+          >
             Đánh dấu đã đọc tất cả
           </Button>
         )}
       </div>
-      {notifications.length === 0 ? (
+
+      {unreadNotifications.length === 0 ? (
         <div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>
           Không có thông báo mới
         </div>
       ) : (
         <List
-          dataSource={notifications}
+          dataSource={unreadNotifications.slice(0, 5)}
           renderItem={(item) => (
             <List.Item
+              key={item.id}
               style={{ cursor: 'pointer', padding: '12px 16px' }}
               onClick={() => handleNotificationClick(item)}
             >
               <List.Item.Meta
-                avatar={
-                  item.type === 'application_accepted' ? (
-                    <CheckCircleOutlined style={{ fontSize: 24, color: '#16a34a' }} />
-                  ) : item.type === 'application_rejected' ? (
-                    <CloseCircleOutlined style={{ fontSize: 24, color: '#ef4444' }} />
-                  ) : item.type === 'new_message' ? (
-                    <MessageOutlined style={{ fontSize: 24, color: '#3b82f6' }} />
-                  ) : (
-                    <BellOutlined style={{ fontSize: 24, color: '#16a34a' }} />
-                  )
-                }
+                avatar={<NotificationIcon type={item.type} />}
                 title={<span style={{ fontWeight: 500, color: '#0b1220' }}>{item.title}</span>}
                 description={
                   <div>
@@ -179,7 +195,8 @@ export const Navbar = () => {
           )}
         />
       )}
-      {notifications.length > 0 && (
+
+      {unreadNotifications.length > 0 && (
         <div style={{ padding: '12px 16px', borderTop: '1px solid #f0f0f0', textAlign: 'center' }}>
           <Button
             type="link"
@@ -193,27 +210,20 @@ export const Navbar = () => {
     </div>
   );
 
+  // ──────────────────────────────────────────────────────────────
+  // USER MENU ITEMS
+  // ──────────────────────────────────────────────────────────────
   const userMenuItems: MenuProps['items'] = [
-    {
-      key: '1',
-      label: 'Hồ sơ của tôi',
-      onClick: () => router.push('/profile')
-    },
-    {
-      key: 'settings',
-      label: 'Cài đặt tài khoản',
-      onClick: () => router.push('/settings/profile')
-    },
-    {
-      key: '2',
-      label: 'Tạo CV Online',
-      icon: <FileTextOutlined />,
-      onClick: () => router.push('/cv-builder')
-    },
+    { key: '1', label: 'Hồ sơ của tôi', onClick: () => router.push('/profile') },
+    { key: 'settings', label: 'Cài đặt tài khoản', onClick: () => router.push('/settings/profile') },
+    { key: '2', label: 'Tạo CV Online', icon: <FileTextOutlined />, onClick: () => router.push('/cv-builder') },
     { type: 'divider' },
     { key: '4', label: 'Đăng xuất', danger: true, onClick: logout },
   ];
 
+  // ──────────────────────────────────────────────────────────────
+  // MOBILE MENU ITEMS
+  // ──────────────────────────────────────────────────────────────
   const mobileMenuItems: MenuProps['items'] = [
     { key: '/', icon: <HomeOutlined />, label: 'Trang chủ', onClick: () => router.push('/') },
     { key: '/jobs', icon: <SearchOutlined />, label: 'Tìm việc làm', onClick: () => router.push('/jobs') },
@@ -221,6 +231,9 @@ export const Navbar = () => {
     { key: '/blog', icon: <FileTextOutlined />, label: 'Blog', onClick: () => router.push('/blog') },
   ];
 
+  // ──────────────────────────────────────────────────────────────
+  // RENDER
+  // ──────────────────────────────────────────────────────────────
   return (
     <Header
       style={{
@@ -240,30 +253,21 @@ export const Navbar = () => {
       }}
     >
       <div style={{ maxWidth: 1200, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+
         {/* Logo */}
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <div
-            style={{
-              width: 38,
-              height: 38,
-              borderRadius: 10,
-              background: 'linear-gradient(135deg, #16a34a, #22c55e)',
-              display: 'grid',
-              placeItems: 'center',
-              boxShadow: '0 4px 12px rgba(22,163,74,0.2)',
-            }}
-          >
+          <div style={{
+            width: 38, height: 38, borderRadius: 10,
+            background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+            display: 'grid', placeItems: 'center',
+            boxShadow: '0 4px 12px rgba(22,163,74,0.2)',
+          }}>
             <span style={{ color: '#fff', fontWeight: 700, fontSize: 18 }}>V</span>
           </div>
           <span style={{
-            fontSize: 22,
-            fontWeight: 800,
-            color: '#0f172a',
-            display: 'none',
+            fontSize: 22, fontWeight: 800, color: '#0f172a', display: 'none',
             letterSpacing: '-0.02em'
-          }}
-            className="logo-text"
-          >
+          }} className="logo-text">
             ViệcLàm<span style={{ color: '#16a34a' }}>24h</span>
           </span>
         </Link>
@@ -282,79 +286,59 @@ export const Navbar = () => {
               style={{
                 color: router.pathname === item.href ? '#16a34a' : '#475569',
                 fontWeight: router.pathname === item.href ? 700 : 500,
-                fontSize: 14,
-                textDecoration: 'none',
-                transition: 'all 0.2s',
+                fontSize: 14, textDecoration: 'none', transition: 'all 0.2s',
               }}
             >
               {item.label}
             </Link>
           ))}
+
           {isAuthenticated && (
             <Link
               href="/saved-items"
               style={{
                 color: router.pathname === '/saved-items' ? '#16a34a' : '#475569',
                 fontWeight: router.pathname === '/saved-items' ? 700 : 500,
-                fontSize: 14,
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                transition: 'all 0.2s',
+                fontSize: 14, textDecoration: 'none',
+                display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.2s',
               }}
             >
               Thư mục đã lưu
-              {savedItemsCount > 0 && (
+              {savedItemsTotal > 0 && (
                 <span style={{
-                  minWidth: 20,
-                  height: 20,
-                  borderRadius: 10,
-                  background: '#16a34a',
-                  color: '#fff',
-                  fontSize: 11,
-                  fontWeight: 700,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  minWidth: 20, height: 20, borderRadius: 10,
+                  background: '#16a34a', color: '#fff',
+                  fontSize: 11, fontWeight: 700,
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                   padding: '0 6px',
                 }}>
-                  {savedItemsCount}
+                  {savedItemsTotal}
                 </span>
               )}
             </Link>
           )}
+
           {isAuthenticated && (
             <Link
               href="/chat"
               style={{
                 color: router.pathname === '/chat' ? '#16a34a' : '#475569',
                 fontWeight: router.pathname === '/chat' ? 700 : 500,
-                fontSize: 14,
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                transition: 'all 0.2s',
+                fontSize: 14, textDecoration: 'none',
+                display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.2s',
               }}
             >
               <MessageOutlined style={{ fontSize: 14 }} />
               Tin nhắn
-              {chatUnreadCount > 0 && (
+              {navbarCount.chatCount > 0 && (
                 <span style={{
-                  minWidth: 20,
-                  height: 20,
-                  borderRadius: 10,
-                  background: '#ef4444',
-                  color: '#fff',
-                  fontSize: 11,
-                  fontWeight: 700,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  minWidth: 20, height: 20, borderRadius: 10,
+                  background: '#ef4444', color: '#fff',
+                  fontSize: 11, fontWeight: 700,
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                   padding: '0 6px',
                 }}>
-                  {chatUnreadCount > 99 ? '99+' : chatUnreadCount}
+                  {navbarCount.chatCount > 99 ? '99+' : navbarCount.chatCount}
                 </span>
               )}
             </Link>
@@ -363,6 +347,7 @@ export const Navbar = () => {
 
         {/* Right Section */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+
           {/* Mobile Menu */}
           <div className="mobile-menu">
             <Dropdown menu={{ items: mobileMenuItems }} placement="bottomRight">
@@ -376,16 +361,12 @@ export const Navbar = () => {
 
           {!isAuthenticated ? (
             <Button
-              type="primary"
-              size="large"
+              type="primary" size="large"
               onClick={() => router.push('/login')}
               style={{
-                height: 40,
-                borderRadius: 10,
+                height: 40, borderRadius: 10,
                 background: 'linear-gradient(135deg, #16a34a, #22c55e)',
-                border: 'none',
-                fontWeight: 700,
-                fontSize: 14,
+                border: 'none', fontWeight: 700, fontSize: 14,
                 boxShadow: '0 4px 12px rgba(22,163,74,0.2)',
               }}
             >
@@ -400,18 +381,11 @@ export const Navbar = () => {
                 open={notificationOpen}
                 onOpenChange={setNotificationOpen}
               >
-                <Badge count={unreadCount} size="small" offset={[-2, 2]}>
+                <Badge count={navbarCount.notificationCount} size="small" offset={[-2, 2]}>
                   <Button
                     type="text"
                     icon={<BellOutlined style={{ fontSize: 18, color: '#475569' }} />}
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 10,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
+                    style={{ width: 40, height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   />
                 </Badge>
               </Dropdown>
@@ -432,8 +406,7 @@ export const Navbar = () => {
                     icon={!user?.avatarUrl && <UserOutlined />}
                     style={{
                       background: 'linear-gradient(135deg, #16a34a, #22c55e)',
-                      cursor: 'pointer',
-                      boxShadow: '0 2px 8px rgba(22,163,74,0.3)',
+                      cursor: 'pointer', boxShadow: '0 2px 8px rgba(22,163,74,0.3)',
                       border: '2px solid #ffffff',
                     }}
                     size={40}
@@ -455,9 +428,7 @@ export const Navbar = () => {
           .mobile-menu { display: flex !important; }
           .user-info-desktop { display: none !important; }
         }
-        .desktop-nav a:hover {
-          color: #16a34a !important;
-        }
+        .desktop-nav a:hover { color: #16a34a !important; }
       `}</style>
     </Header>
   );

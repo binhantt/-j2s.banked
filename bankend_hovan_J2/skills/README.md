@@ -32,6 +32,7 @@ Mỗi feature có prefix riêng tránh trùng:
 
 | Prefix | Feature |
 |--------|---------|
+| SC | Security — Bảo mật (Rate Limit, JWT) |
 | US | Users — Quản lý tài khoản |
 | DM | Domains — Quản lý lĩnh vực |
 | BL | Blog — Quản lý blog |
@@ -55,6 +56,14 @@ http://localhost:8080/api
 ```
 
 ## Features
+
+### Security (SC) — Bảo mật & Rate Limit
+
+| # | Skill | Thư mục |
+|---|-------|---------|
+| 01 | Cấu hình Rate Limit từ application.yml | `features/security/01-rate-limit-config/` |
+| 02 | JWT Security Hardening (Refresh Token Rotation + Blacklist) | `features/security/02-jwt-security/` |
+| 03 | Endpoint-Specific Rate Limit (auth strict / read loose) | `features/security/03-endpoint-rate-limit/` |
 
 ### Users (US) — Quản lý tài khoản
 

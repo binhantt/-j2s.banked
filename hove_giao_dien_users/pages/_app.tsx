@@ -5,6 +5,8 @@ import '../styles/profile.css';
 import theme from '../theme/themeConfig';
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/lib/queryClient';
 
 // Đọc banned message NGAY khi module load, trước cả React render
 const bannedMessageOnLoad = (() => {
@@ -48,9 +50,11 @@ const App = ({ Component, pageProps }: AppProps) => {
   }, [checkBannedStatus]);
 
   return (
-    <ConfigProvider theme={theme}>
-      <Component {...pageProps} />
-    </ConfigProvider>
+    <QueryClientProvider client={queryClient}>
+      <ConfigProvider theme={theme}>
+        <Component {...pageProps} />
+      </ConfigProvider>
+    </QueryClientProvider>
   );
 };
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Card, Button, Table, Modal, Form, Input, Upload, message, Tag, Space, Popconfirm, Select, Tooltip, notification } from 'antd';
+import { Card, Button, Table, Modal, Form, Input, Upload, message, Tag, Space, Popconfirm, Select, Tooltip, notification, Typography } from 'antd';
+const { Text } = Typography;
 import { UploadOutlined, PlusOutlined, DeleteOutlined, EyeOutlined, StarOutlined, StarFilled, EditOutlined, FilePdfOutlined, FileWordOutlined, FileTextOutlined, ShareAltOutlined, CopyOutlined } from '@ant-design/icons';
 import { cvApi, CV } from '@/lib/cvApi';
 import { uploadApi } from '@/lib/uploadApi';
@@ -12,6 +13,7 @@ export const CVManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCV, setEditingCV] = useState<CV | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [form] = Form.useForm();
   const { user } = useAuthStore();
 
@@ -73,10 +75,13 @@ export const CVManagement = () => {
     }
 
     setUploading(true);
+    setUploadProgress(0);
     try {
       const title = form.getFieldValue('title') || file.name.replace(/\.[^/.]+$/, '');
-      const result = await uploadApi.uploadCV(file, user!.id, title);
-      
+      const result = await uploadApi.uploadCV(file, user!.id, title, (percent) => {
+        setUploadProgress(percent);
+      });
+
       // Lưu ID của CV đã được tạo tự động
       form.setFieldsValue({
         cvId: result.id,
@@ -84,12 +89,13 @@ export const CVManagement = () => {
         fileName: result.filename,
         fileSize: result.size,
       });
-      
+
       message.success('Upload CV thành công!');
     } catch (error: any) {
       message.error(error.response?.data?.error || 'Upload thất bại');
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
 
     return false;
@@ -460,7 +466,16 @@ export const CVManagement = () => {
                       gap: 8
                     }}
                   >
-                    {uploading ? 'Đang xử lý tệp...' : <><UploadOutlined style={{ fontSize: 24, color: '#16a34a' }} /> <Text style={{ color: '#64748b' }}>Kéo thả hoặc click để chọn file</Text></>}
+                    {uploading ? (
+                      <>
+                        <Text style={{ color: '#16a34a', fontWeight: 600 }}>Đang tải lên... {uploadProgress}%</Text>
+                        <div style={{ width: '100%', height: 6, background: '#e5e7eb', borderRadius: 3, marginTop: 8, overflow: 'hidden' }}>
+                          <div style={{ width: `${uploadProgress}%`, height: '100%', background: 'linear-gradient(90deg, #16a34a, #22c55e)', borderRadius: 3, transition: 'width 0.2s ease' }} />
+                        </div>
+                      </>
+                    ) : (
+                      <><UploadOutlined style={{ fontSize: 24, color: '#16a34a' }} /> <Text style={{ color: '#64748b' }}>Kéo thả hoặc click để chọn file</Text></>
+                    )}
                   </Button>
                 </Upload>
                 <div style={{ marginTop: 12, fontSize: 12, color: '#94a3b8', textAlign: 'center' }}>

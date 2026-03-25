@@ -23,11 +23,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
     private final UserRepository userRepository;
+    private final TokenBlacklistService tokenBlacklistService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public JwtAuthenticationFilter(JwtProvider jwtProvider, UserRepository userRepository) {
+    public JwtAuthenticationFilter(JwtProvider jwtProvider,
+                                  UserRepository userRepository,
+                                  TokenBlacklistService tokenBlacklistService) {
         this.jwtProvider = jwtProvider;
         this.userRepository = userRepository;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @Override
@@ -50,6 +54,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
+            // --- Blacklist check (SC-02) ---
+            String jti = jwtProvider.getJtiFromToken(token);
+            if (tokenBlacklistService != null && tokenBlacklistService.isBlacklisted(jti)) {
+                // Token đã bị revoke — coi như invalid
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             Long userId = jwtProvider.getUserIdFromToken(token);
             User user = userRepository.findById(userId).orElse(null);
 
@@ -93,7 +105,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        // Skip filter for auth endpoints (login, register, OAuth callbacks)
         return path.startsWith("/api/auth/");
     }
 }

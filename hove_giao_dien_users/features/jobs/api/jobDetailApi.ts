@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+import { api } from '@/lib/api'; // Dùng api singleton có interceptor → auto-refresh token, handle 403 banned
 
 export interface JobDetail {
   id: number;
@@ -28,41 +26,21 @@ export interface JobDetail {
 
 class JobDetailApiService {
   async getJobDetail(id: number): Promise<JobDetail> {
-    try {
-      const response = await axios.get(`${API_URL}/api/jobs/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error('Get job detail error:', error);
-      throw error;
-    }
+    const response = await api.get(`/api/jobs/${id}`);
+    return response.data;
   }
 
   async incrementViews(id: number): Promise<void> {
-    try {
-      await axios.put(`${API_URL}/api/jobs/${id}/view`);
-    } catch (error) {
-      console.error('Increment views error:', error);
-    }
+    await api.put(`/api/jobs/${id}/view`);
   }
 
   async updateJobStatus(id: number, status: 'active' | 'closed'): Promise<JobDetail> {
-    try {
-      const response = await axios.put(`${API_URL}/api/jobs/${id}/toggle-status`);
-      return response.data;
-    } catch (error) {
-      console.error('Update job status error:', error);
-      throw error;
-    }
+    const response = await api.put(`/api/jobs/${id}/toggle-status`);
+    return response.data;
   }
 
   async saveJob(jobId: number, userId: number): Promise<void> {
-    try {
-      // TODO: Implement save job API when backend is ready
-      await axios.post(`${API_URL}/api/saved-jobs`, { jobId, userId });
-    } catch (error) {
-      console.error('Save job error:', error);
-      throw error;
-    }
+    await api.post('/api/saved-jobs', { jobId, userId });
   }
 }
 

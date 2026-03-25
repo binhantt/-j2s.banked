@@ -59,6 +59,8 @@ export const useAuthStore = create<AuthStore>()(
           }
           return false;
         } catch {
+          // Nếu interceptor đã xử lý banned (403 + handleLogout) → đã redirect rồi
+          // Không làm gì thêm
           return false;
         }
       },

@@ -101,3 +101,34 @@ logging:
     com.example.bankend_hovan_J2: INFO
     org.hibernate.SQL: WARN
     org.springframework.web: INFO
+
+rate-limit:
+  enabled: true
+  whitelist-paths: |
+    /api/notifications/,
+    /api/auth/,
+    /api/upload/,
+    /api/cv/,
+    /uploads/,
+    /api/health
+
+  group:
+    auth-strict:               # /api/auth/login, /api/auth/register — chống brute-force
+      limit: 5
+      window-seconds: 60
+
+    auth:                      # /api/auth/** (khác)
+      limit: 10
+      window-seconds: 60
+
+    read:                      # GET /api/jobs, /api/companies, /api/blog, /api/domains
+      limit: 200
+      window-seconds: 60
+
+    write:                     # POST/PUT/PATCH/DELETE non-auth
+      limit: 20
+      window-seconds: 60
+
+    default:                    # Fallback
+      limit: 100
+      window-seconds: 60

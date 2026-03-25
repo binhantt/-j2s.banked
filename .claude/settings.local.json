@@ -20,7 +20,15 @@
       "Bash(npm run:*)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/chat)",
       "Read(//d//**)",
-      "Bash(dir)"
+      "Bash(dir)",
+      "Bash(mkdir -p \"d:/DOANJ2/bankend_hovan_J2/skills/features/security/01-rate-limit-config/scripts\")",
+      "Bash(mkdir -p \"d:/DOANJ2/bankend_hovan_J2/skills/features/security/01-rate-limit-config/references\")",
+      "Bash(mkdir -p \"d:/DOANJ2/bankend_hovan_J2/skills/features/security/02-jwt-security/scripts\")",
+      "Bash(mkdir -p \"d:/DOANJ2/bankend_hovan_J2/skills/features/security/02-jwt-security/references\")",
+      "Bash(mkdir -p \"d:/DOANJ2/bankend_hovan_J2/skills/features/security/03-endpoint-rate-limit/scripts\")",
+      "Bash(mvn compile:*)",
+      "Bash(npm install:*)",
+      "Bash(findstr /i \"docker deploy config script package\")"
     ]
   }
 }

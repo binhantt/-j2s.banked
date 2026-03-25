@@ -46,6 +46,8 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // ── Check if banned (403 with banned: true) ──
+    // Backend trả 403 khi admin khóa tài khoản user
+    // (JwtAuthenticationFilter + AuthController.refresh đều trả 403 này)
     if (error.response?.status === 403 && error.response?.data?.banned === true) {
       const bannedMessage = error.response?.data?.message || 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.';
       handleLogout(bannedMessage);
@@ -59,13 +61,19 @@ api.interceptors.response.use(
       const refreshToken = localStorage.getItem('refreshToken');
       if (refreshToken) {
         try {
-          const response = await axios.post(`${API_URL}/api/auth/refresh`, {
+          // ╔══════════════════════════════════════════════════════════╗
+          // ║  FIX LỖI 2: Dùng api (có interceptor) thay vì axios  ║
+          // ║  → Nếu backend trả 403+banned → interceptor tự bắt   ║
+          // ║    → handleLogout → redirect /login                    ║
+          // ╚══════════════════════════════════════════════════════════╝
+          const response = await api.post('/api/auth/refresh', {
             refreshToken
           });
 
           const { token, refreshToken: newRefreshToken } = response.data;
 
-          // ── Check if refresh returned banned empty response ──
+          // Check if refresh returned banned (shouldn't happen now since backend
+          // returns 403, but keep as safety net)
           if (!token || !response.data?.userId) {
             handleLogout('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.');
             return Promise.reject(new Error('banned'));
@@ -79,7 +87,7 @@ api.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${token}`;
           return api(originalRequest);
         } catch (refreshError: any) {
-          // Refresh failed, logout user
+          // Refresh failed → logout user
           handleLogout();
           return Promise.reject(refreshError);
         }
@@ -112,17 +120,34 @@ export const authApi = {
   },
 
   /** Dùng /api/auth/refresh để kiểm tra tài khoản có bị banned không.
-   *  Trả về { banned: true } nếu bị banned, hoặc {} nếu bình thường. */
+   *  Trả về { banned: true } nếu bị banned, hoặc {} nếu bình thường.
+   *
+   *  ╔══════════════════════════════════════════════════════════════════╗
+   *  ║  FIX LỖI 2: Dùng api (có interceptor) thay vì axios thuần   ║
+   *  ║  → Nếu backend trả 403+banned → interceptor xử lý           ║
+   *  ║    handleLogout() → redirect /login → KHÔNG chạy tiếp       ║
+   *  ║  ║  → interceptor throw error → catch ở đây → return banned   ║
+   *  ╚══════════════════════════════════════════════════════════════════╝
+   */
   checkStatus: async (token?: string | null): Promise<{ banned?: boolean }> => {
     const refreshToken = localStorage.getItem('refreshToken');
     if (!refreshToken) return {};
-    const response = await axios.post(`${API_URL}/api/auth/refresh`, {
-      refreshToken,
-    });
-    // Nếu backend trả empty DTO với null token → tài khoản bị banned
-    if (!response.data?.token) {
-      return { banned: true };
+    try {
+      const response = await api.post('/api/auth/refresh', {
+        refreshToken,
+      });
+      // Nếu backend trả empty DTO với null token → tài khoản bị banned
+      if (!response.data?.token) {
+        return { banned: true };
+      }
+      return {};
+    } catch (error: any) {
+      // Nếu interceptor đã xử lý banned (redirect) → interceptor không throw
+      // Nếu backend trả lỗi khác → coi như không banned (để interceptor xử lý)
+      // Chỉ return banned=true khi backend trả đúng signal
+      const isBanned = error.response?.data?.banned === true;
+      if (isBanned) return { banned: true };
+      return {};
     }
-    return {};
   },
 };

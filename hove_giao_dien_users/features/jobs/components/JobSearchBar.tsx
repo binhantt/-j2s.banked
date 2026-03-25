@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Input, Select, Button } from 'antd';
 import { SearchOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { jobApiService } from '../api/jobApi';
+import { useDebouncedCallback } from '@/hooks/useDebouncedSearch';
 
 interface JobSearchBarProps {
   searchText: string;
@@ -28,6 +29,13 @@ export default function JobSearchBar({
     });
   }, []);
 
+  // ╔══════════════════════════════════════════════════════════════════╗
+  // ║  DEBOUNCE: onSearchChange chỉ trigger search khi user NGỪNG GÕ  ║
+  // ║  Thay vì gọi API mỗi lần user gõ 1 ký tự                     ║
+  // ║  → Chỉ gọi API 1 lần sau 400ms user không gõ                   ║
+  // ╚══════════════════════════════════════════════════════════════════╝
+  const debouncedSearch = useDebouncedCallback(onSearchChange, 400);
+
   const locationOptions = [
     { value: 'all', label: 'Toàn quốc' },
     ...locations.map((loc) => ({ value: loc, label: loc })),
@@ -52,7 +60,7 @@ export default function JobSearchBar({
           border: '1px solid rgba(0,0,0,0.04)',
           flexWrap: 'wrap',
         }}>
-          {/* Keyword Search */}
+          {/* Keyword Search — debounced */}
           <div style={{ flex: 1, minWidth: 280, display: 'flex', alignItems: 'center', padding: '0 12px' }}>
             <SearchOutlined style={{ color: '#16a34a', fontSize: 18, marginRight: 12 }} />
             <Input
@@ -60,7 +68,8 @@ export default function JobSearchBar({
               placeholder="Từ khóa, chức danh hoặc công ty..."
               style={{ fontSize: 15, width: '100%' }}
               value={searchText}
-              onChange={(e) => onSearchChange(e.target.value)}
+              // Dùng debounced callback → không gọi onSearchChange mỗi ký tự
+              onChange={(e) => debouncedSearch(e.target.value)}
               onPressEnter={onSearch}
               allowClear
             />

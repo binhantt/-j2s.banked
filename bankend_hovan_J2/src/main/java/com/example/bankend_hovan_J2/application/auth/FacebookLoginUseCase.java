@@ -28,8 +28,8 @@ public class FacebookLoginUseCase {
     }
 
     @Transactional
-    public AuthResponseDTO execute(String accessToken, String userType) {
-        FacebookTokenVerifier.FacebookUserInfo userInfo = facebookTokenVerifier.verify(accessToken);
+    public AuthResponseDTO execute(String fbAccessToken, String userType) {
+        FacebookTokenVerifier.FacebookUserInfo userInfo = facebookTokenVerifier.verify(fbAccessToken);
         
         String facebookId = userInfo.getId();
         String email = userInfo.getEmail();
@@ -67,17 +67,16 @@ public class FacebookLoginUseCase {
             throw new RuntimeException("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.");
         }
 
-        String jwtAccessToken = jwtProvider.generateAccessToken(
-            user.getId(), 
+        String accessToken = jwtProvider.generateAccessToken(
+            user.getId(),
             user.getEmail().getValue(),
             user.getUserType()
         );
-        
-        String refreshToken = jwtProvider.generateRefreshToken(user.getId());
 
+        // Refresh token được tạo và lưu bởi RefreshTokenService trong AuthController
         return new AuthResponseDTO(
-            jwtAccessToken,
-            refreshToken,
+            accessToken,
+            null,
             user.getId(),
             user.getEmail().getValue(),
             user.getName(),

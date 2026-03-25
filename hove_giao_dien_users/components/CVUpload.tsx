@@ -13,6 +13,7 @@ interface CVUploadProps {
 export const CVUpload = ({ value, onChange }: CVUploadProps) => {
   const [uploadedCV, setUploadedCV] = useState<{ url: string; filename: string } | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [manualUrl, setManualUrl] = useState(value || '');
   const [savedCVs, setSavedCVs] = useState<CV[]>([]);
   const [selectedCVId, setSelectedCVId] = useState<number | null>(null);
@@ -72,9 +73,12 @@ export const CVUpload = ({ value, onChange }: CVUploadProps) => {
     }
 
     setUploading(true);
+    setUploadProgress(0);
     try {
       const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
-      const result = await uploadApi.uploadCV(file, user.id, fileNameWithoutExt);
+      const result = await uploadApi.uploadCV(file, user.id, fileNameWithoutExt, (percent) => {
+        setUploadProgress(percent);
+      });
       
       const fullUrl = uploadApi.getFileUrl(result.url);
       setUploadedCV({ url: result.url, filename: result.filename });
@@ -88,6 +92,7 @@ export const CVUpload = ({ value, onChange }: CVUploadProps) => {
       message.error(error.response?.data?.error || error.message || 'Upload thất bại');
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
 
     return false;
@@ -222,10 +227,15 @@ export const CVUpload = ({ value, onChange }: CVUploadProps) => {
                 cursor: uploading ? 'not-allowed' : 'pointer',
                 }}
               >
-                <UploadOutlined style={{ fontSize: 34, color: '#16a34a', marginBottom: 8 }} />
+                <UploadOutlined style={{ fontSize: 34, color: uploading ? '#94a3b8' : '#16a34a', marginBottom: 8 }} />
                 <div style={{ fontSize: 15, fontWeight: 600, color: '#111827', marginBottom: 4 }}>
-                  {uploading ? 'Đang upload CV...' : 'Chọn file CV để upload'}
+                  {uploading ? `Đang upload CV... ${uploadProgress}%` : 'Chọn file CV để upload'}
                 </div>
+                {uploading && (
+                  <div style={{ width: '100%', height: 6, background: '#e5e7eb', borderRadius: 3, marginTop: 10, overflow: 'hidden' }}>
+                    <div style={{ width: `${uploadProgress}%`, height: '100%', background: 'linear-gradient(90deg, #16a34a, #22c55e)', borderRadius: 3, transition: 'width 0.2s ease' }} />
+                  </div>
+                )}
                 <div style={{ fontSize: 12, color: '#6b7280' }}>
                   Hỗ trợ PDF/DOC/DOCX • Tối đa 10MB
                 </div>
