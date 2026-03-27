@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import { useAuthStore } from '@/store/useAuthStore';
 import Link from 'next/link';
 
+
 declare global {
   interface Window {
     google?: any;
@@ -27,7 +28,15 @@ export default function LoginPage() {
   const [userType, setUserType] = useState<UserType>('job_seeker');
   const [bannedMsg, setBannedMsg] = useState(bannedMessageOnLoad);
   const router = useRouter();
-  const { googleLogin, githubLogin } = useAuthStore();
+  const { googleLogin, githubLogin, isAuthenticated, _hasHydrated } = useAuthStore();
+
+  // Redirect away from login page if already authenticated
+  useEffect(() => {
+    if (_hasHydrated && isAuthenticated) {
+      const redirect = (router.query.redirect as string) || '/';
+      router.replace(redirect);
+    }
+  }, [_hasHydrated, isAuthenticated, router]);
 
   // Hiện message ngay khi component mount (không chờ Zustand rehydrate)
   useEffect(() => {

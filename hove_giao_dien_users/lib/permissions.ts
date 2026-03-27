@@ -1,6 +1,6 @@
 // Permission system based on user types
 
-export type UserType = 'job_seeker' | 'freelancer' | 'hr';
+export type UserType = 'job_seeker' | 'freelancer' | 'hr' | 'admin' | 'super_admin';
 
 export interface Permission {
   canPostJob: boolean;
@@ -31,6 +31,20 @@ export const PERMISSIONS: Record<UserType, Permission> = {
     canApplyJob: true,
     canCreateCV: true,
     canPostFreelanceProject: false,
+    canApplyFreelance: true,
+  },
+  admin: {
+    canPostJob: true,
+    canApplyJob: true,
+    canCreateCV: true,
+    canPostFreelanceProject: true,
+    canApplyFreelance: true,
+  },
+  super_admin: {
+    canPostJob: true,
+    canApplyJob: true,
+    canCreateCV: true,
+    canPostFreelanceProject: true,
     canApplyFreelance: true,
   },
 };

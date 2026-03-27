@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Input, Button, Avatar, message, Empty, Card, Typography, Tag, Upload } from 'antd';
 import type { UploadProps } from 'antd';
 import {
@@ -40,7 +40,13 @@ function ChatPageContent() {
   const router = useRouter();
   const { user, _hasHydrated } = useAuthStore();
   const { id } = router.query;
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 80);
+  };
   useEffect(() => {
     console.log('[ChatPage] _hasHydrated:', _hasHydrated, '| user:', user, '| user.id:', user?.id);
     if (_hasHydrated && user?.id) {
@@ -106,7 +112,7 @@ function ChatPageContent() {
   const handleSelectConversation = (conv: any) => {
     setSelectedConversation(conv);
     router.push(`/chat/${conv.id}`, undefined, { shallow: true, scroll: false });
-    loadMessages(conv.id, true);
+    loadMessages(conv.id, true).then(() => scrollToBottom());
   };
 
   const handleSend = async () => {
@@ -130,6 +136,7 @@ function ChatPageContent() {
       setNewMessage('');
       setReplyingTo(null);
       await loadMessages(selectedConversation.id, false);
+      scrollToBottom();
     } catch {
       message.error('Không thể gửi tin nhắn');
     } finally {
@@ -183,11 +190,16 @@ function ChatPageContent() {
 
   return (
     <div style={{ background: '#f8fafc', minHeight: 'calc(100vh - 64px)' }}>
+      {/* Hide all scrollbars globally for this layout */}
+      <style>{`
+        .chat-scroll::-webkit-scrollbar { display: none; }
+        .chat-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+      `}</style>
       <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
         <div className="mb-10 text-center">
-          <h1 style={{ 
-            fontSize: 'clamp(24px, 5vw, 40px)', 
-            fontWeight: 800, 
+          <h1 style={{
+            fontSize: 'clamp(24px, 5vw, 40px)',
+            fontWeight: 800,
             background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
@@ -208,9 +220,9 @@ function ChatPageContent() {
           }}
           styles={{ body: { padding: 0 } }}
         >
-          <div className="grid min-h-[75vh] grid-cols-1 lg:grid-cols-[360px_1fr]">
+          <div className="grid h-[80vh] grid-cols-1 lg:grid-cols-[360px_1fr]">
             {/* Sidebar */}
-            <aside style={{ borderRight: '1px solid #f1f5f9', background: '#fff' }}>
+            <aside style={{ borderRight: '1px solid #f1f5f9', background: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
               <div style={{ padding: '24px', borderBottom: '1px solid #f1f5f9' }}>
                 <div style={{ position: 'relative' }}>
                   <Input
@@ -219,9 +231,9 @@ function ChatPageContent() {
                     prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    style={{ 
-                      borderRadius: 16, 
-                      background: '#f8fafc', 
+                    style={{
+                      borderRadius: 16,
+                      background: '#f8fafc',
                       border: '1px solid #e2e8f0',
                       padding: '10px 16px'
                     }}
@@ -229,7 +241,7 @@ function ChatPageContent() {
                 </div>
               </div>
 
-              <div style={{ maxHeight: '65vh', overflowY: 'auto', padding: '12px' }}>
+              <div className="chat-scroll" style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
                 {filteredConversations.length === 0 ? (
                   <div style={{ padding: '40px 20px', textAlign: 'center' }}>
                     <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chưa có cuộc trò chuyện" />
@@ -259,7 +271,7 @@ function ChatPageContent() {
                             size={48}
                             src={conv.authorAvatar}
                             icon={<UserOutlined />}
-                            style={{ 
+                            style={{
                               background: isSelected ? '#16a34a' : '#f1f5f9',
                               color: isSelected ? '#fff' : '#64748b',
                               flexShrink: 0,
@@ -269,8 +281,8 @@ function ChatPageContent() {
                           />
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 2 }}>
-                              <Text style={{ 
-                                fontWeight: isSelected ? 700 : 600, 
+                              <Text style={{
+                                fontWeight: isSelected ? 700 : 600,
                                 color: isSelected ? '#166534' : '#0f172a',
                                 fontSize: 15
                               }} ellipsis>
@@ -280,8 +292,8 @@ function ChatPageContent() {
                                 {new Date(conv.updatedAt).toLocaleDateString('vi-VN')}
                               </Text>
                             </div>
-                            <Text style={{ 
-                              fontSize: 13, 
+                            <Text style={{
+                              fontSize: 13,
                               color: isSelected ? '#15803d' : '#64748b',
                               display: 'block'
                             }} ellipsis>
@@ -297,7 +309,7 @@ function ChatPageContent() {
             </aside>
 
             {/* Chat Area */}
-            <section style={{ display: 'flex', flexDirection: 'column', background: '#f8fafc' }}>
+            <section style={{ display: 'flex', flexDirection: 'column', background: '#f8fafc', flex: 1, overflow: 'hidden' }}>
               {!selectedConversation ? (
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, opacity: 0.6 }}>
                   <div style={{ width: 80, height: 80, background: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
@@ -309,19 +321,19 @@ function ChatPageContent() {
               ) : (
                 <>
                   {/* Chat Header */}
-                  <div style={{ 
-                    padding: '20px 32px', 
-                    background: '#fff', 
+                  <div style={{
+                    padding: '20px 32px',
+                    background: '#fff',
                     borderBottom: '1px solid #f1f5f9',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center'
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                      <Avatar 
-                        size={44} 
-                        icon={<UserOutlined />} 
-                        style={{ background: '#16a34a', boxShadow: '0 4px 12px rgba(22, 163, 74, 0.2)' }} 
+                      <Avatar
+                        size={44}
+                        icon={<UserOutlined />}
+                        style={{ background: '#16a34a', boxShadow: '0 4px 12px rgba(22, 163, 74, 0.2)' }}
                       />
                       <div>
                         <div style={{ fontWeight: 800, fontSize: 18, color: '#0f172a', lineHeight: 1.2 }}>
@@ -336,7 +348,7 @@ function ChatPageContent() {
                   </div>
 
                   {/* Messages Stream */}
-                  <div style={{ flex: 1, overflowY: 'auto', padding: '32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <div className="chat-scroll" style={{ flex: 1, overflowY: 'auto', padding: '32px', display: 'flex', flexDirection: 'column', gap: 16, minHeight: 0 }}>
                     {messages.length === 0 ? (
                       <div style={{ textAlign: 'center', padding: '40px 0' }}>
                         <Empty description={<span style={{ color: '#94a3b8' }}>Chưa có tin nhắn nào trong cuộc hội thoại này</span>} />
@@ -347,16 +359,16 @@ function ChatPageContent() {
                         return (
                           <div
                             key={index}
-                            style={{ 
-                              display: 'flex', 
+                            style={{
+                              display: 'flex',
                               justifyContent: isMe ? 'flex-end' : 'flex-start',
                               animation: 'fadeIn 0.3s ease-out'
                             }}
                           >
                             <div style={{ maxWidth: '75%' }}>
                               {msg.replyToMessage && (
-                                <div style={{ 
-                                  padding: '8px 16px', 
+                                <div style={{
+                                  padding: '8px 16px',
                                   background: isMe ? 'rgba(22, 163, 74, 0.1)' : '#f1f5f9',
                                   borderLeft: '4px solid #16a34a',
                                   borderRadius: '12px 12px 0 0',
@@ -370,7 +382,7 @@ function ChatPageContent() {
                                   <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{msg.replyToMessage}</div>
                                 </div>
                               )}
-                              
+
                               <div style={{
                                 padding: '12px 20px',
                                 borderRadius: isMe ? '24px 24px 4px 24px' : '24px 24px 24px 4px',
@@ -391,11 +403,11 @@ function ChatPageContent() {
                                     msg.message
                                   )}
                                 </div>
-                                
-                                <div style={{ 
-                                  marginTop: 8, 
-                                  display: 'flex', 
-                                  justifyContent: 'space-between', 
+
+                                <div style={{
+                                  marginTop: 8,
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
                                   alignItems: 'center',
                                   fontSize: 11,
                                   opacity: isMe ? 0.8 : 0.5
@@ -404,9 +416,9 @@ function ChatPageContent() {
                                     <ClockCircleOutlined />
                                     {new Date(msg.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
                                   </div>
-                                  <Button 
-                                    type="text" 
-                                    size="small" 
+                                  <Button
+                                    type="text"
+                                    size="small"
                                     onClick={() => setReplyingTo(msg)}
                                     style={{ color: isMe ? '#fff' : '#16a34a', padding: '0 4px', height: 'auto', fontSize: 11, fontWeight: 700 }}
                                   >
@@ -419,14 +431,15 @@ function ChatPageContent() {
                         );
                       })
                     )}
+                    <div ref={messagesEndRef} style={{ height: 1 }} />
                   </div>
 
                   {/* Input Component */}
                   <div style={{ padding: '24px', background: '#fff', borderTop: '1px solid #f1f5f9' }}>
                     {replyingTo && (
-                      <div style={{ 
-                        marginBottom: 16, padding: '12px 16px', background: '#f0fdf4', borderLeft: '4px solid #16a34a', 
-                        borderRadius: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' 
+                      <div style={{
+                        marginBottom: 16, padding: '12px 16px', background: '#f0fdf4', borderLeft: '4px solid #16a34a',
+                        borderRadius: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                       }}>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <span style={{ fontSize: 12, fontWeight: 700, color: '#16a34a', display: 'block' }}>Đang trả lời tin nhắn:</span>
@@ -435,15 +448,15 @@ function ChatPageContent() {
                         <Button type="text" shape="circle" icon={<CloseOutlined />} onClick={() => setReplyingTo(null)} style={{ color: '#16a34a' }} />
                       </div>
                     )}
-                    
+
                     <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
                       <Upload accept="image/*" showUploadList={false} beforeUpload={handleSendImage}>
-                        <Button 
-                          icon={<PictureOutlined />} 
-                          style={{ 
-                            height: 48, width: 48, borderRadius: 16, border: '1px solid #e2e8f0', 
-                            background: '#f8fafc', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center' 
-                          }} 
+                        <Button
+                          icon={<PictureOutlined />}
+                          style={{
+                            height: 48, width: 48, borderRadius: 16, border: '1px solid #e2e8f0',
+                            background: '#f8fafc', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                          }}
                         />
                       </Upload>
                       <Input.TextArea
@@ -452,9 +465,9 @@ function ChatPageContent() {
                         onPressEnter={(e) => { if (!e.shiftKey) { e.preventDefault(); handleSend(); } }}
                         placeholder="Nhập nội dung tin nhắn..."
                         autoSize={{ minRows: 1, maxRows: 4 }}
-                        style={{ 
-                          borderRadius: 20, padding: '12px 20px', border: '1px solid #e2e8f0', 
-                          background: '#f8fafc', fontSize: 15 
+                        style={{
+                          borderRadius: 20, padding: '12px 20px', border: '1px solid #e2e8f0',
+                          background: '#f8fafc', fontSize: 15
                         }}
                       />
                       <Button

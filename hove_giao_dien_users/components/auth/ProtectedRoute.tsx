@@ -19,13 +19,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const router = useRouter();
   const { isAuthenticated, user, _hasHydrated } = useAuthStore();
-  // Chờ Zustand rehydrate xong trước khi check auth
-  // Nếu không có check này → F5 reload → isAuthenticated=false (chưa đọc localStorage)
-  // → redirect /login ngay lập tức → user bị đẩy ra ngoài ý muốn
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    // Đợi Zustand persist rehydrate xong
     if (_hasHydrated) {
       setHydrated(true);
     }
