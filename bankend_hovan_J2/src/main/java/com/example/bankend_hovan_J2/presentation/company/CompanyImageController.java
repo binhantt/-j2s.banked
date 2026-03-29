@@ -1,7 +1,7 @@
 package com.example.bankend_hovan_J2.presentation.company;
 
 import com.example.bankend_hovan_J2.application.company.*;
-import com.example.bankend_hovan_J2.domain.company.CompanyImage;
+import com.example.bankend_hovan_J2.domain.company.entity.CompanyImage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

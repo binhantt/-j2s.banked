@@ -76,11 +76,12 @@ public class JwtProvider {
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder()
+            Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
-                .parseClaimsJws(token);
-            return true;
+                .parseClaimsJws(token)
+                .getBody();
+            return "access".equals(claims.get("type", String.class));
         } catch (Exception e) {
             return false;
         }

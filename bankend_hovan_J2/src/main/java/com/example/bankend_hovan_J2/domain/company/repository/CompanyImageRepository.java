@@ -1,6 +1,6 @@
 package com.example.bankend_hovan_J2.domain.company.repository;
 
-import com.example.bankend_hovan_J2.domain.company.CompanyImage;
+import com.example.bankend_hovan_J2.domain.company.entity.CompanyImage;
 
 import java.util.List;
 import java.util.Optional;

@@ -1,7 +1,9 @@
 package com.example.bankend_hovan_J2.application.auth;
 
+import com.example.bankend_hovan_J2.domain.user.entity.User;
 import com.example.bankend_hovan_J2.domain.user.entity.UserRefreshToken;
 import com.example.bankend_hovan_J2.domain.user.repository.UserRefreshTokenRepository;
+import com.example.bankend_hovan_J2.domain.user.repository.UserRepository;
 import com.example.bankend_hovan_J2.infrastructure.security.JwtProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,11 +20,14 @@ public class RefreshTokenService {
 
     private final UserRefreshTokenRepository refreshTokenRepository;
     private final JwtProvider jwtProvider;
+    private final UserRepository userRepository;
 
     public RefreshTokenService(UserRefreshTokenRepository refreshTokenRepository,
-                               JwtProvider jwtProvider) {
+                               JwtProvider jwtProvider,
+                               UserRepository userRepository) {
         this.refreshTokenRepository = refreshTokenRepository;
         this.jwtProvider = jwtProvider;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -45,16 +50,15 @@ public class RefreshTokenService {
     }
 
     /**
-     * ╔══════════════════════════════════════════════════════════════╗
-     * ║  FIX LỖI 2: Kiểm tra refresh token mà KHÔNG rotate        ║
-     * ║  Dùng trong /api/auth/refresh endpoint để:                ║
-     * ║  1. Kiểm tra isActive của user TRƯỚC KHI rotate          ║
-     * ║  2. Trả 403 banned nếu tài khoản bị khóa                  ║
-     * ║  3. Trả 401 nếu token đã dùng/hết hạn                    ║
-     * ╚══════════════════════════════════════════════════════════════╝
-     * @throws RuntimeException  "banned"  = tài khoản bị khóa (→ trả 403)
-     * @throws RuntimeException  "invalid" = token không hợp lệ (→ trả 401)
-     * @throws RuntimeException  "used"    = token đã dùng/revoke (→ trả 401)
+     * Kiểm tra refresh token mà KHÔNG rotate.
+     * Dùng trong /api/auth/refresh endpoint để:
+     * 1. Kiểm tra isActive của user TRƯỚC KHI rotate
+     * 2. Trả 403 banned nếu tài khoản bị khóa
+     * 3. Trả 401 nếu token đã dùng/hết hạn
+     *
+     * @throws RefreshTokenException  BANNED = tài khoản bị khóa (→ trả 403)
+     * @throws RefreshTokenException  INVALID = token không hợp lệ (→ trả 401)
+     * @throws RefreshTokenException  USED    = token đã dùng/revoke (→ trả 401)
      */
     public RefreshTokenValidationResult validateRefreshTokenOnly(String oldToken) {
         if (!jwtProvider.validateRefreshToken(oldToken)) {
@@ -75,8 +79,15 @@ public class RefreshTokenService {
 
         // ── Kiểm tra tài khoản có bị khóa không ──
         Long userId = jwtProvider.getUserIdFromToken(oldToken);
-        // Lấy user qua UserRepository được inject ở AuthController
-        // (UserRepository được truyền qua method parameter bên dưới)
+        User user = userRepository.findById(userId).orElse(null);
+        if (user != null) {
+            boolean isAdmin = "admin".equalsIgnoreCase(user.getUserType()) ||
+                             "super_admin".equalsIgnoreCase(user.getUserType());
+            if (!isAdmin && user.getIsActive() != null && !user.getIsActive()) {
+                throw RefreshTokenException.banned();
+            }
+        }
+
         return new RefreshTokenValidationResult(userId, entity);
     }
 

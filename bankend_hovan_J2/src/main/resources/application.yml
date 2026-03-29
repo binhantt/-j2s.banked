@@ -99,8 +99,27 @@ logging:
   level:
     root: INFO
     com.example.bankend_hovan_J2: INFO
+    com.example.bankend_hovan_J2.infrastructure.oauth.GoogleTokenVerifier: DEBUG
+    com.example.bankend_hovan_J2.application.auth.GoogleLoginUseCase: DEBUG
+    com.example.bankend_hovan_J2.presentation.auth.AuthController: DEBUG
     org.hibernate.SQL: WARN
     org.springframework.web: INFO
+
+springdoc:
+  api-docs:
+    path: /api/swagger.json
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+  show-actuator: false
+  supported-submit-methods:
+    - get
+    - post
+    - put
+    - patch
+    - delete
 
 rate-limit:
   enabled: true
@@ -110,7 +129,12 @@ rate-limit:
     /api/upload/,
     /api/cv/,
     /uploads/,
-    /api/health
+    /api/health,
+    /api/swagger.json,
+    /swagger-ui,
+    /swagger-ui/,
+    /swagger-ui.html,
+    /v3/api-docs
 
   group:
     auth-strict:               # /api/auth/login, /api/auth/register — chống brute-force

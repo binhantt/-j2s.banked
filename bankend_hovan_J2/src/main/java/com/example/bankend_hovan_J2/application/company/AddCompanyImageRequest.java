@@ -1,6 +1,6 @@
 package com.example.bankend_hovan_J2.application.company;
 
-import com.example.bankend_hovan_J2.domain.company.CompanyImage;
+import com.example.bankend_hovan_J2.domain.company.entity.CompanyImage;
 import lombok.Data;
 
 @Data

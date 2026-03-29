@@ -28,7 +28,12 @@
       "Bash(mkdir -p \"d:/DOANJ2/bankend_hovan_J2/skills/features/security/03-endpoint-rate-limit/scripts\")",
       "Bash(mvn compile:*)",
       "Bash(npm install:*)",
-      "Bash(findstr /i \"docker deploy config script package\")"
+      "Bash(findstr /i \"docker deploy config script package\")",
+      "Bash(del:*)",
+      "Bash(cmd /c del \"D:\\\\DOANJ2\\\\bankend_hovan_J2\\\\src\\\\main\\\\java\\\\com\\\\example\\\\bankend_hovan_J2\\\\domain\\\\company\\\\CompanyImage.java\")",
+      "Bash(cmd /c \"if exist \"D:\\\\DOANJ2\\\\bankend_hovan_J2\\\\src\\\\main\\\\java\\\\com\\\\example\\\\bankend_hovan_J2\\\\domain\\\\company\\\\CompanyImage.java\" echo EXISTS || echo DELETED\")",
+      "Bash(powershell -Command \"Remove-Item 'D:\\\\DOANJ2\\\\bankend_hovan_J2\\\\src\\\\main\\\\java\\\\com\\\\example\\\\bankend_hovan_J2\\\\domain\\\\company\\\\CompanyImage.java' -Force\")",
+      "Bash(mvn clean:*)"
     ]
   }
 }

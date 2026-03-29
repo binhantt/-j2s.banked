@@ -1,6 +1,6 @@
 package com.example.bankend_hovan_J2.infrastructure.persistence.company;
 
-import com.example.bankend_hovan_J2.domain.company.CompanyImage;
+import com.example.bankend_hovan_J2.domain.company.entity.CompanyImage;
 import com.example.bankend_hovan_J2.domain.company.repository.CompanyImageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

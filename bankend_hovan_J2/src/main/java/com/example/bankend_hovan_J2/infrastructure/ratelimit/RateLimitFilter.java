@@ -19,20 +19,21 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Distributed Rate Limiter — Dùng Redis để chia sẻ rate limit GIỮA các instances.
+ * Distributed Rate Limiter — Dùng Redis để chia sẻ rate limit GIỮA các
+ * instances.
  *
- * Key: "rl:{ip}:{group}"  ( Ví dụ: "rl:127.0.0.1:auth-strict" )
+ * Key: "rl:{ip}:{group}" ( Ví dụ: "rl:127.0.0.1:auth-strict" )
  *
  * Logic Redis:
- *   INCR rl:{ip}:{group} → nếu count == 1 → SET EXPIRE (window seconds)
- *   → nếu count > limit → trả 429
+ * INCR rl:{ip}:{group} → nếu count == 1 → SET EXPIRE (window seconds)
+ * → nếu count > limit → trả 429
  *
  * Fallback: Nếu Redis không khả dụng → dùng Bucket4j local (in-memory)
  *
  * ╔══════════════════════════════════════════════════════════════╗
- * ║  Mỗi user/IP có bucket RIÊNG trong Redis              ║
- * ║  User A gửi 100 req → User B vẫn có bucket đầy       ║
- * ║  → KHÔNG ẢNH HƯỞNG nhau                           ║
+ * ║ Mỗi user/IP có bucket RIÊNG trong Redis ║
+ * ║ User A gửi 100 req → User B vẫn có bucket đầy ║
+ * ║ → KHÔNG ẢNH HƯỞNG nhau ║
  * ╚══════════════════════════════════════════════════════════════╝
  */
 @Component
@@ -93,9 +94,8 @@ public class RateLimitFilter implements Filter {
 
     // ── Paths bị giới hạn cực chặt ──
     private static final List<String> AUTH_STRICT_PATHS = List.of(
-        "/api/auth/login",
-        "/api/auth/register"
-    );
+            "/api/auth/login",
+            "/api/auth/register");
 
     public RateLimitFilter(
             StringRedisTemplate redisTemplate,
@@ -135,7 +135,7 @@ public class RateLimitFilter implements Filter {
         int window = getWindowSeconds(group);
 
         // ╔══════════════════════════════════════════════════════════╗
-        // ║  REDIS RATE LIMIT (distributed — nếu Redis khả dụng)  ║
+        // ║ REDIS RATE LIMIT (distributed — nếu Redis khả dụng) ║
         // ╚══════════════════════════════════════════════════════════╝
         if (redisEnabled) {
             boolean allowed = checkRedisRateLimit(ip, group, limit, window);
@@ -163,14 +163,14 @@ public class RateLimitFilter implements Filter {
 
     /**
      * ╔══════════════════════════════════════════════════════════════╗
-     * ║  REDIS DISTRIBUTED RATE LIMIT                          ║
-     * ║                                                        ║
-     * ║  1. INCR rl:{ip}:{group}                             ║
-     * ║  2. Nếu count == 1 → SET EXPIRE (window seconds)    ║
-     * ║  3. Nếu count > limit → REJECT                       ║
-     * ║                                                        ║
-     * ║  ★ Mỗi instance chạy cùng 1 Redis                  ║
-     * ║  ★ Không ai có thể vượt limit dù chạy nhiều server  ║
+     * ║ REDIS DISTRIBUTED RATE LIMIT ║
+     * ║ ║
+     * ║ 1. INCR rl:{ip}:{group} ║
+     * ║ 2. Nếu count == 1 → SET EXPIRE (window seconds) ║
+     * ║ 3. Nếu count > limit → REJECT ║
+     * ║ ║
+     * ║ ★ Mỗi instance chạy cùng 1 Redis ║
+     * ║ ★ Không ai có thể vượt limit dù chạy nhiều server ║
      * ╚══════════════════════════════════════════════════════════════╝
      */
     private boolean checkRedisRateLimit(String ip, String group, int limit, int windowSeconds) {
@@ -207,10 +207,10 @@ public class RateLimitFilter implements Filter {
 
     /**
      * ╔══════════════════════════════════════════════════════════════╗
-     * ║  LOCAL BUCKET4J RATE LIMIT (fallback / dev)          ║
-     * ║                                                        ║
-     * ║  Mỗi instance có Map riêng                          ║
-     * ║  Dùng khi: Redis không khả dụng HOẶC dev localhost   ║
+     * ║ LOCAL BUCKET4J RATE LIMIT (fallback / dev) ║
+     * ║ ║
+     * ║ Mỗi instance có Map riêng ║
+     * ║ Dùng khi: Redis không khả dụng HOẶC dev localhost ║
      * ╚══════════════════════════════════════════════════════════════╝
      */
     private boolean checkLocalRateLimit(String ip, String group) {
@@ -223,21 +223,20 @@ public class RateLimitFilter implements Filter {
         int limit = getLimit(group);
         int window = getWindowSeconds(group);
         Bandwidth bandwidth = Bandwidth.classic(
-            limit,
-            Refill.intervally(limit, Duration.ofSeconds(window))
-        );
+                limit,
+                Refill.intervally(limit, Duration.ofSeconds(window)));
         return Bucket.builder().addLimit(bandwidth).build();
     }
 
     /**
      * ╔══════════════════════════════════════════════════════════════╗
-     * ║  PHÂN LOẠI ENDPOINT VÀO GROUP                       ║
-     * ║                                                        ║
-     * ║  auth-strict:  5 req/min  — login, register        ║
-     * ║  auth:        10 req/min  — other auth             ║
-     * ║  read:       200 req/min  — GET public data         ║
-     * ║  write:       20 req/min  — POST/PUT/DELETE        ║
-     * ║  default:    100 req/min  — fallback                ║
+     * ║ PHÂN LOẠI ENDPOINT VÀO GROUP ║
+     * ║ ║
+     * ║ auth-strict: 5 req/min — login, register ║
+     * ║ auth: 10 req/min — other auth ║
+     * ║ read: 200 req/min — GET public data ║
+     * ║ write: 20 req/min — POST/PUT/DELETE ║
+     * ║ default: 100 req/min — fallback ║
      * ╚══════════════════════════════════════════════════════════════╝
      */
     private String resolveGroup(String path, String method) {
@@ -252,18 +251,18 @@ public class RateLimitFilter implements Filter {
         // Read-only GET trên public resources
         if ("GET".equalsIgnoreCase(method)) {
             if (path.startsWith("/api/jobs") ||
-                path.startsWith("/api/companies") ||
-                path.startsWith("/api/blog") ||
-                path.startsWith("/api/domains")) {
+                    path.startsWith("/api/companies") ||
+                    path.startsWith("/api/blog") ||
+                    path.startsWith("/api/domains")) {
                 return "read";
             }
         }
 
         // Write operations
         if ("POST".equalsIgnoreCase(method) ||
-            "PUT".equalsIgnoreCase(method) ||
-            "PATCH".equalsIgnoreCase(method) ||
-            "DELETE".equalsIgnoreCase(method)) {
+                "PUT".equalsIgnoreCase(method) ||
+                "PATCH".equalsIgnoreCase(method) ||
+                "DELETE".equalsIgnoreCase(method)) {
             return "write";
         }
 
@@ -273,20 +272,20 @@ public class RateLimitFilter implements Filter {
     private int getLimit(String group) {
         return switch (group) {
             case "auth-strict" -> authStrictLimit;
-            case "auth"         -> authLimit;
-            case "read"         -> readLimit;
-            case "write"        -> writeLimit;
-            default             -> defaultLimit;
+            case "auth" -> authLimit;
+            case "read" -> readLimit;
+            case "write" -> writeLimit;
+            default -> defaultLimit;
         };
     }
 
     private int getWindowSeconds(String group) {
         return switch (group) {
             case "auth-strict" -> authStrictWindow;
-            case "auth"         -> authWindow;
-            case "read"         -> readWindow;
-            case "write"        -> writeWindow;
-            default             -> defaultWindow;
+            case "auth" -> authWindow;
+            case "read" -> readWindow;
+            case "write" -> writeWindow;
+            default -> defaultWindow;
         };
     }
 
@@ -299,15 +298,15 @@ public class RateLimitFilter implements Filter {
         response.setHeader("X-RateLimit-Limit", String.valueOf(limit));
 
         String json = """
-            {
-                "error": "Quá nhiều yêu cầu. Vui lòng chờ %d giây và thử lại.",
-                "code": "RATE_LIMIT_EXCEEDED",
-                "group": "%s",
-                "limit": %d,
-                "windowSeconds": %d,
-                "retryAfter": %d
-            }
-            """.formatted(window, group, limit, window);
+                {
+                    "error": "Quá nhiều yêu cầu. Vui lòng chờ %d giây và thử lại.",
+                    "code": "RATE_LIMIT_EXCEEDED",
+                    "group": "%s",
+                    "limit": %d,
+                    "windowSeconds": %d,
+                    "retryAfter": %d
+                }
+                """.formatted(window, group, limit, window);
 
         response.getWriter().write(json);
     }

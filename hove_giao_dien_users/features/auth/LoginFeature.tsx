@@ -3,7 +3,7 @@ import { GithubOutlined, GoogleOutlined, UserOutlined, TeamOutlined, CodeOutline
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useState, useCallback, memo, useEffect } from 'react';
+import { useState, useCallback, memo, useEffect, useRef } from 'react';
 
 // Facebook SDK type declaration
 declare global {
@@ -119,13 +119,25 @@ export const LoginFeature = () => {
     }
   }, [bannedMsg]);
 
-  const handleGoogleSuccess = useCallback(async (credentialResponse: any) => {
+  // NOTE: handleGoogleSuccess KHÔNG dùng useCallback vì
+  // useCallback với deps rỗng [] sẽ tạo closure bị "đóng băng",
+  // dẫn đến setShowUserTypeModal không được gọi đúng sau re-render.
+  // Dùng useRef để luôn truy cập state mới nhất mà không phụ thuộc deps.
+  const pendingTokenRef = useRef<{ idToken: string; method: 'google' | 'github' | 'facebook'; code?: string; fbToken?: string } | null>(null);
+
+  const handleGoogleSuccess = (credentialResponse: any) => {
     const idToken = credentialResponse.credential;
-    // Always show user type modal
+    if (!idToken) {
+      message.error('Không nhận được token từ Google. Vui lòng thử lại!');
+      return;
+    }
+    console.log('[GoogleLogin] ✅ Received FRESH idToken (length=' + idToken.length + ', prefix=' + idToken.substring(0, 20) + '...)');
+    console.log('[GoogleLogin] Token expires in ~1 hour from now — FRESH token, not expired!');
+    pendingTokenRef.current = { idToken, method: 'google' };
     setPendingIdToken(idToken);
     setLoginMethod('google');
     setShowUserTypeModal(true);
-  }, []);
+  };
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -146,17 +158,16 @@ export const LoginFeature = () => {
       script.async = true;
       script.defer = true;
       script.onload = () => {
-        // Initialize Google after SDK loads
         if ((window as any).google) {
           (window as any).google.accounts.id.initialize({
             client_id: GOOGLE_CLIENT_ID,
             callback: handleGoogleSuccess,
           });
+          console.log('[GoogleLogin] ✅ Google SDK initialized');
         }
       };
       document.body.appendChild(script);
     } else if ((window as any).google) {
-      // SDK already loaded, just initialize
       (window as any).google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: handleGoogleSuccess,
@@ -167,7 +178,8 @@ export const LoginFeature = () => {
     if (FACEBOOK_APP_ID && !window.FB) {
       loadFacebookSDK();
     }
-  }, [handleGoogleSuccess]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Chỉ chạy 1 lần khi mount — KHÔNG thêm handleGoogleSuccess vào deps
 
   const loadFacebookSDK = () => {
     (window as any).fbAsyncInit = function() {
@@ -187,36 +199,28 @@ export const LoginFeature = () => {
   };
 
   const handleGoogleLogin = useCallback(() => {
-    if ((window as any).google) {
-      try {
-        // Use renderButton instead of prompt to avoid FedCM issues
-        const buttonDiv = document.createElement('div');
-        buttonDiv.style.display = 'none';
-        document.body.appendChild(buttonDiv);
-        
-        (window as any).google.accounts.id.renderButton(buttonDiv, {
-          type: 'standard',
-          size: 'large',
-          text: 'signin_with',
-          shape: 'rectangular',
-        });
-        
-        // Trigger click on the hidden button
-        const googleButton = buttonDiv.querySelector('div[role="button"]');
-        if (googleButton) {
-          (googleButton as HTMLElement).click();
+    if (!(window as any).google) {
+      message.error('Google SDK chưa được tải. Vui lòng thử lại sau vài giây!');
+      return;
+    }
+    try {
+      (window as any).google.accounts.id.prompt((notification: any) => {
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          // Fallback: dùng renderButton nếu prompt bị chặn
+          (window as any).google.accounts.id.renderButton(
+            document.getElementById('google-signin-button') as HTMLElement,
+            {
+              type: 'standard',
+              size: 'large',
+              text: 'signin_with',
+              shape: 'rectangular',
+            }
+          );
         }
-        
-        // Clean up after a delay
-        setTimeout(() => {
-          document.body.removeChild(buttonDiv);
-        }, 1000);
-      } catch (error) {
-        console.error('Google login error:', error);
-        message.error('Đăng nhập Google thất bại. Vui lòng thử lại!');
-      }
-    } else {
-      message.error('Google SDK chưa được tải. Vui lòng thử lại!');
+      });
+    } catch (error) {
+      console.error('Google login error:', error);
+      message.error('Đăng nhập Google thất bại. Vui lòng thử lại!');
     }
   }, []);
 
@@ -354,6 +358,7 @@ export const LoginFeature = () => {
                 <div className="space-y-4">
                   {/* Google Login */}
                   <Button
+                    id="google-signin-button"
                     size="large"
                     block
                     icon={<GoogleOutlined className="text-xl" />}
