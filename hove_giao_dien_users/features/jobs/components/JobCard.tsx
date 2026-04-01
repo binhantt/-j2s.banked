@@ -6,14 +6,19 @@ import {
   HeartOutlined,
   HeartFilled,
   ThunderboltOutlined,
+  ExperimentOutlined,
 } from '@ant-design/icons';
 import { useRouter } from 'next/router';
 import { Job } from '../api/jobApi';
+
+export type JobCardAppStatus = '' | 'pending' | 'reviewing' | 'accepted' | 'rejected';
 
 interface JobCardProps {
   job: Job;
   isSaved?: boolean;
   onSaveToggle?: (jobId: number) => void;
+  /** Trạng thái đơn ứng tuyển của user hiện tại với job này */
+  applicationStatus?: JobCardAppStatus;
 }
 
 const jobTypeMap: Record<string, string> = {
@@ -21,6 +26,22 @@ const jobTypeMap: Record<string, string> = {
   'part-time': 'Bán thời gian',
   'contract': 'Hợp đồng',
   'internship': 'Thực tập',
+};
+
+// Format experienceYearsMin (INT) to display text
+const formatExperience = (experienceYearsMin: number | undefined | null, experience: string | undefined): string => {
+  if (experienceYearsMin !== undefined && experienceYearsMin !== null) {
+    if (experienceYearsMin === 0) return 'Không yêu cầu';
+    if (experienceYearsMin === 1) return '1 năm';
+    if (experienceYearsMin === 2) return '2 năm';
+    if (experienceYearsMin === 3) return '3 năm';
+    if (experienceYearsMin === 5) return '5 năm';
+    if (experienceYearsMin === 7) return '7+ năm';
+    return `${experienceYearsMin} năm`;
+  }
+  // Fallback to legacy String field
+  if (experience) return experience;
+  return 'Không yêu cầu';
 };
 
 const getTimeAgo = (date: string) => {
@@ -32,8 +53,56 @@ const getTimeAgo = (date: string) => {
   return `${days} ngày trước`;
 };
 
-export default function JobCard({ job, isSaved = false, onSaveToggle }: JobCardProps) {
+export default function JobCard({ job, isSaved = false, onSaveToggle, applicationStatus }: JobCardProps) {
   const router = useRouter();
+
+  const hasApplied = applicationStatus !== '' && applicationStatus !== undefined;
+  const isRejected = applicationStatus === 'rejected';
+
+  const getApplyButtonText = () => {
+    if (isRejected) return 'Ứng tuyển lại';
+    if (hasApplied) return 'Đã ứng tuyển';
+    return 'Ứng tuyển ngay';
+  };
+
+  const getApplyButtonStyle = (): React.CSSProperties => {
+    if (isRejected) {
+      return {
+        height: 40,
+        borderRadius: 12,
+        background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+        border: 'none',
+        fontWeight: 700,
+        fontSize: 14,
+        paddingInline: 24,
+        boxShadow: '0 4px 12px rgba(245,158,11,0.25)',
+        color: '#fff',
+      };
+    }
+    if (hasApplied) {
+      return {
+        height: 40,
+        borderRadius: 12,
+        background: '#f1f5f9',
+        border: 'none',
+        fontWeight: 700,
+        fontSize: 14,
+        paddingInline: 24,
+        color: '#94a3b8',
+        cursor: 'default',
+      };
+    }
+    return {
+      height: 40,
+      borderRadius: 12,
+      background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+      border: 'none',
+      fontWeight: 700,
+      fontSize: 14,
+      paddingInline: 24,
+      boxShadow: '0 4px 12px rgba(22,163,74,0.15)',
+    };
+  };
 
   return (
     <Card
@@ -122,6 +191,10 @@ export default function JobCard({ job, isSaved = false, onSaveToggle }: JobCardP
                 {job.salaryMin} - {job.salaryMax}
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <ExperimentOutlined style={{ color: '#16a34a', fontSize: 16 }} />
+                {formatExperience(job.experienceYearsMin, job.experience)}
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <ClockCircleOutlined style={{ color: '#16a34a', fontSize: 16 }} />
                 {getTimeAgo(job.createdAt)}
               </span>
@@ -173,18 +246,9 @@ export default function JobCard({ job, isSaved = false, onSaveToggle }: JobCardP
           
           <Button
             type="primary"
-            style={{
-              height: 40,
-              borderRadius: 12,
-              background: 'linear-gradient(135deg, #16a34a, #22c55e)',
-              border: 'none',
-              fontWeight: 700,
-              fontSize: 14,
-              paddingInline: 24,
-              boxShadow: '0 4px 12px rgba(22,163,74,0.15)',
-            }}
+            style={getApplyButtonStyle()}
           >
-            Ứng tuyển ngay
+            {getApplyButtonText()}
           </Button>
         </div>
       </div>

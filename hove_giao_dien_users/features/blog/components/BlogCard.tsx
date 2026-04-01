@@ -1,4 +1,4 @@
-import { Card, Tag, Avatar } from 'antd';
+import { Card, Tag, Avatar, Divider } from 'antd';
 import { ClockCircleOutlined, EyeOutlined, UserOutlined, RightOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import type { BlogPost } from '@/store/useBlogStore';
@@ -10,8 +10,8 @@ interface BlogCardProps {
 
 export const BlogCard = ({ post, size = 'default' }: BlogCardProps) => {
   const isLarge = size === 'large';
-  const imageHeight = isLarge ? 260 : 192;
-  const titleSize = isLarge ? 18 : 15;
+  const imageHeight = isLarge ? 280 : 220;
+  const titleSize = isLarge ? 22 : 18;
   const excerptLines = isLarge ? 4 : 3;
 
   return (
@@ -20,118 +20,124 @@ export const BlogCard = ({ post, size = 'default' }: BlogCardProps) => {
         hoverable
         style={{
           height: '100%',
-          borderRadius: 16,
-          border: '1px solid #e8edf3',
+          borderRadius: 32,
+          border: '1px solid #f1f5f9',
           overflow: 'hidden',
-          transition: 'all 0.3s ease',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+          transition: 'all 0.5s cubic-bezier(0.19, 1, 0.22, 1)',
+          boxShadow: '0 4px 20px rgba(15,23,42,0.02)',
+          background: '#fff',
         }}
-        styles={{
-          body: { padding: 0 }
-        }}
+        styles={{ body: { padding: 0 } }}
         onMouseEnter={(e) => {
           const el = e.currentTarget as HTMLElement;
-          el.style.transform = 'translateY(-4px)';
-          el.style.boxShadow = '0 12px 32px rgba(22,163,74,0.12)';
-          el.style.borderColor = '#16a34a';
+          el.style.transform = 'translateY(-10px)';
+          el.style.boxShadow = '0 30px 60px rgba(15,23,42,0.1)';
+          el.style.borderColor = '#dcfce7';
         }}
         onMouseLeave={(e) => {
           const el = e.currentTarget as HTMLElement;
           el.style.transform = 'translateY(0)';
-          el.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)';
-          el.style.borderColor = '#e8edf3';
+          el.style.boxShadow = '0 4px 20px rgba(15,23,42,0.02)';
+          el.style.borderColor = '#f1f5f9';
         }}
         cover={
           <div style={{ position: 'relative', height: imageHeight, overflow: 'hidden' }}>
-            {/* Gradient overlay khi hover */}
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              background: post.image
-                ? 'linear-gradient(180deg, transparent 50%, rgba(22,163,74,0.08) 100%)'
-                : 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
-              zIndex: 1,
-              transition: 'opacity 0.3s',
-              opacity: 0,
-            }} />
-
             <img
-              src={post.image}
+              src={post.image || 'https://via.placeholder.com/600x400/f8fafc/64748b?text=Knowledge Experience'}
               alt={post.title}
               style={{
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
-                transition: 'transform 0.4s ease',
+                transition: 'transform 0.8s ease',
               }}
             />
-
-            {/* Category badge */}
+            
             <div style={{
               position: 'absolute',
-              top: 14,
-              left: 14,
+              inset: 0,
+              background: 'linear-gradient(to top, rgba(15,23,42,0.4) 0%, transparent 40%)',
+              pointerEvents: 'none'
+            }} />
+
+            <div style={{
+              position: 'absolute',
+              top: 20,
+              left: 20,
               zIndex: 2,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '4px 12px',
-              borderRadius: 100,
-              background: 'rgba(22,163,74,0.92)',
-              backdropFilter: 'blur(8px)',
-              color: '#fff',
-              fontSize: 12,
-              fontWeight: 600,
             }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', opacity: 0.8 }} />
-              {post.category}
+              <Tag style={{
+                background: 'rgba(255,255,255,0.92)',
+                backdropFilter: 'blur(8px)',
+                color: '#16a34a',
+                fontSize: 11,
+                fontWeight: 800,
+                borderRadius: 100,
+                padding: '4px 14px',
+                border: 'none',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+              }}>
+                {post.category?.toUpperCase()}
+              </Tag>
             </div>
 
-            {/* Arrow icon on hover */}
             <div style={{
               position: 'absolute',
-              bottom: 14,
-              right: 14,
+              bottom: 20,
+              right: 20,
               zIndex: 2,
-              width: 36,
-              height: 36,
+              width: 44,
+              height: 44,
               borderRadius: '50%',
               background: '#fff',
               display: 'grid',
               placeItems: 'center',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              opacity: 0,
-              transform: 'translateX(8px)',
-              transition: 'all 0.3s ease',
+              boxShadow: '0 10px 25px rgba(22,163,74,0.2)',
+              color: '#16a34a'
             }}>
-              <RightOutlined style={{ color: '#16a34a', fontSize: 14 }} />
+              <RightOutlined style={{ fontSize: 16 }} />
             </div>
           </div>
         }
       >
-        <div style={{ padding: isLarge ? 24 : 18 }}>
-          {/* Title */}
+        <div style={{ padding: 28, display: 'flex', flexDirection: 'column' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            fontSize: 12,
+            color: '#94a3b8',
+            marginBottom: 16,
+            fontWeight: 600
+          }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <ClockCircleOutlined style={{ color: '#16a34a' }} />
+              {post.readTime}
+            </span>
+            <span style={{ height: 4, width: 4, background: '#cbd5e1', borderRadius: '50%' }} />
+            <span>{post.date}</span>
+          </div>
+
           <h3 style={{
             fontSize: titleSize,
-            fontWeight: 700,
-            color: '#0b1220',
-            marginBottom: 10,
-            lineHeight: 1.4,
+            fontWeight: 850,
+            color: '#0f172a',
+            marginBottom: 14,
+            lineHeight: 1.3,
             display: '-webkit-box',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
-            transition: 'color 0.2s',
+            letterSpacing: '-0.01em'
           }}>
             {post.title}
           </h3>
 
-          {/* Excerpt */}
           <p style={{
-            fontSize: 13,
+            fontSize: 14,
             color: '#64748b',
-            marginBottom: 16,
-            lineHeight: 1.7,
+            marginBottom: 24,
+            lineHeight: 1.6,
             display: '-webkit-box',
             WebkitLineClamp: excerptLines,
             WebkitBoxOrient: 'vertical',
@@ -140,64 +146,26 @@ export const BlogCard = ({ post, size = 'default' }: BlogCardProps) => {
             {post.excerpt}
           </p>
 
-          {/* Stats row */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 14,
-            fontSize: 12,
-            color: '#94a3b8',
-            marginBottom: 14,
-          }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <ClockCircleOutlined style={{ color: '#16a34a', fontSize: 12 }} />
-              {post.readTime}
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <EyeOutlined style={{ color: '#16a34a', fontSize: 12 }} />
-              {post.views} lượt xem
-            </span>
-            <span>{post.date}</span>
-          </div>
+          <Divider style={{ margin: '0 0 20px' }} />
 
-          {/* Author + Tags */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            paddingTop: 14,
-            borderTop: '1px solid #f0fdf4',
-            flexWrap: 'wrap',
-            gap: 8,
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <Avatar
                 src={post.authorAvatar}
                 icon={<UserOutlined />}
-                size={28}
-                style={{ background: 'linear-gradient(135deg, #16a34a, #22c55e)', flexShrink: 0 }}
+                size={32}
+                style={{ background: '#16a34a', border: '2px solid #f0fdf4' }}
               />
-              <span style={{ fontSize: 13, color: '#374151', fontWeight: 500, maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: 13, color: '#334155', fontWeight: 800 }}>
                 {post.author}
               </span>
             </div>
-            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-              {post.tags.slice(0, 2).map((tag, index) => (
-                <Tag
-                  key={index}
-                  style={{
-                    fontSize: 11,
-                    margin: 0,
-                    borderRadius: 4,
-                    border: '1px solid #dcfce7',
-                    color: '#16a34a',
-                    background: '#f0fdf4',
-                    padding: '0 6px',
-                  }}
-                >
-                  #{tag}
-                </Tag>
-              ))}
+            <div style={{ fontSize: 13, color: '#94a3b8', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <EyeOutlined style={{ color: '#16a34a' }} /> {post.views}
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { Button, Card, message, Modal } from 'antd';
-import { GithubOutlined, GoogleOutlined, UserOutlined, TeamOutlined, CodeOutlined, FacebookOutlined } from '@ant-design/icons';
+import { GoogleOutlined, UserOutlined, TeamOutlined, CodeOutlined, FacebookOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -13,7 +13,6 @@ declare global {
 }
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
-const GITHUB_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || '';
 const FACEBOOK_APP_ID = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '';
 
 const UserTypeModal = memo(({ 
@@ -103,12 +102,11 @@ const bannedMessageOnLoad = (() => {
 
 export const LoginFeature = () => {
   const router = useRouter();
-  const { googleLogin, githubLogin, facebookLogin, isLoading } = useAuthStore();
+  const { googleLogin, facebookLogin, isLoading } = useAuthStore();
   const [showUserTypeModal, setShowUserTypeModal] = useState(false);
   const [pendingIdToken, setPendingIdToken] = useState<string>('');
-  const [pendingGitHubCode, setPendingGitHubCode] = useState<string>('');
   const [pendingFacebookToken, setPendingFacebookToken] = useState<string>('');
-  const [loginMethod, setLoginMethod] = useState<'google' | 'github' | 'facebook'>('google');
+  const [loginMethod, setLoginMethod] = useState<'google' | 'facebook'>('google');
   const [bannedMsg, setBannedMsg] = useState(bannedMessageOnLoad);
 
   // Hiện message ngay khi component mount (không chờ Zustand rehydrate)
@@ -123,7 +121,7 @@ export const LoginFeature = () => {
   // useCallback với deps rỗng [] sẽ tạo closure bị "đóng băng",
   // dẫn đến setShowUserTypeModal không được gọi đúng sau re-render.
   // Dùng useRef để luôn truy cập state mới nhất mà không phụ thuộc deps.
-  const pendingTokenRef = useRef<{ idToken: string; method: 'google' | 'github' | 'facebook'; code?: string; fbToken?: string } | null>(null);
+  const pendingTokenRef = useRef<{ idToken: string; method: 'google' | 'facebook'; fbToken?: string } | null>(null);
 
   const handleGoogleSuccess = (credentialResponse: any) => {
     const idToken = credentialResponse.credential;
@@ -140,16 +138,6 @@ export const LoginFeature = () => {
   };
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    if (code) {
-      // Always show user type modal for GitHub login
-      setPendingGitHubCode(code);
-      setLoginMethod('github');
-      setShowUserTypeModal(true);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-
     // Load Google SDK
     if (GOOGLE_CLIENT_ID && !document.getElementById('google-sdk')) {
       const script = document.createElement('script');
@@ -204,31 +192,21 @@ export const LoginFeature = () => {
       return;
     }
     try {
+      (window as any).google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleSuccess,
+      });
+      // prompt() luôn trả FRESH token — không dùng lại token cũ
       (window as any).google.accounts.id.prompt((notification: any) => {
         if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-          // Fallback: dùng renderButton nếu prompt bị chặn
-          (window as any).google.accounts.id.renderButton(
-            document.getElementById('google-signin-button') as HTMLElement,
-            {
-              type: 'standard',
-              size: 'large',
-              text: 'signin_with',
-              shape: 'rectangular',
-            }
-          );
+          message.info('Vui lòng cho phép popup để đăng nhập Google.');
         }
       });
     } catch (error) {
       console.error('Google login error:', error);
       message.error('Đăng nhập Google thất bại. Vui lòng thử lại!');
     }
-  }, []);
-
-  const handleGitHubLogin = useCallback(() => {
-    const redirectUri = `${window.location.origin}/login`;
-    const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${redirectUri}&scope=user:email`;
-    window.location.href = githubAuthUrl;
-  }, []);
+  }, [GOOGLE_CLIENT_ID]);
 
   const handleFacebookLogin = useCallback(() => {
     if (!(window as any).FB) {
@@ -253,8 +231,6 @@ export const LoginFeature = () => {
     try {
       if (loginMethod === 'google') {
         await googleLogin(pendingIdToken, userType);
-      } else if (loginMethod === 'github') {
-        await githubLogin(pendingGitHubCode, userType);
       } else if (loginMethod === 'facebook') {
         await facebookLogin(pendingFacebookToken, userType);
       }
@@ -265,15 +241,13 @@ export const LoginFeature = () => {
     } finally {
       setShowUserTypeModal(false);
       setPendingIdToken('');
-      setPendingGitHubCode('');
       setPendingFacebookToken('');
     }
-  }, [pendingIdToken, pendingGitHubCode, pendingFacebookToken, loginMethod, googleLogin, githubLogin, facebookLogin, router]);
+  }, [pendingIdToken, pendingFacebookToken, loginMethod, googleLogin, facebookLogin, router]);
 
   const handleModalCancel = useCallback(() => {
     setShowUserTypeModal(false);
     setPendingIdToken('');
-    setPendingGitHubCode('');
     setPendingFacebookToken('');
   }, []);
 
@@ -367,18 +341,6 @@ export const LoginFeature = () => {
                     className="h-14 font-medium text-base border-2 border-red-300 hover:border-red-600 hover:text-red-600 hover:shadow-lg transition-all"
                   >
                     Đăng nhập với Google
-                  </Button>
-
-                  {/* GitHub Login */}
-                  <Button
-                    size="large"
-                    block
-                    icon={<GithubOutlined className="text-xl" />}
-                    onClick={handleGitHubLogin}
-                    loading={isLoading}
-                    className="h-14 font-medium text-base border-2 border-gray-300 hover:border-gray-800 hover:text-gray-800 hover:shadow-lg transition-all"
-                  >
-                    Đăng nhập với GitHub
                   </Button>
 
                   {/* Facebook Login */}

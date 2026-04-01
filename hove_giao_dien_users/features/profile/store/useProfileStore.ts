@@ -63,15 +63,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   saveJobSeekerProfile: async (userId: number, data: Partial<JobSeekerProfile>) => {
     set({ loading: true, error: null });
     try {
-      const { jobSeekerProfile } = get();
-      let savedProfile: JobSeekerProfile;
-
-      if (jobSeekerProfile?.id) {
-        savedProfile = await profileApi.updateJobSeekerProfile(jobSeekerProfile.id, data);
-      } else {
-        savedProfile = await profileApi.createJobSeekerProfile({ ...data, userId });
-      }
-
+      const savedProfile = await profileApi.updateJobSeekerProfile(userId, data);
       set({ jobSeekerProfile: savedProfile, loading: false });
     } catch (error: any) {
       set({ error: error.message || 'Failed to save profile', loading: false });

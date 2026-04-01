@@ -27,6 +27,11 @@ export interface JobSeekerProfile {
   phone?: string;
   location?: string;
   bio?: string;
+  currentPosition?: string;
+  hometown?: string;
+  currentLocation?: string;
+  certificateImages?: string;
+  domainId?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -67,17 +72,17 @@ export const profileApi = {
 
   // Job Seeker Profile APIs
   async getJobSeekerProfile(userId: number): Promise<JobSeekerProfile> {
-    const response = await api.get<JobSeekerProfile>(`/api/job-seeker-profiles/user/${userId}`);
+    const response = await api.get<JobSeekerProfile>(`/api/profile/job-seeker/${userId}`);
     return response.data;
   },
 
   async createJobSeekerProfile(data: Partial<JobSeekerProfile>): Promise<JobSeekerProfile> {
-    const response = await api.post<JobSeekerProfile>('/api/job-seeker-profiles', data);
+    const response = await api.post<JobSeekerProfile>('/api/profile/job-seeker', data);
     return response.data;
   },
 
-  async updateJobSeekerProfile(id: number, data: Partial<JobSeekerProfile>): Promise<JobSeekerProfile> {
-    const response = await api.put<JobSeekerProfile>(`/api/job-seeker-profiles/${id}`, data);
+  async updateJobSeekerProfile(userId: number, data: Partial<JobSeekerProfile>): Promise<JobSeekerProfile> {
+    const response = await api.put<JobSeekerProfile>(`/api/profile/job-seeker-profiles/by-user/${userId}`, data);
     return response.data;
   },
 };

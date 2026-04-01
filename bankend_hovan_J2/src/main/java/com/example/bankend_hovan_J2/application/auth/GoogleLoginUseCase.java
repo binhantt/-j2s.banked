@@ -4,8 +4,8 @@ import com.example.bankend_hovan_J2.domain.user.entity.User;
 import com.example.bankend_hovan_J2.domain.user.repository.UserRepository;
 import com.example.bankend_hovan_J2.domain.user.valueobject.Email;
 import com.example.bankend_hovan_J2.infrastructure.oauth.GoogleTokenVerifier;
+import com.example.bankend_hovan_J2.infrastructure.oauth.GoogleTokenVerifier.GooglePayload;
 import com.example.bankend_hovan_J2.infrastructure.security.JwtProvider;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -34,9 +34,9 @@ public class GoogleLoginUseCase {
         log.info("[GoogleLoginUseCase] idToken null: {}, length: {}",
                 idToken == null, idToken != null ? idToken.length() : 0);
 
-        // 1. Verify Google token
+        // 1. Verify Google token (GIS One Tap credential)
         log.info("[GoogleLoginUseCase] 🔍 Step 1: Verifying Google idToken...");
-        GoogleIdToken.Payload payload;
+        GooglePayload payload;
         try {
             payload = googleTokenVerifier.verify(idToken);
             log.info("[GoogleLoginUseCase] ✅ Step 1 PASSED — token verified");
@@ -46,10 +46,10 @@ public class GoogleLoginUseCase {
         }
 
         // 2. Extract user info
-        String googleId = payload.getSubject();
-        String email = payload.getEmail();
-        String name = (String) payload.get("name");
-        String avatarUrl = (String) payload.get("picture");
+        String googleId = payload.subject();
+        String email = payload.email();
+        String name = payload.name();
+        String avatarUrl = payload.picture();
         log.info("[GoogleLoginUseCase] 📋 Extracted user info:");
         log.info("[GoogleLoginUseCase]   googleId: {}", googleId);
         log.info("[GoogleLoginUseCase]   email: {}", email);

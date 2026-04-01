@@ -1,17 +1,21 @@
 import { create } from 'zustand';
 import { jobDetailApi, JobDetail } from '../api/jobDetailApi';
 
+export type ApplicationStatus = '' | 'pending' | 'reviewing' | 'accepted' | 'rejected';
+
 interface JobDetailState {
   job: JobDetail | null;
   loading: boolean;
   error: string | null;
-  hasApplied: boolean;
-  
+  /** '' = chưa ứng tuyển, 'rejected' = có thể ứng tuyển lại, 'pending'/'reviewing'/'accepted' = đã ứng tuyển */
+  applicationStatus: ApplicationStatus;
+
   fetchJobDetail: (id: number) => Promise<void>;
   incrementViews: (id: number) => Promise<void>;
   updateJobStatus: (id: number, status: 'active' | 'closed') => Promise<void>;
   saveJob: (jobId: number, userId: number) => Promise<void>;
-  setHasApplied: (applied: boolean) => void;
+  /** @param status – '' = chưa ứng tuyển */
+  setApplicationStatus: (status: ApplicationStatus) => void;
   clearJob: () => void;
 }
 
@@ -19,7 +23,7 @@ export const useJobDetailStore = create<JobDetailState>((set) => ({
   job: null,
   loading: false,
   error: null,
-  hasApplied: false,
+  applicationStatus: '',
 
   fetchJobDetail: async (id: number) => {
     set({ loading: true, error: null });
@@ -27,9 +31,9 @@ export const useJobDetailStore = create<JobDetailState>((set) => ({
       const job = await jobDetailApi.getJobDetail(id);
       set({ job, loading: false });
     } catch (error: any) {
-      set({ 
-        error: error.message || 'Failed to fetch job detail', 
-        loading: false 
+      set({
+        error: error.message || 'Failed to fetch job detail',
+        loading: false
       });
     }
   },
@@ -48,9 +52,9 @@ export const useJobDetailStore = create<JobDetailState>((set) => ({
       const updatedJob = await jobDetailApi.updateJobStatus(id, status);
       set({ job: updatedJob, loading: false });
     } catch (error: any) {
-      set({ 
-        error: error.message || 'Failed to update job status', 
-        loading: false 
+      set({
+        error: error.message || 'Failed to update job status',
+        loading: false
       });
       throw error;
     }
@@ -64,11 +68,11 @@ export const useJobDetailStore = create<JobDetailState>((set) => ({
     }
   },
 
-  setHasApplied: (applied: boolean) => {
-    set({ hasApplied: applied });
+  setApplicationStatus: (status: ApplicationStatus) => {
+    set({ applicationStatus: status });
   },
 
   clearJob: () => {
-    set({ job: null, error: null, hasApplied: false });
+    set({ job: null, error: null, applicationStatus: '' });
   },
 }));

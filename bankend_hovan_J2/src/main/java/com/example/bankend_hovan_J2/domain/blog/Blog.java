@@ -59,6 +59,15 @@ public class Blog {
     @Column(name = "company_id")
     private Long companyId;
 
+    @Column(name = "facebook_link")
+    private String facebookLink;
+
+    @Column(name = "instagram_link")
+    private String instagramLink;
+
+    @Column(name = "zalo_link")
+    private String zaloLink;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;

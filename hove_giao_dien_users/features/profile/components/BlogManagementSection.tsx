@@ -107,7 +107,7 @@ export const BlogManagementSection = () => {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button icon={<EyeOutlined />} onClick={() => router.push(`/blog/${blog.id}`)}>
+                  <Button icon={<EyeOutlined />} onClick={() => router.push(`/blog/company_${blog.id}`)}>
                     Xem
                   </Button>
                   <Button icon={<EditOutlined />} onClick={() => router.push(`/company/blogs/edit/${blog.id}`)}>

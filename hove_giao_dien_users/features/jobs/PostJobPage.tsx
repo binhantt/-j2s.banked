@@ -226,10 +226,18 @@ export default function PostJobPage() {
             </Form.Item>
 
             <Form.Item
-              label="Kinh nghiệm"
-              name="experience"
+              label="Kinh nghiệm tối thiểu"
+              name="experienceYearsMin"
+              tooltip="Số năm kinh nghiệm tối thiểu yêu cầu"
             >
-              <Input placeholder="VD: 2-3 năm" size="large" />
+              <Select size="large" placeholder="Chọn số năm kinh nghiệm">
+                <Option value={0}>Không yêu cầu</Option>
+                <Option value={1}>1 năm</Option>
+                <Option value={2}>2 năm</Option>
+                <Option value={3}>3 năm</Option>
+                <Option value={5}>5 năm</Option>
+                <Option value={7}>7+ năm</Option>
+              </Select>
             </Form.Item>
           </div>
 

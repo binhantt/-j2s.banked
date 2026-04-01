@@ -39,4 +39,8 @@ public class CreateBlogRequest {
     private String source; // "platform" or "company"
 
     private Long companyId; // Required for company blogs
+
+    private String facebookLink;
+    private String instagramLink;
+    private String zaloLink;
 }

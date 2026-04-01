@@ -5,7 +5,6 @@ import type { MenuProps } from 'antd';
 import {
   AppstoreOutlined,
   TeamOutlined,
-  LineChartOutlined,
   BellOutlined,
   UserOutlined,
   SearchOutlined,
@@ -41,6 +40,7 @@ export function AdminLayout({
       { key: 'users', icon: <TeamOutlined />, label: 'Người dùng' },
       { key: 'domains', icon: <TagsOutlined />, label: 'Lĩnh vực' },
       { key: 'blog', icon: <FileTextOutlined />, label: 'Blog' },
+      { key: 'blogCategory', icon: <TagsOutlined />, label: 'Danh mục Blog' },
       { key: 'chat', icon: <MessageOutlined />, label: 'Chat' },
     ],
     [],

@@ -60,8 +60,12 @@ function convertToUserAdminRow(user: UserResponse): UserAdminRow {
   };
 }
 
-export const useUsersStore = create<UsersState>((set, get) => ({
+export const useUsersStore = create<UsersState>((set) => ({
   users: [],
+  totalElements: 0,
+  totalPages: 0,
+  currentPage: 0,
+  pageSize: 100,
   loading: false,
   error: null,
 

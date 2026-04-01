@@ -54,7 +54,7 @@ export const CompanyBlogSection = () => {
           Blog nhà tuyển dụng
         </h2>
         <button
-          onClick={() => router.push('/blogs')}
+          onClick={() => router.push('/blog')}
           style={{
             background: 'none', border: 'none', cursor: 'pointer',
             color: '#16a34a', fontWeight: 500, fontSize: 14,
@@ -69,7 +69,7 @@ export const CompanyBlogSection = () => {
           <Col xs={24} sm={12} lg={8} key={blog.id}>
             <Card
               hoverable
-              onClick={() => router.push(`/blogs/${blog.id}`)}
+              onClick={() => router.push(`/blog/company_${blog.id}`)}
               cover={
                 blog.imageUrl ? (
                   <img

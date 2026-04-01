@@ -22,7 +22,22 @@ public class JobSeekerProfileEntityJpa {
     
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
-    
+
+    @Column(name = "current_position")
+    private String currentPosition;
+
+    @Column(name = "hometown")
+    private String hometown;
+
+    @Column(name = "current_location")
+    private String currentLocation;
+
+    @Column(name = "certificate_images", columnDefinition = "TEXT")
+    private String certificateImages;
+
+    @Column(name = "domain_id")
+    private Long domainId;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
     
@@ -79,6 +94,46 @@ public class JobSeekerProfileEntityJpa {
 
     public void setBio(String bio) {
         this.bio = bio;
+    }
+
+    public String getCurrentPosition() {
+        return currentPosition;
+    }
+
+    public void setCurrentPosition(String currentPosition) {
+        this.currentPosition = currentPosition;
+    }
+
+    public String getHometown() {
+        return hometown;
+    }
+
+    public void setHometown(String hometown) {
+        this.hometown = hometown;
+    }
+
+    public String getCurrentLocation() {
+        return currentLocation;
+    }
+
+    public void setCurrentLocation(String currentLocation) {
+        this.currentLocation = currentLocation;
+    }
+
+    public String getCertificateImages() {
+        return certificateImages;
+    }
+
+    public void setCertificateImages(String certificateImages) {
+        this.certificateImages = certificateImages;
+    }
+
+    public Long getDomainId() {
+        return domainId;
+    }
+
+    public void setDomainId(Long domainId) {
+        this.domainId = domainId;
     }
 
     public LocalDateTime getCreatedAt() {

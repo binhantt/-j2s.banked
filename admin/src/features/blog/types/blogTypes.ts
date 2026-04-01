@@ -12,8 +12,11 @@ export interface BlogPostSummary {
 
 export interface BlogPostDetail extends BlogPostSummary {
   content: string;
-  tags: string[];
+  tags: string | string[];
   image?: string | null;
+  facebookLink?: string;
+  instagramLink?: string;
+  zaloLink?: string;
 }
 
 export interface CreateBlogPostPayload {
@@ -24,6 +27,9 @@ export interface CreateBlogPostPayload {
   category: string;
   readTime: string;
   image?: string | null;
-  tags?: string[];
+  tags?: string | string[];
+  facebookLink?: string;
+  instagramLink?: string;
+  zaloLink?: string;
 }
 

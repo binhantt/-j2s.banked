@@ -229,9 +229,9 @@ public class AuthController {
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
             // Check isActive TRƯỚC KHI rotate — tài khoản bị khóa → trả 403 banned
-            boolean isAdmin = "admin".equalsIgnoreCase(user.getUserType()) ||
-                             "super_admin".equalsIgnoreCase(user.getUserType());
-            if (!isAdmin && user.getIsActive() != null && !user.getIsActive()) {
+            // Chỉ super_admin được bypass
+            boolean isSuperAdmin = "super_admin".equalsIgnoreCase(user.getUserType());
+            if (!isSuperAdmin && user.getIsActive() != null && !user.getIsActive()) {
                 return ResponseEntity.status(403)
                     .body(Map.of(
                         "banned", true,

@@ -28,7 +28,13 @@ export const JobDetailFeature = ({ jobId }: JobDetailFeatureProps) => {
   const { user, isAuthenticated } = useAuthStore();
   const router = useRouter();
   
-  const { job, loading, hasApplied, fetchJobDetail, incrementViews, setHasApplied } = useJobDetailStore();
+  const { job, loading, applicationStatus, fetchJobDetail, incrementViews, setApplicationStatus } = useJobDetailStore();
+
+  const hasApplied = applicationStatus !== '' && applicationStatus !== 'rejected';
+  const isRejected = applicationStatus === 'rejected';
+
+  const [isSaved, setIsSaved] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
 
   useEffect(() => {
     if (jobId && jobId !== 'undefined' && jobId !== 'null') {
@@ -37,17 +43,36 @@ export const JobDetailFeature = ({ jobId }: JobDetailFeatureProps) => {
         fetchJobDetail(numericJobId);
         incrementViews(numericJobId);
         checkApplied();
+        checkSaved();
       }
     }
   }, [jobId]);
 
+  const checkSaved = async () => {
+    if (!isAuthenticated || !user?.id || !jobId) return;
+    try {
+      const { savedJobApi } = await import('@/lib/savedJobApi');
+      const saved: any[] = await savedJobApi.getUserSavedJobs(user.id);
+      setIsSaved(saved.some((s: any) => s.jobId === Number(jobId) || s.job?.id === Number(jobId)));
+    } catch (error) {
+      console.error('checkSaved error:', error);
+    }
+  };
+
+  // Poll application status every 10s to keep in sync with HR actions
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id || !jobId) return;
+    const interval = setInterval(() => checkApplied(), 10_000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated, user?.id, jobId]);
+
   const checkApplied = async () => {
     if (!isAuthenticated || !user?.id) return;
-    
+
     try {
       const { applicationApi } = await import('@/lib/applicationApi');
-      const applied = await applicationApi.checkApplied(Number(jobId), user.id);
-      setHasApplied(applied);
+      const result = await applicationApi.checkApplied(Number(jobId), user.id);
+      setApplicationStatus(result.hasApplied ? (result.status as any) : '');
     } catch (error) {
       console.error('Check applied error:', error);
     }
@@ -81,7 +106,7 @@ export const JobDetailFeature = ({ jobId }: JobDetailFeatureProps) => {
       return;
     }
 
-    if (hasApplied) {
+    if (hasApplied && !isRejected) {
       message.info('Bạn đã ứng tuyển vào công việc này rồi');
       return;
     }
@@ -96,16 +121,22 @@ export const JobDetailFeature = ({ jobId }: JobDetailFeatureProps) => {
       return;
     }
 
+    setSaveLoading(true);
     try {
-      await savedJobApi.saveJob(user.id, Number(jobId));
-      message.success('Đã lưu tin tuyển dụng');
-    } catch (error: any) {
-      const msg = error?.response?.data?.error || 'Có lỗi xảy ra';
-      if (msg === 'Job already saved') {
-        message.info('Bạn đã lưu tin này rồi');
+      if (isSaved) {
+        await savedJobApi.unsaveJob(user.id, Number(jobId));
+        setIsSaved(false);
+        message.success('Đã bỏ lưu tin tuyển dụng');
       } else {
-        message.error('Không thể lưu tin');
+        await savedJobApi.saveJob(user.id, Number(jobId));
+        setIsSaved(true);
+        message.success('Đã lưu tin tuyển dụng');
       }
+    } catch (error: any) {
+      const msg = error?.response?.data?.error || error?.response?.data?.message || 'Có lỗi xảy ra';
+      message.error(`Không thể lưu tin: ${msg}`);
+    } finally {
+      setSaveLoading(false);
     }
   };
 
@@ -138,7 +169,7 @@ export const JobDetailFeature = ({ jobId }: JobDetailFeatureProps) => {
       message.success('Ứng tuyển thành công!');
       setPreviewModalOpen(false);
       setApplyModalOpen(false);
-      setHasApplied(true);
+      setApplicationStatus('pending');
       form.resetFields();
     } catch (error: any) {
       message.error(error.response?.data?.message || 'Có lỗi xảy ra khi ứng tuyển');
@@ -182,6 +213,9 @@ export const JobDetailFeature = ({ jobId }: JobDetailFeatureProps) => {
                 onSave={handleSaveJob}
                 canApply={canApplyJob}
                 hasApplied={hasApplied}
+                isRejected={isRejected}
+                isSaved={isSaved}
+                saveLoading={saveLoading}
               />
             </div>
 

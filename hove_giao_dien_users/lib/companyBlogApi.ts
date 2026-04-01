@@ -8,6 +8,11 @@ export interface CompanyBlog {
   imageUrl?: string;
   authorName: string;
   status: 'draft' | 'published';
+  category?: string;
+  facebookLink?: string;
+  instagramLink?: string;
+  zaloLink?: string;
+  tags?: string;
   views?: number;
   publishedAt?: string;
   createdAt?: string;
@@ -59,13 +64,24 @@ export const companyBlogApi = {
     }
   },
 
-  // Get single blog
+  // Get single blog by numeric ID
   getBlog: async (id: number) => {
     try {
       const response = await api.get(`/api/company-blogs/${id}`);
       return response.data;
     } catch (error: any) {
       console.error('Error fetching blog:', error);
+      throw new Error(error.response?.data?.message || 'Không thể tải blog');
+    }
+  },
+
+  // Get single blog by reference (e.g., "company_2")
+  getBlogByRef: async (ref: string) => {
+    try {
+      const response = await api.get(`/api/company-blogs/by-ref/${ref}`);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error fetching blog by ref:', error);
       throw new Error(error.response?.data?.message || 'Không thể tải blog');
     }
   },
@@ -99,6 +115,16 @@ export const companyBlogApi = {
     } catch (error: any) {
       console.error('Error deleting blog:', error);
       throw new Error(error.response?.data?.message || 'Không thể xóa blog');
+    }
+  },
+
+  getCategories: async () => {
+    try {
+      const response = await api.get('/api/blog-categories/active');
+      return response.data;
+    } catch (error: any) {
+      console.error('Error fetching categories:', error);
+      return [];
     }
   },
 };

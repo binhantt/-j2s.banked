@@ -24,6 +24,22 @@ export const JobInfoSidebar = ({ job, onChatWithHR, companyName }: JobInfoSideba
     'manager': 'Manager',
   };
 
+  // Format experienceYearsMin (INT) to display text
+  const formatExperience = (experienceYearsMin: number | undefined | null, experience: string | undefined): string => {
+    if (experienceYearsMin !== undefined && experienceYearsMin !== null) {
+      if (experienceYearsMin === 0) return 'Không yêu cầu';
+      if (experienceYearsMin === 1) return '1 năm';
+      if (experienceYearsMin === 2) return '2 năm';
+      if (experienceYearsMin === 3) return '3 năm';
+      if (experienceYearsMin === 5) return '5 năm';
+      if (experienceYearsMin === 7) return '7+ năm';
+      return `${experienceYearsMin} năm`;
+    }
+    // Fallback to legacy String field
+    if (experience) return experience;
+    return 'Không yêu cầu';
+  };
+
   const isOwner = user?.id === job.userId;
   const [companyProfile, setCompanyProfile] = useState<CompanyWithDomain | null>(null);
 
@@ -157,7 +173,9 @@ export const JobInfoSidebar = ({ job, onChatWithHR, companyName }: JobInfoSideba
               </div>
               <div>
                 <div style={{ color: '#8c8c8c', fontSize: 13, marginBottom: 4 }}>Kinh nghiệm</div>
-                <div style={{ fontWeight: 500, fontSize: 14 }}>{job.experience || '2 years'}</div>
+                <div style={{ fontWeight: 500, fontSize: 14 }}>
+                  {formatExperience(job.experienceYearsMin, job.experience)}
+                </div>
               </div>
               <div>
                 <div style={{ color: '#8c8c8c', fontSize: 13, marginBottom: 4 }}>Hạn nộp hồ sơ</div>

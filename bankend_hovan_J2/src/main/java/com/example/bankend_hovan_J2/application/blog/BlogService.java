@@ -70,6 +70,9 @@ public class BlogService {
                 .source(source)
                 .tags(request.getTags())
                 .companyId(request.getCompanyId())
+                .facebookLink(request.getFacebookLink())
+                .instagramLink(request.getInstagramLink())
+                .zaloLink(request.getZaloLink())
                 .build();
 
         Blog savedBlog = blogRepository.save(blog);
@@ -89,6 +92,9 @@ public class BlogService {
         blog.setImage(request.getImage());
         blog.setReadTime(request.getReadTime());
         blog.setTags(request.getTags());
+        blog.setFacebookLink(request.getFacebookLink());
+        blog.setInstagramLink(request.getInstagramLink());
+        blog.setZaloLink(request.getZaloLink());
 
         Blog savedBlog = blogRepository.save(blog);
         return BlogResponse.from(savedBlog);

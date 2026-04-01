@@ -19,10 +19,15 @@ export const applicationApi = {
     return response.data;
   },
 
-  // Check if applied
+  // Check application status — returns { hasApplied, status, applicationId, updatedAt }
   checkApplied: async (jobId: number, userId: number) => {
     const response = await api.get(`/api/applications/check/${jobId}/${userId}`);
-    return response.data;
+    return response.data as {
+      hasApplied: boolean;
+      status: string;
+      applicationId: number;
+      updatedAt: string;
+    };
   },
 
   // Update status (HR)

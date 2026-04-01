@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash: Read and write in d:/DOANJ2",
+      "Bash: Read and write in d:/DOANJ2/bankend_hovan_J2",
+      "Bash: Read and write in d:/DOANJ2/hove_giao_dien_users",
+      "Bash: Read and write in d:/DOANJ2/admin",
+      "Bash: Read and write in d:/DOANJ2/.claude"
+    ]
+  },
+  "features": {
+    "maxConcurrentAgents": 5
+  }
+}

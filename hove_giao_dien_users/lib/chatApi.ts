@@ -27,35 +27,28 @@ const enrichConversation = async (conversation: any) => {
   return enriched;
 };
 
-const enrichConversations = async (conversations: any[]) => {
-  if (!Array.isArray(conversations)) {
-    console.warn('enrichConversations: conversations is not an array', conversations);
-    return [];
-  }
-  return Promise.all(conversations.map((conversation) => enrichConversation(conversation)));
+const enrichConversations = async (conversations: any) => {
+  const list = Array.isArray(conversations)
+    ? conversations
+    : (conversations?.content ? conversations.content : []);
+  return Promise.all(list.map((conversation) => enrichConversation(conversation)));
 };
 
 export const chatApi = {
   // Get conversations
   getJobSeekerConversations: async (userId: number) => {
     const response = await api.get(`/api/chat/conversations/job-seeker/${userId}`);
-    // Backend returns PagedResponse: { content: [...], totalElements, ... }
-    const page = response.data;
-    return enrichConversations(Array.isArray(page) ? page : (page?.content ?? []));
+    return enrichConversations(response.data?.content ?? response.data ?? []);
   },
 
   getHRConversations: async (userId: number) => {
     const response = await api.get(`/api/chat/conversations/hr/${userId}`);
-    // Backend returns PagedResponse: { content: [...], totalElements, ... }
-    const page = response.data;
-    return enrichConversations(Array.isArray(page) ? page : (page?.content ?? []));
+    return enrichConversations(response.data?.content ?? response.data ?? []);
   },
 
   getAllConversations: async () => {
     const response = await api.get('/api/chat/conversations/all');
-    // Backend returns PagedResponse: { content: [...], totalElements, ... }
-    const page = response.data;
-    return enrichConversations(Array.isArray(page) ? page : (page?.content ?? []));
+    return enrichConversations(response.data?.content ?? response.data ?? []);
   },
 
   // Create conversation
@@ -67,9 +60,7 @@ export const chatApi = {
   // Messages
   getMessages: async (conversationId: number) => {
     const response = await api.get(`/api/chat/messages/${conversationId}`);
-    // Backend returns PagedResponse: { content: [...], totalElements, ... }
-    const page = response.data;
-    return Array.isArray(page) ? page : (page?.content ?? []);
+    return response.data?.content ?? response.data ?? [];
   },
 
   sendMessage: async (data: any) => {

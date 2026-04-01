@@ -19,6 +19,10 @@ export interface Company {
   benefits?: string;
   workingHours?: string;
   imageGallery?: string; // JSON string of image URLs
+  tags?: string;
+  facebookLink?: string;
+  instagramLink?: string;
+  zaloLink?: string;
   createdAt?: string;
   updatedAt?: string;
 }

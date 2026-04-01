@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Input, Button, Tag } from 'antd';
-import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
+import { SearchOutlined } from '@ant-design/icons';
 import { useCompanyStore } from '../store/useCompanyStore';
 import { domainApi, Domain } from '@/lib/domainApi';
+
 
 export const CompanySearch = () => {
   const { filters, setFilters } = useCompanyStore();
@@ -18,6 +19,7 @@ export const CompanySearch = () => {
         setDomains([]);
       }
     };
+
     loadDomains();
   }, []);
 
@@ -29,173 +31,167 @@ export const CompanySearch = () => {
     setFilters({ ...filters, domainId });
   };
 
+
   return (
-    <div style={{ position: 'relative', overflow: 'hidden' }}>
-      {/* Hero Section — Premium Light Header */}
+    <div style={{ background: '#f8fafc' }}>
+      {/* Premium Hero Search Section */}
       <div
         style={{
-          background: 'rgba(255, 255, 255, 0.7)',
-          backdropFilter: 'blur(20px)',
-          borderRadius: 24,
-          padding: '60px 48px 64px',
-          marginBottom: 32,
+          background: 'linear-gradient(135deg, #0b1220 0%, #166534 100%)',
+          padding: '80px 24px 100px',
           position: 'relative',
           overflow: 'hidden',
-          border: '1px solid rgba(0, 0, 0, 0.04)',
-          boxShadow: '0 10px 40px rgba(0, 0, 0, 0.03)',
+          marginBottom: 40,
         }}
       >
-        {/* Background Decorative Shapes */}
         <div style={{
-          position: 'absolute', top: '-10%', right: '-5%',
-          width: 300, height: 300,
-          background: 'radial-gradient(circle, rgba(22,163,74,0.06) 0%, transparent 70%)',
-          zIndex: 0,
-        }} />
-        <div style={{
-          position: 'absolute', bottom: '-10%', left: '5%',
-          width: 250, height: 250,
-          background: 'radial-gradient(circle, rgba(22,163,74,0.04) 0%, transparent 70%)',
-          zIndex: 0,
+          position: 'absolute', top: '-20%', right: '-10%',
+          width: '50%', height: '100%',
+          background: 'radial-gradient(circle, rgba(74,222,128,0.1) 0%, transparent 70%)',
+          filter: 'blur(80px)', pointerEvents: 'none'
         }} />
 
-        <div style={{ position: 'relative', zIndex: 2 }}>
-          {/* Badge */}
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            background: 'rgba(22,163,74,0.06)',
-            color: '#16a34a',
-            padding: '6px 16px', borderRadius: 100,
-            fontSize: 13, fontWeight: 700,
-            marginBottom: 20, border: '1px solid rgba(22,163,74,0.08)',
-          }}>
-            🏢 Mạng lưới doanh nghiệp uy tín
+        <div style={{ maxWidth: 1000, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
+            <Tag color="success" style={{ borderRadius: 100, padding: '4px 16px', marginBottom: 24, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Top Employers 2024
+            </Tag>
+            <h1
+              style={{
+                fontSize: 'clamp(32px, 5vw, 56px)',
+                fontWeight: 900,
+                color: '#fff',
+                marginBottom: 20,
+                letterSpacing: '-0.02em',
+                lineHeight: 1.1
+              }}
+            >
+              Khám phá các <span style={{ color: '#4ade80' }}>Doanh nghiệp</span> hàng đầu
+            </h1>
+            <p
+              style={{
+                fontSize: 18,
+                color: 'rgba(255,255,255,0.7)',
+                maxWidth: 700,
+                margin: '0 auto 48px',
+                lineHeight: 1.6
+              }}
+            >
+              Tìm kiếm môi trường làm việc lý tưởng và cơ hội bứt phá nghề nghiệp từ hàng nghìn công ty uy tín nhất Việt Nam.
+            </p>
           </div>
 
-          {/* Heading */}
-          <h1 style={{
-            fontSize: 40, fontWeight: 800,
-            color: '#0f172a', lineHeight: 1.2, marginBottom: 16,
-            letterSpacing: '-0.02em',
-          }}>
-            Nơi kết nối các{' '}
-            <span style={{ color: '#16a34a' }}>Sự nghiệp hàng đầu</span>
-          </h1>
-
-          <p style={{
-            fontSize: 16, color: '#64748b',
-            marginBottom: 36, maxWidth: 620,
-            lineHeight: 1.6,
-          }}>
-            Khám phá mạng lưới hàng ngàn doanh nghiệp hàng đầu. Hãy tìm môi trường làm việc lý tưởng để bứt phá tiềm năng của bạn.
-          </p>
-
-          {/* Search Bar Container */}
-          <div style={{ 
-            display: 'flex', gap: 12, maxWidth: 640, 
-            background: '#fff', padding: 8, borderRadius: 18,
-            boxShadow: '0 12px 30px rgba(0, 0, 0, 0.06)'
+          <div style={{
+            maxWidth: 800,
+            margin: '0 auto',
+            background: 'rgba(255,255,255,0.05)',
+            padding: 10,
+            borderRadius: 24,
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            display: 'flex',
+            gap: 12
           }}>
             <Input
-              variant="borderless"
-              placeholder="Nhập tên công ty hoặc ngành nghề..."
+              size="large"
+              placeholder="Tìm tên công ty, lĩnh vực kinh doanh..."
+              prefix={<SearchOutlined style={{ color: '#4ade80', fontSize: 20 }} />}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onPressEnter={handleSearch}
               style={{
-                flex: 1, paddingLeft: 16,
-                fontSize: 16, fontWeight: 500,
-                color: '#1e293b',
+                borderRadius: 16,
+                fontSize: 16,
+                flex: 1,
+                height: 60,
+                border: 'none',
+                background: '#fff'
               }}
-              prefix={<SearchOutlined style={{ color: '#16a34a', fontSize: 18, marginRight: 8 }} />}
             />
             <Button
               type="primary"
               size="large"
               onClick={handleSearch}
               style={{
-                height: 50, borderRadius: 12,
-                background: 'linear-gradient(135deg, #16a34a, #22c55e)',
-                border: 'none',
-                fontWeight: 700,
-                fontSize: 15,
-                paddingInline: 32,
-                boxShadow: '0 6px 16px rgba(22,163,74,0.15)',
+                borderRadius: 16,
+                height: 60,
+                background: '#16a34a',
+                borderColor: 'transparent',
+                fontWeight: 800,
+                fontSize: 16,
+                padding: '0 40px',
+                boxShadow: '0 10px 20px rgba(22, 163, 74, 0.3)',
               }}
             >
-              Tìm ngay
+              TÌM KIẾM
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Modern Filter Category Bar */}
-      <div
-        style={{
-          background: 'rgba(255, 255, 255, 0.4)',
-          borderRadius: 20,
-          padding: '24px 30px',
-          marginBottom: 40,
-          border: '1px solid rgba(0, 0, 0, 0.03)',
-        }}
-      >
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 10,
-          marginBottom: 16,
-        }}>
-          <div style={{
-            width: 28, height: 28, borderRadius: 8,
-            background: 'rgba(22,163,74,0.1)', display: 'grid', placeItems: 'center'
-          }}>
-            <FilterOutlined style={{ color: '#16a34a', fontSize: 14 }} />
+      {/* Modern Industry Filter Section */}
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px' }}>
+        <div
+          style={{
+            background: '#fff',
+            borderRadius: 32,
+            padding: '32px 40px',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.04)',
+            border: '1px solid #f1f5f9',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+            <div style={{ width: 4, height: 20, background: '#16a34a', borderRadius: 4 }} />
+            <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+              Lọc theo lĩnh vực
+            </div>
           </div>
-          <span style={{ fontSize: 15, fontWeight: 700, color: '#1e293b' }}>
-            Lọc theo lĩnh vực hoạt động
-          </span>
-        </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-          <Tag
-            onClick={() => handleIndustryClick(undefined)}
-            style={{
-              cursor: 'pointer',
-              borderRadius: 12,
-              border: !filters.domainId ? 'none' : '1px solid #e2e8f0',
-              background: !filters.domainId ? 'linear-gradient(135deg, #16a34a, #22c55e)' : '#fff',
-              color: !filters.domainId ? '#fff' : '#475569',
-              fontWeight: 700,
-              fontSize: 14,
-              padding: '6px 20px',
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              boxShadow: !filters.domainId ? '0 4px 12px rgba(22,163,74,0.15)' : 'none',
-              margin: 0,
-            }}
-          >
-            🔥 Tất cả ngành
-          </Tag>
-          {domains.map((domain) => (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
             <Tag
-              key={domain.id}
-              onClick={() => handleIndustryClick(domain.id)}
+              key="all-domains"
+              onClick={() => handleIndustryClick(undefined)}
               style={{
                 cursor: 'pointer',
-                borderRadius: 12,
-                border: filters.domainId === domain.id ? 'none' : '1px solid #e2e8f0',
-                background: filters.domainId === domain.id ? 'linear-gradient(135deg, #16a34a, #22c55e)' : '#fff',
-                color: filters.domainId === domain.id ? '#fff' : '#475569',
-                fontWeight: 700,
+                padding: '10px 24px',
                 fontSize: 14,
-                padding: '6px 20px',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                boxShadow: filters.domainId === domain.id ? '0 4px 12px rgba(22,163,74,0.15)' : 'none',
+                borderRadius: 100,
+                transition: 'all 0.3s ease',
+                border: !filters.domainId ? 'none' : '1px solid #e2e8f0',
+                background: !filters.domainId ? '#16a34a' : '#f8fafc',
+                color: !filters.domainId ? '#fff' : '#64748b',
+                fontWeight: 700,
                 margin: 0,
+                boxShadow: !filters.domainId ? '0 10px 20px rgba(22,163,74,0.2)' : 'none'
               }}
             >
-              {domain.name}
+              Tất cả ngành nghề
             </Tag>
-          ))}
+            {domains.map((domain) => (
+              <Tag
+                key={domain.id}
+                onClick={() => handleIndustryClick(domain.id)}
+                style={{
+                  cursor: 'pointer',
+                  padding: '10px 24px',
+                  fontSize: 14,
+                  borderRadius: 100,
+                  transition: 'all 0.3s ease',
+                  border: filters.domainId === domain.id ? 'none' : '1px solid #e2e8f0',
+                  background: filters.domainId === domain.id ? '#16a34a' : '#fff',
+                  color: filters.domainId === domain.id ? '#fff' : '#475569',
+                  fontWeight: 700,
+                  margin: 0,
+                  boxShadow: filters.domainId === domain.id ? '0 10px 20px rgba(22,163,74,0.2)' : 'none'
+                }}
+              >
+                {domain.name}
+              </Tag>
+            ))}
+          </div>
         </div>
       </div>
     </div>
   );
 };
+

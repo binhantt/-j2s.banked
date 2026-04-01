@@ -1,4 +1,6 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+import { getAccessToken } from './tokenStorage';
+
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://hovan.online/api';
 
 export class BannedException extends Error {
   readonly banned = true;
@@ -9,12 +11,21 @@ export class BannedException extends Error {
 }
 
 export async function httpRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = getAccessToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      ...headers,
       ...options.headers,
     },
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -48,4 +59,3 @@ export async function httpRequest<T>(path: string, options: RequestInit = {}): P
 
   return JSON.parse(text) as T;
 }
-

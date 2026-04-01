@@ -76,6 +76,11 @@ public class CompanyBlogRepositoryImpl implements CompanyBlogRepository {
                 .publishedAt(blog.getPublishedAt())
                 .createdAt(blog.getCreatedAt())
                 .updatedAt(blog.getUpdatedAt())
+                .category(blog.getCategory())
+                .tags(blog.getTags())
+                .facebookLink(blog.getFacebookLink())
+                .instagramLink(blog.getInstagramLink())
+                .zaloLink(blog.getZaloLink())
                 .build();
     }
 
@@ -92,6 +97,11 @@ public class CompanyBlogRepositoryImpl implements CompanyBlogRepository {
                 .publishedAt(entity.getPublishedAt())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
+                .category(entity.getCategory())
+                .tags(entity.getTags())
+                .facebookLink(entity.getFacebookLink())
+                .instagramLink(entity.getInstagramLink())
+                .zaloLink(entity.getZaloLink())
                 .build();
     }
 }

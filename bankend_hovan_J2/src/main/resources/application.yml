@@ -75,7 +75,7 @@ facebook:
 
 jwt:
   secret: hovan_google_login_system_super_secure_jwt_secret_key_2026_512bits_minimum_length_token_auth
-  expiration: 86400000
+  expiration: 604800000
 
 security:
   aes:
@@ -125,7 +125,6 @@ rate-limit:
   enabled: true
   whitelist-paths: |
     /api/notifications/,
-    /api/auth/,
     /api/upload/,
     /api/cv/,
     /uploads/,
@@ -137,6 +136,10 @@ rate-limit:
     /v3/api-docs
 
   group:
+    google-login:              # /api/auth/google — 10 req/s → block IP 60s
+      limit: 10
+      window-seconds: 60
+
     auth-strict:               # /api/auth/login, /api/auth/register — chống brute-force
       limit: 5
       window-seconds: 60

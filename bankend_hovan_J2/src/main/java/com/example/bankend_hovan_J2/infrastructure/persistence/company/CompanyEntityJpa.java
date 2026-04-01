@@ -65,6 +65,18 @@ public class CompanyEntityJpa {
     @Column(name = "image_gallery", columnDefinition = "TEXT")
     private String imageGallery; // JSON array of image URLs
 
+    @Column(name = "tags", columnDefinition = "TEXT")
+    private String tags;
+
+    @Column(name = "facebook_link")
+    private String facebookLink;
+
+    @Column(name = "instagram_link")
+    private String instagramLink;
+
+    @Column(name = "zalo_link")
+    private String zaloLink;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

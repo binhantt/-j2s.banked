@@ -2,12 +2,12 @@ package com.example.bankend_hovan_J2.infrastructure.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.UUID;
 
@@ -23,8 +23,8 @@ public class JwtProvider {
     @Value("${jwt.refresh-expiration:604800000}") // 7 ngày = 604800000ms
     private long refreshTokenExpiration;
 
-    private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
     // ===== Access Token =====
@@ -37,14 +37,14 @@ public class JwtProvider {
         Date expiryDate = new Date(now.getTime() + accessTokenExpiration);
 
         return Jwts.builder()
-                .setId(UUID.randomUUID().toString())    // JTI — đây là điểm mới
-                .setSubject(userId.toString())
+                .id(UUID.randomUUID().toString())       // JTI
+                .subject(userId.toString())
                 .claim("email", email)
                 .claim("userType", userType)
                 .claim("type", "access")
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(getSigningKey())
                 .compact();
     }
 
@@ -63,12 +63,12 @@ public class JwtProvider {
         Date expiryDate = new Date(now.getTime() + refreshTokenExpiration);
 
         return Jwts.builder()
-                .setId(UUID.randomUUID().toString())    // JTI
-                .setSubject(userId.toString())
+                .id(UUID.randomUUID().toString())       // JTI
+                .subject(userId.toString())
                 .claim("type", "refresh")
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(getSigningKey())
                 .compact();
     }
 
@@ -76,11 +76,11 @@ public class JwtProvider {
 
     public boolean validateToken(String token) {
         try {
-            Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+            Claims claims = Jwts.parser()
+                .verifyWith(getSigningKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
             return "access".equals(claims.get("type", String.class));
         } catch (Exception e) {
             return false;
@@ -92,11 +92,11 @@ public class JwtProvider {
      */
     public boolean validateRefreshToken(String token) {
         try {
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
+            Claims claims = Jwts.parser()
+                    .verifyWith(getSigningKey())
                     .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+                    .parseSignedClaims(token)
+                    .getPayload();
             return "refresh".equals(claims.get("type", String.class));
         } catch (Exception e) {
             return false;
@@ -106,29 +106,29 @@ public class JwtProvider {
     // ===== Claims extraction =====
 
     public Long getUserIdFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+        Claims claims = Jwts.parser()
+                .verifyWith(getSigningKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
         return Long.parseLong(claims.getSubject());
     }
 
     public String getEmailFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+        Claims claims = Jwts.parser()
+                .verifyWith(getSigningKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
         return claims.get("email", String.class);
     }
 
     public String getUserTypeFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+        Claims claims = Jwts.parser()
+                .verifyWith(getSigningKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
         return claims.get("userType", String.class);
     }
 
@@ -136,11 +136,11 @@ public class JwtProvider {
      * Lấy JTI (JWT ID) từ token — dùng cho blacklist.
      */
     public String getJtiFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+        Claims claims = Jwts.parser()
+                .verifyWith(getSigningKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
         return claims.getId();
     }
 
@@ -148,21 +148,21 @@ public class JwtProvider {
      * Lấy expiration timestamp (epoch seconds) từ token.
      */
     public Date getExpirationFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+        Claims claims = Jwts.parser()
+                .verifyWith(getSigningKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
         return claims.getExpiration();
     }
 
     public boolean isTokenExpired(String token) {
         try {
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
+            Claims claims = Jwts.parser()
+                    .verifyWith(getSigningKey())
                     .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+                    .parseSignedClaims(token)
+                    .getPayload();
             return claims.getExpiration().before(new Date());
         } catch (Exception e) {
             return true;

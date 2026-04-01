@@ -30,6 +30,10 @@ public class Company {
     private String benefits;
     private String workingHours;
     private String imageGallery; // JSON array of image URLs
+    private String tags;
+    private String facebookLink;
+    private String instagramLink;
+    private String zaloLink;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

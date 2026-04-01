@@ -23,4 +23,9 @@ public class CompanyBlog {
     private LocalDateTime publishedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String category;
+    private String tags;
+    private String facebookLink;
+    private String instagramLink;
+    private String zaloLink;
 }

@@ -8,7 +8,8 @@ export interface Job {
   location: string;
   salaryMin: number;
   salaryMax: number;
-  experience: string;
+  experience: string;       // Text: "0-1 năm", "1-3 năm", "3-5 năm", "5+ năm"
+  experienceYearsMin: number; // Số năm kinh nghiệm tối thiểu (INT)
   level: string;
   jobType: 'full-time' | 'part-time' | 'contract' | 'internship';
   description: string;
@@ -24,7 +25,13 @@ export interface JobFilters {
   location?: string;
   jobType?: string[];
   salaryRange?: string;
-  experience?: string;
+  experienceMin?: number;   // Số năm kinh nghiệm tối thiểu
+  experienceMax?: number;   // Số năm kinh nghiệm tối đa
+}
+
+export interface ExperienceOption {
+  value: number;
+  label: string;
 }
 
 class JobApiService {
@@ -57,27 +64,34 @@ class JobApiService {
   /**
    * Search jobs with filters (server-side)
    */
-  async searchJobs(filters: JobFilters): Promise<Job[]> {
+  async searchJobs(filters: JobFilters, page = 0, size = 3): Promise<{ jobs: Job[]; total: number }> {
     try {
-      const params: Record<string, string> = {};
+      const params: Record<string, string | number> = {
+        page,
+        size,
+      };
 
       if (filters.searchText) params.searchText = filters.searchText;
       if (filters.location && filters.location !== 'all') params.location = filters.location;
       if (filters.jobType && filters.jobType.length > 0) params.jobType = filters.jobType.join(',');
-      if (filters.experience && filters.experience !== 'all') params.experience = filters.experience;
+
+      // Experience range filter (INT) - replaces old String experience
+      if (filters.experienceMin !== undefined && filters.experienceMin !== null) {
+        params.experienceMin = filters.experienceMin;
+      }
+      if (filters.experienceMax !== undefined && filters.experienceMax !== null) {
+        params.experienceMax = filters.experienceMax;
+      }
 
       // Parse salary range to min/max
       if (filters.salaryRange && filters.salaryRange !== 'all') {
         if (filters.salaryRange.startsWith('under-')) {
-          // "under-10" → salaryMax = 10 (jobs with max salary <= 10)
           const val = filters.salaryRange.replace('under-', '').replace(/,/g, '');
           params.salaryMax = val;
         } else if (filters.salaryRange.startsWith('over-')) {
-          // "over-50" → salaryMin = 50 (jobs with min salary >= 50)
           const val = filters.salaryRange.replace('over-', '').replace(/,/g, '');
           params.salaryMin = val;
         } else {
-          // "10-20" → salaryMin = 10, salaryMax = 20
           const parts = filters.salaryRange.split('-');
           if (parts.length === 2) {
             const [minStr, maxStr] = parts;
@@ -94,7 +108,12 @@ class JobApiService {
       }
 
       const response = await api.get('/api/jobs/search', { params });
-      return response.data;
+      return {
+        jobs: response.data,
+        total: response.headers['x-total-count']
+          ? Number(response.headers['x-total-count'])
+          : response.data.length,
+      };
     } catch (error: any) {
       console.error('Search jobs error:', error);
       const message =
@@ -197,7 +216,7 @@ class JobApiService {
   }
 
   /**
-   * Get unique experience levels from active jobs (server-side)
+   * Get unique experience levels from active jobs (legacy String field)
    */
   async getExperiences(): Promise<string[]> {
     try {
@@ -205,6 +224,19 @@ class JobApiService {
       return response.data;
     } catch (error) {
       console.error('Get experiences error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get predefined experience options (INT dropdown for job creation)
+   */
+  async getExperienceOptions(): Promise<ExperienceOption[]> {
+    try {
+      const response = await api.get('/api/jobs/experience-options');
+      return response.data;
+    } catch (error) {
+      console.error('Get experience options error:', error);
       return [];
     }
   }

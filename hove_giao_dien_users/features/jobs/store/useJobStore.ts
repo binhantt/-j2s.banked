@@ -8,12 +8,16 @@ interface JobState {
   loading: boolean;
   error: string | null;
   filters: JobFilters;
-  
+  currentPage: number;
+  totalJobs: number;
+  pageSize: number;
+
   // Actions
-  fetchJobs: () => Promise<void>;
+  fetchJobs: (page?: number) => Promise<void>;
   fetchJobById: (id: number) => Promise<void>;
-  searchJobs: (filters: JobFilters) => Promise<void>;
+  searchJobs: (filters: JobFilters, page?: number) => Promise<void>;
   setFilters: (filters: Partial<JobFilters>) => void;
+  setPage: (page: number) => void;
   clearFilters: () => void;
   createJob: (jobData: Partial<Job>) => Promise<Job>;
   updateJob: (id: number, jobData: Partial<Job>) => Promise<Job>;
@@ -36,17 +40,20 @@ export const useJobStore = create<JobState>((set, get) => ({
   loading: false,
   error: null,
   filters: initialFilters,
+  currentPage: 0,
+  totalJobs: 0,
+  pageSize: 3,
 
   // Fetch all active jobs
-  fetchJobs: async () => {
+  fetchJobs: async (page = 0) => {
     set({ loading: true, error: null });
     try {
-      const jobs = await jobApiService.getActiveJobs();
-      set({ jobs, loading: false });
+      const { jobs, total } = await jobApiService.searchJobs(get().filters, page, get().pageSize);
+      set({ jobs, totalJobs: total, currentPage: page, loading: false });
     } catch (error: any) {
-      set({ 
-        error: error.message || 'Failed to fetch jobs', 
-        loading: false 
+      set({
+        error: error.message || 'Failed to fetch jobs',
+        loading: false
       });
     }
   },
@@ -66,15 +73,15 @@ export const useJobStore = create<JobState>((set, get) => ({
   },
 
   // Search jobs with filters
-  searchJobs: async (filters: JobFilters) => {
+  searchJobs: async (filters: JobFilters, page = 0) => {
     set({ loading: true, error: null, filters });
     try {
-      const jobs = await jobApiService.searchJobs(filters);
-      set({ jobs, loading: false });
+      const { jobs, total } = await jobApiService.searchJobs(filters, page, get().pageSize);
+      set({ jobs, totalJobs: total, currentPage: page, loading: false });
     } catch (error: any) {
-      set({ 
-        error: error.message || 'Failed to search jobs', 
-        loading: false 
+      set({
+        error: error.message || 'Failed to search jobs',
+        loading: false
       });
     }
   },
@@ -83,16 +90,22 @@ export const useJobStore = create<JobState>((set, get) => ({
   setFilters: (newFilters: Partial<JobFilters>) => {
     const currentFilters = get().filters;
     const updatedFilters = { ...currentFilters, ...newFilters };
-    set({ filters: updatedFilters });
-    
+    set({ filters: updatedFilters, currentPage: 0 });
+
     // Auto search when filters change
-    get().searchJobs(updatedFilters);
+    get().searchJobs(updatedFilters, 0);
+  },
+
+  // Set current page
+  setPage: (page: number) => {
+    set({ currentPage: page });
+    get().searchJobs(get().filters, page);
   },
 
   // Clear all filters
   clearFilters: () => {
-    set({ filters: initialFilters });
-    get().fetchJobs();
+    set({ filters: initialFilters, currentPage: 0 });
+    get().fetchJobs(0);
   },
 
   // Create new job

@@ -97,51 +97,51 @@ export default function LoginPage() {
     setGoogleLoading(true);
 
     if (typeof window.google !== 'undefined' && window.google.accounts) {
-      try {
-        window.google.accounts.id.initialize({
-          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-          callback: handleGoogleCallback,
-          auto_select: false,
-          cancel_on_tap_outside: true,
-        });
-
-        const buttonDiv = document.createElement('div');
-        buttonDiv.style.position = 'absolute';
-        buttonDiv.style.top = '-9999px';
-        document.body.appendChild(buttonDiv);
-
-        window.google.accounts.id.renderButton(buttonDiv, {
-          type: 'standard',
-          theme: 'outline',
-          size: 'large',
-          width: 250,
-        });
-
-        setTimeout(() => {
-          const googleButton = buttonDiv.querySelector('div[role="button"]') as HTMLElement;
-          if (googleButton) {
-            googleButton.click();
+      // Initialize chỉ cần gọi 1 lần — SDK giữ state
+      window.google.accounts.id.initialize({
+        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        callback: (response: any) => {
+          if (response.credential) {
+            handleGoogleCallback(response);
           } else {
-            window.google.accounts.id.prompt((notification: any) => {
-              if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                setGoogleLoading(false);
-                message.info('Vui lòng click lại nút Google để đăng nhập');
-              }
-            });
+            setGoogleLoading(false);
+            message.error('Không nhận được token từ Google.');
           }
+        },
+        auto_select: false,
+      });
+
+      // prompt() luôn trả FRESH token — không dùng lại token cũ
+      window.google.accounts.id.prompt((notification: any) => {
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          // Nếu popup bị chặn → fallback dùng renderButton
+          const container = document.createElement('div');
+          container.style.position = 'fixed';
+          container.style.top = '50%';
+          container.style.left = '50%';
+          container.style.transform = 'translate(-50%,-50%)';
+          container.style.zIndex = '9999';
+          document.body.appendChild(container);
+
+          window.google.accounts.id.renderButton(container, {
+            type: 'standard',
+            theme: 'outline',
+            size: 'large',
+            width: 300,
+          });
+
+          const btn = container.querySelector('[role="button"]') as HTMLElement;
+          if (btn) btn.click();
+
           setTimeout(() => {
-            if (buttonDiv.parentNode) {
-              buttonDiv.parentNode.removeChild(buttonDiv);
-            }
-          }, 1000);
-        }, 100);
-      } catch (error) {
-        setGoogleLoading(false);
-        message.error('Không thể khởi tạo Google Sign-In.');
-      }
+            if (container.parentNode) container.parentNode.removeChild(container);
+          }, 3000);
+          setGoogleLoading(false);
+        }
+      });
     } else {
       setGoogleLoading(false);
-      message.error('Google Sign-In chưa sẵn sàng.');
+      message.error('Google Sign-In chưa sẵn sàng. Hãy tải lại trang.');
     }
   };
 
@@ -375,29 +375,7 @@ export default function LoginPage() {
             Tiếp tục với Google
           </Button>
 
-          <Button
-            size="large"
-            block
-            icon={<GithubOutlined style={{ fontSize: 20 }} />}
-            onClick={handleGithubLogin}
-            loading={githubLoading}
-            style={{
-              height: 52,
-              borderRadius: 14,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 12,
-              fontWeight: 600,
-              fontSize: 15,
-              background: '#0f172a',
-              color: '#f8fafc',
-              border: 'none',
-              boxShadow: '0 4px 12px rgba(15,23,42,0.15)',
-            }}
-          >
-            Tiếp tục với GitHub
-          </Button>
+    
         </Space>
 
         {/* Footer info */}

@@ -1,22 +1,56 @@
 import { useEffect, useState } from 'react';
-import { Card, message } from 'antd';
+import { Card, message, Pagination } from 'antd';
 import { useJobStore } from './store/useJobStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import JobSearchBar from './components/JobSearchBar';
 import JobFilters from './components/JobFilters';
-import JobCard from './components/JobCard';
+import JobCard, { JobCardAppStatus } from './components/JobCard';
 
 export default function JobsListPage() {
   const { user, isAuthenticated } = useAuthStore();
-  const { jobs, loading, filters, fetchJobs, setFilters } = useJobStore();
+  const { jobs, loading, filters, fetchJobs, setFilters, setPage, currentPage, totalJobs, pageSize } = useJobStore();
   const [savedJobs, setSavedJobs] = useState<number[]>([]);
+  /** Map: jobId → applicationStatus */
+  const [applicationStatuses, setApplicationStatuses] = useState<Record<number, JobCardAppStatus>>({});
 
   useEffect(() => {
     fetchJobs();
     if (isAuthenticated && user?.id) {
       loadSavedJobs();
+      checkAllApplied();
     }
   }, [isAuthenticated, user?.id, fetchJobs]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id || jobs.length === 0) return;
+    checkAllApplied();
+    // Poll every 15s
+    const interval = setInterval(checkAllApplied, 15_000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated, user?.id, jobs]);
+
+  const checkAllApplied = async () => {
+    if (!isAuthenticated || !user?.id || jobs.length === 0) return;
+    try {
+      const { applicationApi } = await import('@/lib/applicationApi');
+      // Batch check all jobs in parallel
+      const results = await Promise.all(
+        jobs.map(async (job) => {
+          try {
+            const res = await applicationApi.checkApplied(job.id, user.id);
+            return { jobId: job.id, status: res.status as JobCardAppStatus };
+          } catch {
+            return { jobId: job.id, status: '' as JobCardAppStatus };
+          }
+        })
+      );
+      const map: Record<number, JobCardAppStatus> = {};
+      for (const r of results) map[r.jobId] = r.status;
+      setApplicationStatuses(map);
+    } catch (error) {
+      console.error('checkAllApplied error:', error);
+    }
+  };
 
   const loadSavedJobs = async () => {
     if (!user?.id) return;
@@ -91,7 +125,7 @@ export default function JobsListPage() {
               <div>
                 <h2 className="text-2xl font-extrabold text-[#0f172a] tracking-tight">Kết quả tìm kiếm</h2>
                 <p className="text-[15px] font-medium text-[#64748b] mt-1">
-                  Đã tìm thấy <span className="text-[#16a34a] font-bold">{jobs.length}</span> công việc phù hợp
+                  Đã tìm thấy <span className="text-[#16a34a] font-bold">{totalJobs}</span> công việc phù hợp
                 </p>
               </div>
               <div className="bg-white px-4 py-2 rounded-xl border border-slate-100 shadow-sm text-[13px] font-bold text-[#64748b]">
@@ -106,9 +140,23 @@ export default function JobsListPage() {
                   job={job}
                   isSaved={savedJobs.includes(job.id)}
                   onSaveToggle={toggleSaveJob}
+                  applicationStatus={applicationStatuses[job.id]}
                 />
               ))}
             </div>
+
+            {totalJobs > pageSize && (
+              <div className="flex justify-center mt-10">
+                <Pagination
+                  current={currentPage + 1}
+                  pageSize={pageSize}
+                  total={totalJobs}
+                  onChange={(page) => setPage(page - 1)}
+                  showSizeChanger={false}
+                  size="large"
+                />
+              </div>
+            )}
 
             {jobs.length === 0 && !loading && (
               <Card

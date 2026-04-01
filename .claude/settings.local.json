@@ -1,39 +1,39 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dir \"D:\\\\DOANJ2\\\\bankend_hovan_J2\\\\skills\")",
-      "Bash(xargs grep:*)",
-      "Bash(./gradlew build:*)",
-      "Bash(./mvnw compile:*)",
-      "Bash(Get-ChildItem -Path \"d:\\\\DOANJ2\\\\bankend_hovan_J2\\\\skills\" -Force -ErrorAction SilentlyContinue)",
-      "Bash(Select-Object Name, Mode, LastWriteTime)",
-      "Bash(grep -rn jobPostingId d:/DOANJ2/hove_giao_dien_users --include=*.tsx --include=*.ts)",
-      "WebSearch",
-      "Bash(find /d/DOANJ2/hove_giao_dien_users/src -type f \\\\\\(-name *.ts -o -name *.tsx -o -name *.js -o -name *.jsx \\\\\\))",
-      "Bash(find /d/DOANJ2/hove_giao_dien_users -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))",
-      "Bash(find /d/DOANJ2/hove_giao_dien_users/store -type f -name *.ts)",
-      "Bash(find /d/DOANJ2/hove_giao_dien_users/pages -type f -name *.tsx -o -name *.ts)",
-      "Bash(dir /s /b \"D:\\\\DOANJ2\\\\bankend_hovan_J2\\\\src\")",
-      "Bash(findstr /i \"\\\\.java$\")",
-      "Bash(dir /b \"D:\\\\DOANJ2\\\\admin\")",
-      "Bash(find ./hove_giao_dien_users -maxdepth 3 -type f -not -path */node_modules/* -not -path */.next/* -not -path */.git/*)",
-      "Bash(npm run:*)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/chat)",
-      "Read(//d//**)",
-      "Bash(dir)",
-      "Bash(mkdir -p \"d:/DOANJ2/bankend_hovan_J2/skills/features/security/01-rate-limit-config/scripts\")",
-      "Bash(mkdir -p \"d:/DOANJ2/bankend_hovan_J2/skills/features/security/01-rate-limit-config/references\")",
-      "Bash(mkdir -p \"d:/DOANJ2/bankend_hovan_J2/skills/features/security/02-jwt-security/scripts\")",
-      "Bash(mkdir -p \"d:/DOANJ2/bankend_hovan_J2/skills/features/security/02-jwt-security/references\")",
-      "Bash(mkdir -p \"d:/DOANJ2/bankend_hovan_J2/skills/features/security/03-endpoint-rate-limit/scripts\")",
       "Bash(mvn compile:*)",
-      "Bash(npm install:*)",
-      "Bash(findstr /i \"docker deploy config script package\")",
-      "Bash(del:*)",
-      "Bash(cmd /c del \"D:\\\\DOANJ2\\\\bankend_hovan_J2\\\\src\\\\main\\\\java\\\\com\\\\example\\\\bankend_hovan_J2\\\\domain\\\\company\\\\CompanyImage.java\")",
-      "Bash(cmd /c \"if exist \"D:\\\\DOANJ2\\\\bankend_hovan_J2\\\\src\\\\main\\\\java\\\\com\\\\example\\\\bankend_hovan_J2\\\\domain\\\\company\\\\CompanyImage.java\" echo EXISTS || echo DELETED\")",
-      "Bash(powershell -Command \"Remove-Item 'D:\\\\DOANJ2\\\\bankend_hovan_J2\\\\src\\\\main\\\\java\\\\com\\\\example\\\\bankend_hovan_J2\\\\domain\\\\company\\\\CompanyImage.java' -Force\")",
-      "Bash(mvn clean:*)"
+      "Bash(find d:/DOANJ2/admin/src -maxdepth 4 -type f -name *.tsx -o -name *.ts)",
+      "Bash(find d:/DOANJ2/admin/src -maxdepth 3 -type f -name *.tsx)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\doan4\\\\.claude\\\\plans\")",
+      "Read(//c/Users/doan4/.claude/plans/**)",
+      "Bash(powershell -Command \"try { \\(Invoke-WebRequest -Uri ''http://localhost:8080/api/admin/register'' -Method Post -ContentType ''application/json'' -Body ''{\"\"email\"\":\"\"admin@hovan.com\"\",\"\"name\"\":\"\"Admin Hovan\"\",\"\"password\"\":\"\"admin123\"\"}'' -UseBasicParsing -TimeoutSec 5\\).StatusCode } catch { $_Exception.Response.StatusCode.value__ }\")",
+      "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File \"d:/DOANJ2/test_admin.ps1\")",
+      "Bash(mvn spring-boot:run)",
+      "Bash(timeout /t 20 /nobreak)",
+      "Bash(findstr /i \"Started\\\\|ERROR\\\\|Exception\\\\|port 8080\")",
+      "Read(//c/Users/doan4/**)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill:*)",
+      "Bash(cmd /c \"taskkill /F /PID 43072\")",
+      "Bash(tasklist)",
+      "Bash(findstr /i \"vite node\")",
+      "Bash(dir)",
+      "Bash(mv \"D:/DOANJ2/admin/.env\" \"D:/DOANJ2/admin/.env.development\")",
+      "Bash(ren \"D:\\\\DOANJ2\\\\admin\\\\.env\" \".env.development\")"
     ]
+  },
+  "project": {
+    "name": "Vieclam24h Platform",
+    "description": "Hệ thống Việc Làm 24h - Backend Spring Boot + Frontend Next.js + Admin React",
+    "root": "d:/DOANJ2"
+  },
+  "paths": {
+    "backend": "d:/DOANJ2/bankend_hovan_J2",
+    "frontend": "d:/DOANJ2/hove_giao_dien_users",
+    "admin": "d:/DOANJ2/admin"
+  },
+  "api": {
+    "baseUrl": "http://hovan.online/api",
+    "localBackend": "http://localhost:8080"
   }
 }

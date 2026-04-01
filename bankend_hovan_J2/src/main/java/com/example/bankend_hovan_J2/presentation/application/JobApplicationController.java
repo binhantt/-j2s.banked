@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/applications")
@@ -44,13 +45,33 @@ public class JobApplicationController {
             return ResponseEntity.badRequest().build();
         }
         
-        // Check if already applied
-        if (applicationRepository.findByJobPostingIdAndUserId(
-                application.getJobPostingId(), 
+        // Check if user already has an active application for this job
+        var existingApp = applicationRepository.findByJobPostingIdAndUserId(
+                application.getJobPostingId(),
                 application.getUserId()
-        ).isPresent()) {
-            System.out.println("User already applied!");
-            return ResponseEntity.badRequest().build();
+        );
+        if (existingApp.isPresent()) {
+            String currentStatus = existingApp.get().getStatus();
+            if (!"rejected".equals(currentStatus)) {
+                // Active application exists (pending/reviewing/accepted) → block re-apply
+                System.out.println("User already applied (status=" + currentStatus + ")! Block re-apply.");
+                return ResponseEntity.badRequest().build();
+            }
+            // Status is "rejected" → delete old record to allow re-apply
+            applicationRepository.delete(existingApp.get());
+            System.out.println("Previous application was REJECTED — deleted old record, allowing re-apply.");
+            // Also decrement job's application count since old record is gone
+            jobPostingRepository.findById(application.getJobPostingId()).ifPresent(job -> {
+                if (job.getApplications() != null && job.getApplications() > 0) {
+                    job.setApplications(Math.max(0, job.getApplications() - 1));
+                    // Re-open job if it was auto-closed due to max applicants
+                    if ("closed".equals(job.getStatus())) {
+                        job.setStatus("active");
+                        System.out.println("Job re-opened because applicant re-applied.");
+                    }
+                    jobPostingRepository.save(job);
+                }
+            });
         }
         
         try {
@@ -103,11 +124,22 @@ public class JobApplicationController {
         return ResponseEntity.ok(applications);
     }
 
-    // Check if user applied
+    // Check application status for a user on a job
     @GetMapping("/check/{jobId}/{userId}")
-    public ResponseEntity<Boolean> checkApplied(@PathVariable Long jobId, @PathVariable Long userId) {
-        boolean applied = applicationRepository.findByJobPostingIdAndUserId(jobId, userId).isPresent();
-        return ResponseEntity.ok(applied);
+    public ResponseEntity<?> checkApplied(@PathVariable Long jobId, @PathVariable Long userId) {
+        return applicationRepository.findByJobPostingIdAndUserId(jobId, userId)
+                .map(app -> ResponseEntity.ok(Map.of(
+                        "hasApplied", true,
+                        "status", app.getStatus(),
+                        "applicationId", app.getId(),
+                        "updatedAt", app.getUpdatedAt() != null ? app.getUpdatedAt().toString() : ""
+                )))
+                .orElse(ResponseEntity.ok(Map.of(
+                        "hasApplied", false,
+                        "status", "",
+                        "applicationId", 0,
+                        "updatedAt", ""
+                )));
     }
 
     // Update application status (HR only)

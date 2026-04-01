@@ -48,6 +48,21 @@ public class CompanyBlogEntityJpa {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(length = 100)
+    private String category;
+
+    @Column(columnDefinition = "TEXT")
+    private String tags;
+
+    @Column(name = "facebook_link")
+    private String facebookLink;
+
+    @Column(name = "instagram_link")
+    private String instagramLink;
+
+    @Column(name = "zalo_link")
+    private String zaloLink;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

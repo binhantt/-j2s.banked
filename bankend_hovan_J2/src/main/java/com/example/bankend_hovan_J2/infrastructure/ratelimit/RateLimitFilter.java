@@ -68,6 +68,13 @@ public class RateLimitFilter implements Filter {
     @Value("${rate-limit.group.auth.limit:10}")
     private int authLimit;
 
+    // ── Google login: /api/auth/google — 10 req/s → block IP 60s ──
+    @Value("${rate-limit.group.google-login.limit:10}")
+    private int googleLoginLimit;
+
+    @Value("${rate-limit.group.google-login.window-seconds:60}")
+    private int googleLoginWindow;
+
     @Value("${rate-limit.group.auth.window-seconds:60}")
     private int authWindow;
 
@@ -96,6 +103,10 @@ public class RateLimitFilter implements Filter {
     private static final List<String> AUTH_STRICT_PATHS = List.of(
             "/api/auth/login",
             "/api/auth/register");
+
+    // ── Paths google-login: 10 req/s → block 60s ──
+    private static final List<String> GOOGLE_LOGIN_PATHS = List.of(
+            "/api/auth/google");
 
     public RateLimitFilter(
             StringRedisTemplate redisTemplate,
@@ -240,6 +251,11 @@ public class RateLimitFilter implements Filter {
      * ╚══════════════════════════════════════════════════════════════╝
      */
     private String resolveGroup(String path, String method) {
+        // Google login — 10 req/s → block IP 60s
+        if (GOOGLE_LOGIN_PATHS.contains(path)) {
+            return "google-login";
+        }
+
         // Auth endpoints
         if (path.startsWith("/api/auth/")) {
             if (AUTH_STRICT_PATHS.contains(path)) {
@@ -271,6 +287,7 @@ public class RateLimitFilter implements Filter {
 
     private int getLimit(String group) {
         return switch (group) {
+            case "google-login" -> googleLoginLimit;
             case "auth-strict" -> authStrictLimit;
             case "auth" -> authLimit;
             case "read" -> readLimit;
@@ -281,6 +298,7 @@ public class RateLimitFilter implements Filter {
 
     private int getWindowSeconds(String group) {
         return switch (group) {
+            case "google-login" -> googleLoginWindow;
             case "auth-strict" -> authStrictWindow;
             case "auth" -> authWindow;
             case "read" -> readWindow;
@@ -306,7 +324,7 @@ public class RateLimitFilter implements Filter {
                     "windowSeconds": %d,
                     "retryAfter": %d
                 }
-                """.formatted(window, group, limit, window);
+                """.formatted(window, group, limit, window, window);
 
         response.getWriter().write(json);
     }

@@ -43,6 +43,22 @@ public class CompanyBlogController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // Endpoint xử lý format company_{id} từ frontend
+    @GetMapping("/by-ref/{ref}")
+    public ResponseEntity<CompanyBlog> getBlogByRef(@PathVariable String ref) {
+        if (ref != null && ref.startsWith("company_")) {
+            try {
+                Long id = Long.parseLong(ref.replace("company_", ""));
+                return blogRepository.findById(id)
+                        .map(ResponseEntity::ok)
+                        .orElse(ResponseEntity.notFound().build());
+            } catch (NumberFormatException e) {
+                return ResponseEntity.notFound().build();
+            }
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     @GetMapping("/company/{companyId}")
     public ResponseEntity<List<CompanyBlog>> getBlogsByCompany(@PathVariable Long companyId) {
         List<CompanyBlog> blogs = blogRepository.findByCompanyId(companyId);

@@ -88,22 +88,22 @@ body {
 }
 
 .ant-message-success .anticon {
-  color: #52c41a !important;
+  color: #16a34a !important;
   font-size: 18px;
 }
 
 .ant-message-error .anticon {
-  color: #ff4d4f !important;
+  color: #ef4444 !important;
   font-size: 18px;
 }
 
 .ant-message-warning .anticon {
-  color: #faad14 !important;
+  color: #f59e0b !important;
   font-size: 18px;
 }
 
 .ant-message-info .anticon {
-  color: #1890ff !important;
+  color: #16a34a !important;
   font-size: 18px;
 }
 
@@ -179,16 +179,9 @@ body {
   color: #000000 !important;
 }
 
-/* Fix border issues - Remove unwanted borders */
+/* Fix layout and border box model */
 * {
   box-sizing: border-box;
-}
-
-/* Complete border reset */
-*,
-*::before,
-*::after {
-  border: none !important;
 }
 
 /* Only add back necessary borders */
@@ -196,20 +189,23 @@ body {
   border: 1px solid #f0f0f0 !important;
   border-radius: 8px !important;
 }
-ant-input,
+.ant-input,
 .ant-input-affix-wrapper,
 .ant-select-selector,
-.ant-input-number {
+.ant-input-number,
+.ant-picker {
   border: 1px solid #d9d9d9 !important;
-  border-radius: 6px !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
 }
 .ant-input:focus,
 .ant-input-affix-wrapper:focus,
 .ant-input-affix-wrapper-focused,
 .ant-select-focused .ant-select-selector,
-.ant-input-number:focus {
-  border-color: #1890ff !important;
-  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+.ant-input-number:focus,
+.ant-picker-focused {
+  border-color: #16a34a !important;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.1) !important;
 }
 
 .ant-btn {
@@ -219,12 +215,18 @@ ant-input,
 
 .ant-btn-primary {
   border: none !important;
-  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%) !important;
+  background: linear-gradient(135deg, #16a34a 0%, #10b981 50%, #14b8a6 100%) !important;
   box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2) !important;
 }
 
+.ant-btn-primary:hover {
+  opacity: 0.9 !important;
+  transform: translateY(-1px);
+}
+
 .ant-btn-default:hover {
-  border-color: #1890ff !important;
+  border-color: #16a34a !important;
+  color: #16a34a !important;
 }
 
 /* Table borders if needed */

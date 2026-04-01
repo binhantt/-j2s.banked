@@ -1,4 +1,5 @@
 import { ConfigProvider, message } from 'antd';
+import Head from 'next/head';
 import type { AppProps } from 'next/app';
 import '../styles/globals.css';
 import '../styles/profile.css';
@@ -17,15 +18,14 @@ const bannedMessageOnLoad = (() => {
 })();
 
 const App = ({ Component, pageProps }: AppProps) => {
-  const initAuth = useAuthStore((state) => state.initAuth);
+  const initAuth        = useAuthStore((state) => state.initAuth);
   const checkBannedStatus = useAuthStore((state) => state.checkBannedStatus);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [bannedMsg, setBannedMsg] = useState(bannedMessageOnLoad);
 
+  // Chạy 1 lần duy nhất khi app mount
   useEffect(() => {
-    // Initialize auth from localStorage
     initAuth();
-
-    // Configure message globally
     message.config({
       top: 100,
       duration: 3,
@@ -33,25 +33,28 @@ const App = ({ Component, pageProps }: AppProps) => {
     });
   }, [initAuth]);
 
-  // Hiện message ngay khi app mount (không chờ Zustand rehydrate)
+  // Hiện banned message ngay khi mount (không chờ Zustand rehydrate)
   useEffect(() => {
     if (bannedMsg) {
       message.error(bannedMsg);
-      setBannedMsg(''); // clear sau khi show
+      setBannedMsg('');
     }
   }, [bannedMsg]);
 
-  // Check banned status for authenticated users
+  // Check banned: CHỈ khi có token (isAuthenticated thay đổi → user login/logout)
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
+    if (isAuthenticated) {
       checkBannedStatus();
     }
-  }, [checkBannedStatus]);
+  }, [isAuthenticated, checkBannedStatus]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <ConfigProvider theme={theme}>
+        <Head>
+          <title>Hove - Tuyển dụng & Việc làm trực tuyến</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        </Head>
         <Component {...pageProps} />
       </ConfigProvider>
     </QueryClientProvider>

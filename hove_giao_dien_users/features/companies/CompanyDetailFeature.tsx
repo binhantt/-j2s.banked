@@ -11,6 +11,8 @@ import {
   CheckCircleOutlined,
   EyeOutlined,
   CalendarOutlined,
+  FacebookOutlined,
+  InstagramOutlined,
 } from '@ant-design/icons';
 import { companyApi, Company } from '@/lib/companyApi';
 import { jobApi } from '@/lib/jobApi';
@@ -263,7 +265,7 @@ export const CompanyDetailFeature = ({ companyId }: CompanyDetailFeatureProps) =
                     </div>
                   )
                 }
-                onClick={() => router.push(`/blogs/${blog.id}`)}
+                onClick={() => router.push(`/blog/company_${blog.id}`)}
               >
                 <Card.Meta
                   title={<div style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{blog.title}</div>}
@@ -354,15 +356,32 @@ export const CompanyDetailFeature = ({ companyId }: CompanyDetailFeatureProps) =
                   <Col xs={24} sm={12} md={8}>
                     <div className="flex items-center text-gray-700">
                       <GlobalOutlined className="text-lg mr-2 text-green-600" />
-                      <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700">
-                        {company.website}
+                      <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 font-semibold">
+                        Website
                       </a>
+                      <div className="flex items-center ml-4 gap-2">
+                        {company.facebookLink && (
+                          <a href={company.facebookLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:opacity-80 transition-opacity">
+                            <FacebookOutlined className="text-xl" />
+                          </a>
+                        )}
+                        {company.instagramLink && (
+                          <a href={company.instagramLink} target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:opacity-80 transition-opacity">
+                            <InstagramOutlined className="text-xl" />
+                          </a>
+                        )}
+                        {company.zaloLink && (
+                          <a href={company.zaloLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:opacity-80 transition-opacity font-bold text-xs border border-blue-500 rounded px-1">
+                            ZALO
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </Col>
                   <Col xs={24} sm={12} md={8}>
                     <div className="flex items-center text-gray-700">
                       <MailOutlined className="text-lg mr-2 text-green-600" />
-                      <a href={`mailto:${company.email}`} className="text-green-600 hover:text-green-700">
+                      <a href={`mailto:${company.email}`} className="text-green-600 hover:text-green-700 font-semibold">
                         {company.email}
                       </a>
                     </div>
@@ -370,18 +389,109 @@ export const CompanyDetailFeature = ({ companyId }: CompanyDetailFeatureProps) =
                   <Col xs={24} sm={12} md={8}>
                     <div className="flex items-center text-gray-700">
                       <PhoneOutlined className="text-lg mr-2 text-green-600" />
-                      <span>{company.phone}</span>
+                      <span className="font-semibold">{company.phone}</span>
                     </div>
                   </Col>
                 </Row>
+
+                {/* Company Tags */}
+                {company.tags && (
+                  <div className="flex flex-wrap gap-2 mt-6">
+                    {company.tags.split(',').map((tag, index) => (
+                      <Tag key={index} color="default" className="rounded-full px-4 py-1 font-semibold text-slate-600 border-slate-200 bg-slate-50">
+                        #{tag.trim()}
+                      </Tag>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </Card>
         </div>
 
-        <Card className="border border-gray-200 rounded-xl mb-8">
-          <Tabs defaultActiveKey="1" items={tabItems} size="large" />
+        <Card className="border border-gray-200 rounded-xl mb-8 overflow-hidden">
+          <Tabs 
+            defaultActiveKey="1" 
+            items={tabItems.map(tab => {
+              if (tab.key === '1') {
+                return {
+                  ...tab,
+                  children: (
+                    <div className="space-y-8 premium-content">
+                      <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                        <h3 className="text-2xl font-black text-slate-900 mb-4 flex items-center gap-3">
+                          <span className="w-1.5 h-8 bg-green-600 rounded-full" />
+                          Câu chuyện của chúng tôi
+                        </h3>
+                        <div 
+                          className="text-slate-600 leading-loose text-lg whitespace-pre-line"
+                          dangerouslySetInnerHTML={{ __html: (company.description || '').replace(/\n/g, '<br/>') }}
+                        />
+                      </div>
+                      
+                      <Row gutter={[32, 32]}>
+                        <Col xs={24} md={12}>
+                          <div className="h-full bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                            <h3 className="text-xl font-bold text-slate-900 mb-4 border-b pb-4">Tầm nhìn</h3>
+                            <div 
+                              className="text-slate-600 leading-relaxed text-base italic"
+                              dangerouslySetInnerHTML={{ __html: (company.vision || '').replace(/\n/g, '<br/>') }}
+                            />
+                          </div>
+                        </Col>
+                        <Col xs={24} md={12}>
+                          <div className="h-full bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                            <h3 className="text-xl font-bold text-slate-900 mb-4 border-b pb-4">Sứ mệnh</h3>
+                            <div 
+                              className="text-slate-600 leading-relaxed text-base"
+                              dangerouslySetInnerHTML={{ __html: (company.mission || '').replace(/\n/g, '<br/>') }}
+                            />
+                          </div>
+                        </Col>
+                      </Row>
+
+                      <div>
+                        <h3 className="text-2xl font-black text-slate-900 mb-6 px-2">Văn hóa & Giá trị cốt lõi</h3>
+                        <Row gutter={[16, 16]}>
+                          {cultureList.map((item, index) => (
+                            <Col key={index} xs={24} sm={12}>
+                              <div className="flex items-start p-4 bg-white border border-slate-100 rounded-xl hover:shadow-md transition-shadow">
+                                <CheckCircleOutlined className="text-green-600 mr-3 mt-1 text-xl flex-shrink-0" />
+                                <span className="text-slate-700 font-medium">{item}</span>
+                              </div>
+                            </Col>
+                          ))}
+                        </Row>
+                      </div>
+                    </div>
+                  )
+                };
+              }
+              return tab;
+            })} 
+            size="large" 
+            className="px-6 py-2"
+          />
         </Card>
+
+        <style jsx global>{`
+          .premium-content b, .premium-content strong {
+            font-weight: 800;
+            color: #1e293b;
+          }
+          .premium-content i, .premium-content em {
+            font-style: italic;
+            color: #475569;
+          }
+          .premium-content a {
+            color: #16a34a;
+            text-decoration: underline;
+            font-weight: 700;
+          }
+          .ant-tabs-tab-btn {
+            font-weight: 600 !important;
+          }
+        `}</style>
       </div>
     </div>
   );

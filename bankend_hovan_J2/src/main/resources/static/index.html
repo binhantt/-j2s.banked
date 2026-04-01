@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Việc Làm 24h - Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/antd@5.12.8/dist/reset.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.23.6/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/antd@5.12.8/dist/antd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; }
+        #root { min-height: 100vh; }
+        .admin-layout { display: flex; min-height: 100vh; }
+        .sidebar { width: 280px; background: #fff; border-right: 1px solid #e2e8f0; position: fixed; height: 100vh; overflow-y: auto; }
+        .logo { height: 84px; display: flex; align-items: center; padding: 0 28px; gap: 14px; }
+        .logo-icon { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #16a34a, #22c55e); display: grid; place-items: center; }
+        .logo-text { display: flex; flex-direction: column; }
+        .logo-text span:first-child { color: #0f172a; font-weight: 800; font-size: 18px; }
+        .logo-text span:last-child { color: #16a34a; font-weight: 800; font-size: 18px; }
+        .menu { padding: 16px 12px; }
+        .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; color: #64748b; cursor: pointer; transition: all 0.2s; margin-bottom: 4px; }
+        .menu-item:hover { background: #f0fdf4; color: #16a34a; }
+        .menu-item.active { background: #16a34a; color: #fff; }
+        .main { flex: 1; margin-left: 280px; }
+        .header { height: 84px; background: #fff; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
+        .search-input { max-width: 500px; width: 100%; padding: 10px 16px; border-radius: 14px; border: 1px solid #eef2f7; background: #f8fafc; font-size: 15px; }
+        .header-actions { display: flex; align-items: center; gap: 20px; }
+        .badge { position: relative; }
+        .badge-count { position: absolute; top: -5px; right: -5px; background: #ef4444; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 10px; }
+        .content { padding: 32px; }
+        .card { background: #fff; border-radius: 24px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .page-title { font-size: 24px; font-weight: 700; color: #0f172a; margin-bottom: 24px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 32px; }
+        .stat-card { background: #fff; border-radius: 20px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .stat-icon { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; margin-bottom: 16px; }
+        .stat-value { font-size: 32px; font-weight: 800; color: #0f172a; }
+        .stat-label { color: #64748b; font-size: 14px; margin-top: 4px; }
+        .table { width: 100%; border-collapse: collapse; }
+        .table th { text-align: left; padding: 12px 16px; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 1px solid #f1f5f9; }
+        .table td { padding: 16px; border-bottom: 1px solid #f1f5f9; }
+        .table tr:hover { background: #f8fafc; }
+        .badge-status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .badge-active { background: #dcfce7; color: #16a34a; }
+        .badge-inactive { background: #fee2e2; color: #ef4444; }
+        .btn { padding: 8px 16px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s; }
+        .btn-primary { background: #16a34a; color: #fff; }
+        .btn-primary:hover { background: #15803d; }
+        .btn-danger { background: #fee2e2; color: #ef4444; }
+        .btn-danger:hover { background: #fecaca; }
+        .btn-outline { background: transparent; border: 1px solid #e2e8f0; color: #64748b; }
+        .btn-outline:hover { background: #f8fafc; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: #f0fdf4; color: #16a34a; display: grid; place-items: center; font-weight: 600; }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .logout-section { padding: 24px; background: #fafafa; margin: 12px; border-radius: 20px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal { background: #fff; border-radius: 20px; padding: 32px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
+        .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 24px; }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-weight: 600; color: #374151; margin-bottom: 8px; }
+        .form-input { width: 100%; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 15px; }
+        .form-input:focus { outline: none; border-color: #16a34a; box-shadow: 0 0 0 3px rgba(22,163,74,0.1); }
+        .form-select { width: 100%; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 15px; background: #fff; }
+        .form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+        .loading { display: flex; align-items: center; justify-content: center; padding: 48px; color: #64748b; }
+        .empty-state { text-align: center; padding: 48px; color: #64748b; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; }
+        .tab { padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; color: #64748b; transition: all 0.2s; }
+        .tab:hover { background: #f8fafc; }
+        .tab.active { background: #16a34a; color: #fff; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { width: 24px; height: 24px; border: 3px solid #e2e8f0; border-top-color: #16a34a; border-radius: 50%; animation: spin 1s linear infinite; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect, useCallback } = React;
+        const { ConfigProvider, theme, Table, Button, Input, Select, Tag, Space, Modal, Form, message, Popconfirm, Spin } = antd;
+
+        const API_BASE = 'http://localhost:8080/api';
+
+        // Custom hooks
+        const useApi = () => {
+            const [data, setData] = useState([]);
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState(null);
+
+            const fetchData = useCallback(async (endpoint, options = {}) => {
+                setLoading(true);
+                setError(null);
+                try {
+                    const token = localStorage.getItem('admin_token');
+                    const res = await fetch(`${API_BASE}${endpoint}`, {
+                        ...options,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...(token && { 'Authorization': `Bearer ${token}` }),
+                            ...options.headers,
+                        },
+                    });
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({ message: 'Lỗi server' }));
+                        throw new Error(err.message || 'Lỗi server');
+                    }
+                    const json = await res.json();
+                    setData(json);
+                    return json;
+                } catch (err) {
+                    setError(err.message);
+                    message.error(err.message);
+                    throw err;
+                } finally {
+                    setLoading(false);
+                }
+            }, []);
+
+            return { data, loading, error, fetchData, setData };
+        };
+
+        // Login Component
+        const LoginPage = ({ onLogin }) => {
+            const [email, setEmail] = useState('doan44503@gmail.com');
+            const [password, setPassword] = useState('123');
+            const [loading, setLoading] = useState(false);
+
+            const handleLogin = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                try {
+                    const res = await fetch(`${API_BASE}/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || 'Đăng nhập thất bại');
+                    localStorage.setItem('admin_token', data.accessToken);
+                    localStorage.setItem('admin_refresh', data.refreshToken);
+                    message.success('Đăng nhập thành công!');
+                    onLogin();
+                } catch (err) {
+                    message.error(err.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            return (
+                <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
+                    <div className="card" style={{ maxWidth: 420, width: '90%', padding: 40 }}>
+                        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+                            <div className="logo-icon" style={{ width: 64, height: 64, margin: '0 auto 16px' }}>
+                                <svg width="32" height="32" viewBox="0 0 38 38" fill="none">
+                                    <path d="M5 8L13.5 28.5L19 15L24.5 28.5L33 8" stroke="#fff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </div>
+                            <h1 style={{ fontSize: 28, fontWeight: 800, color: '#0f172a' }}>Việc Làm 24h</h1>
+                            <p style={{ color: '#64748b', marginTop: 8 }}>Admin Dashboard</p>
+                        </div>
+                        <form onSubmit={handleLogin}>
+                            <div className="form-group">
+                                <label className="form-label">Email</label>
+                                <input type="email" className="form-input" value={email} onChange={e => setEmail(e.target.value)} required />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Password</label>
+                                <input type="password" className="form-input" value={password} onChange={e => setPassword(e.target.value)} required />
+                            </div>
+                            <Button type="primary" htmlType="submit" loading={loading} block size="large" style={{ height: 48, borderRadius: 12, fontWeight: 700 }}>
+                                Đăng nhập
+                            </Button>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        // Dashboard Component
+        const Dashboard = () => {
+            const [stats, setStats] = useState({ users: 0, jobs: 0, companies: 0, blogs: 0 });
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                const fetchStats = async () => {
+                    const token = localStorage.getItem('admin_token');
+                    try {
+                        const [users, jobs, companies, blogs] = await Promise.all([
+                            fetch(`${API_BASE}/users?page=0&size=1`, { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json()),
+                            fetch(`${API_BASE}/jobs?page=0&size=1`, { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json()),
+                            fetch(`${API_BASE}/companies?page=0&size=1`, { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json()),
+                            fetch(`${API_BASE}/blog?page=0&size=1`, { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json()),
+                        ]);
+                        setStats({
+                            users: users.totalElements || 0,
+                            jobs: jobs.totalElements || 0,
+                            companies: companies.totalElements || 0,
+                            blogs: blogs.totalElements || 0,
+                        });
+                    } catch (err) {
+                        console.error('Error fetching stats:', err);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+                fetchStats();
+            }, []);
+
+            if (loading) return <div className="loading"><Spin size="large" /></div>;
+
+            return (
+                <div>
+                    <h1 className="page-title">Bảng điều khiển</h1>
+                    <div className="stats-grid">
+                        <div className="stat-card">
+                            <div className="stat-icon" style={{ background: '#dcfce7' }}>
+                                <svg width="24" height="24" fill="none" stroke="#16a34a" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            </div>
+                            <div className="stat-value">{stats.users}</div>
+                            <div className="stat-label">Người dùng</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-icon" style={{ background: '#dbeafe' }}>
+                                <svg width="24" height="24" fill="none" stroke="#2563eb" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                            </div>
+                            <div className="stat-value">{stats.jobs}</div>
+                            <div className="stat-label">Tin tuyển dụng</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-icon" style={{ background: '#fef3c7' }}>
+                                <svg width="24" height="24" fill="none" stroke="#d97706" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M9 8h1"/><path d="M9 12h1"/><path d="M9 16h1"/><path d="M14 8h1"/><path d="M14 12h1"/><path d="M14 16h1"/><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/></svg>
+                            </div>
+                            <div className="stat-value">{stats.companies}</div>
+                            <div className="stat-label">Công ty</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-icon" style={{ background: '#fce7f3' }}>
+                                <svg width="24" height="24" fill="none" stroke="#db2777" strokeWidth="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            </div>
+                            <div className="stat-value">{stats.blogs}</div>
+                            <div className="stat-label">Bài viết blog</div>
+                        </div>
+                    </div>
+                    <div className="card">
+                        <h3 style={{ marginBottom: 16 }}>Chào mừng Admin!</h3>
+                        <p style={{ color: '#64748b' }}>Đây là trang quản trị hệ thống Việc Làm 24h. Sử dụng menu bên trái để quản lý các chức năng.</p>
+                    </div>
+                </div>
+            );
+        };
+
+        // Users Management Component
+        const UsersManagement = () => {
+            const [users, setUsers] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [page, setPage] = useState(0);
+            const [total, setTotal] = useState(0);
+            const [showModal, setShowModal] = useState(false);
+            const [editingUser, setEditingUser] = useState(null);
+
+            const fetchUsers = async (pageNum = 0) => {
+                const token = localStorage.getItem('admin_token');
+                setLoading(true);
+                try {
+                    const res = await fetch(`${API_BASE}/users?page=${pageNum}&size=20`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    setUsers(data.content || data || []);
+                    setTotal(data.totalElements || 0);
+                    setPage(pageNum);
+                } catch (err) {
+                    message.error('Lỗi khi tải danh sách users');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            useEffect(() => { fetchUsers(page); }, []);
+
+            const toggleUserStatus = async (userId, currentStatus) => {
+                const token = localStorage.getItem('admin_token');
+                try {
+                    const res = await fetch(`${API_BASE}/users/${userId}/toggle-status`, {
+                        method: 'PUT',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) throw new Error();
+                    message.success('Cập nhật trạng thái thành công');
+                    fetchUsers(page);
+                } catch {
+                    message.error('Lỗi khi cập nhật trạng thái');
+                }
+            };
+
+            const columns = [
+                { title: 'Người dùng', dataIndex: 'fullName', render: (_, r) => (
+                    <div className="user-info">
+                        <div className="avatar">{r.fullName?.[0] || r.email?.[0] || 'U'}</div>
+                        <div>
+                            <div style={{ fontWeight: 600 }}>{r.fullName || 'Chưa cập nhật'}</div>
+                            <div style={{ color: '#64748b', fontSize: 13 }}>{r.email}</div>
+                        </div>
+                    </div>
+                )},
+                { title: 'Vai trò', dataIndex: 'role', render: r => <Tag color={r === 'admin' ? 'green' : 'blue'}>{r}</Tag> },
+                { title: 'Trạng thái', dataIndex: 'enabled', render: e => <span className={`badge-status ${e ? 'badge-active' : 'badge-inactive'}`}>{e ? 'Hoạt động' : 'Bị khóa'}</span> },
+                { title: 'Ngày tạo', dataIndex: 'createdAt', render: d => d ? new Date(d).toLocaleDateString('vi-VN') : '-' },
+                { title: 'Hành động', render: (_, r) => (
+                    <Space>
+                        <Button size="small" type="primary" ghost={r.enabled} danger={!r.enabled}
+                            onClick={() => toggleUserStatus(r.id, r.enabled)}>
+                            {r.enabled ? 'Khóa' : 'Mở khóa'}
+                        </Button>
+                    </Space>
+                )},
+            ];
+
+            return (
+                <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                        <h1 className="page-title" style={{ marginBottom: 0 }}>Quản lý người dùng</h1>
+                        <Button type="primary" onClick={() => { setEditingUser(null); setShowModal(true); }}>+ Thêm người dùng</Button>
+                    </div>
+                    <div className="card">
+                        <Table columns={columns} dataSource={users} loading={loading} rowKey="id" pagination={{
+                            current: page + 1, total, onChange: (p) => fetchUsers(p - 1), pageSize: 20
+                        }} />
+                    </div>
+                    {showModal && <UserModal user={editingUser} onClose={() => setShowModal(false)} onSave={() => { setShowModal(false); fetchUsers(page); }} />}
+                </div>
+            );
+        };
+
+        // User Modal
+        const UserModal = ({ user, onClose, onSave }) => {
+            const [form, setForm] = useState({
+                email: user?.email || '',
+                fullName: user?.fullName || '',
+                role: user?.role || 'job_seeker',
+                password: ''
+            });
+            const [loading, setLoading] = useState(false);
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                const token = localStorage.getItem('admin_token');
+                try {
+                    const url = user ? `${API_BASE}/users/${user.id}` : `${API_BASE}/users`;
+                    const method = user ? 'PUT' : 'POST';
+                    const body = user ? { fullName: form.fullName, role: form.role } : form;
+
+                    const res = await fetch(url, {
+                        method,
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    if (!res.ok) throw new Error();
+                    message.success(user ? 'Cập nhật thành công' : 'Tạo người dùng thành công');
+                    onSave();
+                } catch {
+                    message.error('Lỗi khi lưu người dùng');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal" onClick={e => e.stopPropagation()}>
+                        <h2 className="modal-title">{user ? 'Sửa người dùng' : 'Thêm người dùng mới'}</h2>
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <label className="form-label">Email</label>
+                                <input type="email" className="form-input" value={form.email} onChange={e => setForm({...form, email: e.target.value})} disabled={!!user} required />
+                            </div>
+                            {!user && (
+                                <div className="form-group">
+                                    <label className="form-label">Password</label>
+                                    <input type="password" className="form-input" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required={!user} />
+                                </div>
+                            )}
+                            <div className="form-group">
+                                <label className="form-label">Họ tên</label>
+                                <input type="text" className="form-input" value={form.fullName} onChange={e => setForm({...form, fullName: e.target.value})} required />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Vai trò</label>
+                                <select className="form-select" value={form.role} onChange={e => setForm({...form, role: e.target.value})}>
+                                    <option value="job_seeker">Ứng viên</option>
+                                    <option value="freelancer">Freelancer</option>
+                                    <option value="hr">Nhà tuyển dụng</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                            <div className="form-actions">
+                                <Button onClick={onClose}>Hủy</Button>
+                                <Button type="primary" htmlType="submit" loading={loading}>Lưu</Button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        // Domains Management Component
+        const DomainsManagement = () => {
+            const [domains, setDomains] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [showModal, setShowModal] = useState(false);
+            const [editingDomain, setEditingDomain] = useState(null);
+
+            const fetchDomains = async () => {
+                const token = localStorage.getItem('admin_token');
+                setLoading(true);
+                try {
+                    const res = await fetch(`${API_BASE}/domains`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    setDomains(data.content || data || []);
+                } catch {
+                    message.error('Lỗi khi tải lĩnh vực');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            useEffect(() => { fetchDomains(); }, []);
+
+            const toggleDomain = async (id) => {
+                const token = localStorage.getItem('admin_token');
+                try {
+                    await fetch(`${API_BASE}/domains/${id}/toggle-status`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } });
+                    message.success('Cập nhật thành công');
+                    fetchDomains();
+                } catch {
+                    message.error('Lỗi khi cập nhật');
+                }
+            };
+
+            const deleteDomain = async (id) => {
+                const token = localStorage.getItem('admin_token');
+                try {
+                    await fetch(`${API_BASE}/domains/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                    message.success('Xóa thành công');
+                    fetchDomains();
+                } catch {
+                    message.error('Lỗi khi xóa');
+                }
+            };
+
+            const columns = [
+                { title: 'Tên lĩnh vực', dataIndex: 'name', render: t => <strong>{t}</strong> },
+                { title: 'Mô tả', dataIndex: 'description' },
+                { title: 'Trạng thái', dataIndex: 'enabled', render: e => <span className={`badge-status ${e ? 'badge-active' : 'badge-inactive'}`}>{e ? 'Hoạt động' : 'Tắt'}</span> },
+                { title: 'Hành động', render: (_, r) => (
+                    <Space>
+                        <Button size="small" onClick={() => { setEditingDomain(r); setShowModal(true); }}>Sửa</Button>
+                        <Button size="small" type="primary" ghost={r.enabled} danger={!r.enabled} onClick={() => toggleDomain(r.id)}>{r.enabled ? 'Tắt' : 'Bật'}</Button>
+                        <Popconfirm title="Xóa lĩnh vực?" onConfirm={() => deleteDomain(r.id)}>
+                            <Button size="small" danger>Xóa</Button>
+                        </Popconfirm>
+                    </Space>
+                )},
+            ];
+
+            return (
+                <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                        <h1 className="page-title" style={{ marginBottom: 0 }}>Quản lý lĩnh vực</h1>
+                        <Button type="primary" onClick={() => { setEditingDomain(null); setShowModal(true); }}>+ Thêm lĩnh vực</Button>
+                    </div>
+                    <div className="card">
+                        <Table columns={columns} dataSource={domains} loading={loading} rowKey="id" pagination={false} />
+                    </div>
+                    {showModal && <DomainModal domain={editingDomain} onClose={() => setShowModal(false)} onSave={() => { setShowModal(false); fetchDomains(); }} />}
+                </div>
+            );
+        };
+
+        // Domain Modal
+        const DomainModal = ({ domain, onClose, onSave }) => {
+            const [form, setForm] = useState({ name: domain?.name || '', description: domain?.description || '' });
+            const [loading, setLoading] = useState(false);
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                const token = localStorage.getItem('admin_token');
+                try {
+                    const url = domain ? `${API_BASE}/domains/${domain.id}` : `${API_BASE}/domains`;
+                    const method = domain ? 'PUT' : 'POST';
+                    const res = await fetch(url, { method, headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+                    if (!res.ok) throw new Error();
+                    message.success(domain ? 'Cập nhật thành công' : 'Tạo thành công');
+                    onSave();
+                } catch {
+                    message.error('Lỗi khi lưu');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal" onClick={e => e.stopPropagation()}>
+                        <h2 className="modal-title">{domain ? 'Sửa lĩnh vực' : 'Thêm lĩnh vực mới'}</h2>
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <label className="form-label">Tên lĩnh vực</label>
+                                <input type="text" className="form-input" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Mô tả</label>
+                                <textarea className="form-input" rows={3} value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
+                            </div>
+                            <div className="form-actions">
+                                <Button onClick={onClose}>Hủy</Button>
+                                <Button type="primary" htmlType="submit" loading={loading}>Lưu</Button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        // Blog Management Component
+        const BlogManagement = () => {
+            const [blogs, setBlogs] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [page, setPage] = useState(0);
+
+            const fetchBlogs = async (pageNum = 0) => {
+                const token = localStorage.getItem('admin_token');
+                setLoading(true);
+                try {
+                    const res = await fetch(`${API_BASE}/blog?page=${pageNum}&size=20`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    const data = await res.json();
+                    setBlogs(data.content || data || []);
+                } catch {
+                    message.error('Lỗi khi tải blog');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            useEffect(() => { fetchBlogs(page); }, []);
+
+            const deleteBlog = async (id) => {
+                const token = localStorage.getItem('admin_token');
+                try {
+                    await fetch(`${API_BASE}/blog/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                    message.success('Xóa thành công');
+                    fetchBlogs(page);
+                } catch {
+                    message.error('Lỗi khi xóa');
+                }
+            };
+
+            const columns = [
+                { title: 'Tiêu đề', dataIndex: 'title', render: t => <strong>{t}</strong> },
+                { title: 'Tác giả', dataIndex: 'authorName' },
+                { title: 'Danh mục', dataIndex: 'category' },
+                { title: 'Ngày tạo', dataIndex: 'createdAt', render: d => d ? new Date(d).toLocaleDateString('vi-VN') : '-' },
+                { title: 'Hành động', render: (_, r) => (
+                    <Space>
+                        <Button size="small" type="primary" onClick={() => window.open(`http://localhost:3000/blog/${r.id}`, '_blank')}>Xem</Button>
+                        <Popconfirm title="Xóa bài viết?" onConfirm={() => deleteBlog(r.id)}>
+                            <Button size="small" danger>Xóa</Button>
+                        </Popconfirm>
+                    </Space>
+                )},
+            ];
+
+            return (
+                <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                        <h1 className="page-title" style={{ marginBottom: 0 }}>Quản lý blog</h1>
+                        <Button type="primary" onClick={() => window.open('http://localhost:3000/blog/create', '_blank')}>+ Viết bài mới</Button>
+                    </div>
+                    <div className="card">
+                        <Table columns={columns} dataSource={blogs} loading={loading} rowKey="id" pagination={{ current: page + 1, onChange: (p) => fetchBlogs(p - 1) }} />
+                    </div>
+                </div>
+            );
+        };
+
+        // Chat Monitor Component
+        const ChatMonitor = () => {
+            const [conversations, setConversations] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [selectedChat, setSelectedChat] = useState(null);
+            const [messages, setMessages] = useState([]);
+
+            const fetchConversations = async () => {
+                const token = localStorage.getItem('admin_token');
+                setLoading(true);
+                try {
+                    const res = await fetch(`${API_BASE}/chat/conversations`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    const data = await res.json();
+                    setConversations(data.content || data || []);
+                } catch {
+                    message.error('Lỗi khi tải cuộc trò chuyện');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            useEffect(() => { fetchConversations(); }, []);
+
+            const fetchMessages = async (conversationId) => {
+                const token = localStorage.getItem('admin_token');
+                try {
+                    const res = await fetch(`${API_BASE}/chat/conversations/${conversationId}/messages`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    const data = await res.json();
+                    setMessages(data.content || data || []);
+                } catch {
+                    message.error('Lỗi khi tải tin nhắn');
+                }
+            };
+
+            const selectChat = (chat) => {
+                setSelectedChat(chat);
+                fetchMessages(chat.id);
+            };
+
+            return (
+                <div>
+                    <h1 className="page-title">Giám sát chat</h1>
+                    <div style={{ display: 'grid', gridTemplateColumns: '350px 1fr', gap: 24, minHeight: 500 }}>
+                        <div className="card">
+                            <h3 style={{ marginBottom: 16 }}>Cuộc trò chuyện</h3>
+                            {loading ? <div className="loading">Đang tải...</div> : (
+                                <div>
+                                    {conversations.length === 0 ? <div className="empty-state">Không có cuộc trò chuyện</div> : conversations.map(c => (
+                                        <div key={c.id} onClick={() => selectChat(c)}
+                                            style={{ padding: 12, borderRadius: 12, marginBottom: 8, cursor: 'pointer', background: selectedChat?.id === c.id ? '#f0fdf4' : 'transparent', border: '1px solid #e2e8f0' }}>
+                                            <div style={{ fontWeight: 600 }}>{c.participantNames || c.name || 'Cuộc trò chuyện'}</div>
+                                            <div style={{ color: '#64748b', fontSize: 12 }}>{c.lastMessage || 'Chưa có tin nhắn'}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        <div className="card">
+                            <h3 style={{ marginBottom: 16 }}>Tin nhắn {selectedChat ? `- ${selectedChat.participantNames || ''}` : ''}</h3>
+                            {!selectedChat ? <div className="empty-state">Chọn cuộc trò chuyện để xem tin nhắn</div> : (
+                                <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+                                    {messages.length === 0 ? <div className="empty-state">Chưa có tin nhắn</div> : messages.map((m, i) => (
+                                        <div key={i} style={{ padding: 12, background: m.senderId === 'admin' ? '#dcfce7' : '#f8fafc', borderRadius: 12, marginBottom: 8, maxWidth: '80%', marginLeft: m.senderId === 'admin' ? 'auto' : 0 }}>
+                                            <div style={{ fontWeight: 600, fontSize: 13 }}>{m.senderName}</div>
+                                            <div>{m.content}</div>
+                                            <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>{m.createdAt ? new Date(m.createdAt).toLocaleString('vi-VN') : ''}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('admin_token'));
+            const [currentView, setCurrentView] = useState('dashboard');
+            const [collapsed, setCollapsed] = useState(false);
+
+            const menuItems = [
+                { key: 'dashboard', icon: '📊', label: 'Bảng điều khiển' },
+                { key: 'users', icon: '👥', label: 'Người dùng' },
+                { key: 'domains', icon: '🏷️', label: 'Lĩnh vực' },
+                { key: 'blog', icon: '📝', label: 'Blog' },
+                { key: 'chat', icon: '💬', label: 'Chat' },
+            ];
+
+            const handleLogout = () => {
+                localStorage.removeItem('admin_token');
+                localStorage.removeItem('admin_refresh');
+                setIsLoggedIn(false);
+                message.success('Đã đăng xuất');
+            };
+
+            const renderContent = () => {
+                switch (currentView) {
+                    case 'dashboard': return <Dashboard />;
+                    case 'users': return <UsersManagement />;
+                    case 'domains': return <DomainsManagement />;
+                    case 'blog': return <BlogManagement />;
+                    case 'chat': return <ChatMonitor />;
+                    default: return <Dashboard />;
+                }
+            };
+
+            if (!isLoggedIn) {
+                return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
+            }
+
+            return (
+                <ConfigProvider theme={{ algorithm: theme.defaultAlgorithm, token: { colorPrimary: '#16a34a' } }}>
+                    <div className="admin-layout">
+                        <div className="sidebar">
+                            <div className="logo">
+                                <div className="logo-icon">
+                                    <svg width="24" height="24" viewBox="0 0 38 38" fill="none">
+                                        <path d="M5 8L13.5 28.5L19 15L24.5 28.5L33 8" stroke="#fff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div className="logo-text">
+                                    <span>Việc Làm</span>
+                                    <span>24h ADMIN</span>
+                                </div>
+                            </div>
+                            <div className="menu">
+                                {menuItems.map(item => (
+                                    <div key={item.key} className={`menu-item ${currentView === item.key ? 'active' : ''}`}
+                                        onClick={() => setCurrentView(item.key)}>
+                                        <span style={{ fontSize: 20 }}>{item.icon}</span>
+                                        <span style={{ fontWeight: 600 }}>{item.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="logout-section">
+                                <div className="user-info" style={{ marginBottom: 16 }}>
+                                    <div className="avatar" style={{ width: 48, height: 48, fontSize: 20 }}>A</div>
+                                    <div>
+                                        <div style={{ fontWeight: 700 }}>Admin</div>
+                                        <div style={{ color: '#64748b', fontSize: 12 }}>Quản trị viên</div>
+                                    </div>
+                                </div>
+                                <Button block icon="🚪" onClick={handleLogout} danger style={{ borderRadius: 12, height: 44, fontWeight: 600 }}>
+                                    Đăng xuất
+                                </Button>
+                            </div>
+                        </div>
+                        <div className="main">
+                            <div className="header">
+                                <input type="text" className="search-input" placeholder="Tìm kiếm..." />
+                                <div className="header-actions">
+                                    <div className="badge">
+                                        <span style={{ fontSize: 24, cursor: 'pointer' }}>🔔</span>
+                                        <span className="badge-count">5</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="content">
+                                {renderContent()}
+                            </div>
+                        </div>
+                    </div>
+                </ConfigProvider>
+            );
+        };
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>

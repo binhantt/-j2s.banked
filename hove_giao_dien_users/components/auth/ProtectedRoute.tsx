@@ -43,7 +43,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }, [hydrated, isAuthenticated, user, requireAuth, allowedUserTypes, redirectTo, router]);
 
   // Loading state — đợi rehydrate thay vì redirect nhầm sang /login
-  if (!hydrated) {
+  if (!hydrated) { 
     return null;
   }
 

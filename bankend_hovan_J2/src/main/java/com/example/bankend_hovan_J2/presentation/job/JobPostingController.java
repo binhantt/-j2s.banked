@@ -36,7 +36,7 @@ public class JobPostingController {
         return ResponseEntity.ok(enrichWithCompanyName(jobs));
     }
 
-    // Search jobs with filters (server-side)
+    // Search jobs with filters (DB-level query)
     @GetMapping("/search")
     public ResponseEntity<List<JobPostingResponse>> searchJobs(
             @RequestParam(required = false) String searchText,
@@ -44,94 +44,72 @@ public class JobPostingController {
             @RequestParam(required = false) String jobType,
             @RequestParam(required = false) Long salaryMin,
             @RequestParam(required = false) Long salaryMax,
-            @RequestParam(required = false) String experience,
+            @RequestParam(required = false) Integer experienceMin,
+            @RequestParam(required = false) Integer experienceMax,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir) {
 
-        Sort sort = sortDir.equalsIgnoreCase("asc")
-                ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Pageable pageable = PageRequest.of(page, size);
 
-        List<JobPostingEntityJpa> allActive = jobPostingRepository.findByStatus("active");
+        // Query at DB level - salary logic:
+        // - salaryMin: keep jobs where salaryMax >= salaryMin (job can pay at least that much)
+        // - salaryMax: keep jobs where salaryMin <= salaryMax (job starts at or below that amount)
+        // - Jobs with NULL salary fields are included (treat NULL as "negotiable")
+        // Experience: filter by experienceYearsMin (INT) range
+        List<JobPostingEntityJpa> results = jobPostingRepository.searchJobs(
+                searchText,
+                location,
+                jobType,
+                salaryMin,
+                salaryMax,
+                experienceMin,
+                experienceMax
+        );
 
-        List<JobPostingEntityJpa> filtered = allActive.stream()
-                .filter(job -> {
-                    // Filter by search text (title, description, company name)
-                    if (searchText != null && !searchText.trim().isEmpty()) {
-                        String lower = searchText.toLowerCase();
-                        boolean matches = (job.getTitle() != null && job.getTitle().toLowerCase().contains(lower))
-                                || (job.getDescription() != null && job.getDescription().toLowerCase().contains(lower));
-                        if (!matches) {
-                            // Also check company name
-                            var company = companyRepository.findByHrIdIncludingInactive(job.getUserId());
-                            if (company.isEmpty() || company.get().getName() == null
-                                    || !company.get().getName().toLowerCase().contains(lower)) {
-                                return false;
-                            }
-                        }
+        // Apply sorting in memory (JPQL doesn't support dynamic sort column easily)
+        List<JobPostingEntityJpa> sorted = results.stream()
+                .sorted((a, b) -> {
+                    int cmp = 0;
+                    switch (sortBy.toLowerCase()) {
+                        case "salarymin":
+                            Long aMin = a.getSalaryMin() != null ? a.getSalaryMin() : 0L;
+                            Long bMin = b.getSalaryMin() != null ? b.getSalaryMin() : 0L;
+                            cmp = aMin.compareTo(bMin);
+                            break;
+                        case "title":
+                            String aTitle = a.getTitle() != null ? a.getTitle() : "";
+                            String bTitle = b.getTitle() != null ? b.getTitle() : "";
+                            cmp = aTitle.compareToIgnoreCase(bTitle);
+                            break;
+                        case "views":
+                            cmp = a.getViews().compareTo(b.getViews());
+                            break;
+                        case "experienceyearsmin":
+                            Integer aExp = a.getExperienceYearsMin() != null ? a.getExperienceYearsMin() : 0;
+                            Integer bExp = b.getExperienceYearsMin() != null ? b.getExperienceYearsMin() : 0;
+                            cmp = aExp.compareTo(bExp);
+                            break;
+                        case "createdat":
+                        default:
+                            cmp = a.getCreatedAt().compareTo(b.getCreatedAt());
+                            break;
                     }
-                    return true;
-                })
-                .filter(job -> {
-                    // Filter by location
-                    if (location != null && !location.trim().isEmpty() && !location.equalsIgnoreCase("all")) {
-                        if (job.getLocation() == null || !job.getLocation().toLowerCase().contains(location.toLowerCase())) {
-                            return false;
-                        }
-                    }
-                    return true;
-                })
-                .filter(job -> {
-                    // Filter by job type (comma-separated list)
-                    if (jobType != null && !jobType.trim().isEmpty()) {
-                        String[] types = jobType.split(",");
-                        boolean matches = false;
-                        for (String t : types) {
-                            if (job.getJobType() != null && job.getJobType().equalsIgnoreCase(t.trim())) {
-                                matches = true;
-                                break;
-                            }
-                        }
-                        if (!matches) return false;
-                    }
-                    return true;
-                })
-                .filter(job -> {
-                    // Filter by salary range
-                    if (salaryMin != null) {
-                        if (job.getSalaryMin() == null || job.getSalaryMin() < salaryMin) {
-                            return false;
-                        }
-                    }
-                    if (salaryMax != null) {
-                        if (job.getSalaryMax() == null || job.getSalaryMax() > salaryMax) {
-                            return false;
-                        }
-                    }
-                    return true;
-                })
-                .filter(job -> {
-                    // Filter by experience level
-                    if (experience != null && !experience.trim().isEmpty() && !experience.equalsIgnoreCase("all")) {
-                        if (job.getExperience() == null || !job.getExperience().equalsIgnoreCase(experience.trim())) {
-                            return false;
-                        }
-                    }
-                    return true;
+                    return "asc".equalsIgnoreCase(sortDir) ? cmp : -cmp;
                 })
                 .collect(Collectors.toList());
 
-        // Apply pagination manually (since we're already in memory for these queries)
+        // Apply pagination
         int start = (int) pageable.getOffset();
-        int end = Math.min(start + pageable.getPageSize(), filtered.size());
-        List<JobPostingEntityJpa> paged = start < filtered.size()
-                ? filtered.subList(start, end)
+        int end = Math.min(start + pageable.getPageSize(), sorted.size());
+        List<JobPostingEntityJpa> paged = start < sorted.size()
+                ? sorted.subList(start, end)
                 : List.of();
 
-        return ResponseEntity.ok(enrichWithCompanyName(paged));
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(results.size()))
+                .body(enrichWithCompanyName(paged));
     }
 
     // Get unique locations from active jobs
@@ -140,10 +118,24 @@ public class JobPostingController {
         return ResponseEntity.ok(jobPostingRepository.findDistinctActiveLocations());
     }
 
-    // Get unique experience levels from active jobs
+    // Get unique experience levels from active jobs (legacy String field)
     @GetMapping("/experiences")
     public ResponseEntity<List<String>> getActiveExperiences() {
         return ResponseEntity.ok(jobPostingRepository.findDistinctActiveExperiences());
+    }
+
+    // Get predefined experience options (for dropdown)
+    @GetMapping("/experience-options")
+    public ResponseEntity<List<java.util.Map<String, Object>>> getExperienceOptions() {
+        List<java.util.Map<String, Object>> options = java.util.Arrays.asList(
+            java.util.Map.of("value", 0, "label", "Không yêu cầu"),
+            java.util.Map.of("value", 1, "label", "1 năm"),
+            java.util.Map.of("value", 2, "label", "2 năm"),
+            java.util.Map.of("value", 3, "label", "3 năm"),
+            java.util.Map.of("value", 5, "label", "5 năm"),
+            java.util.Map.of("value", 7, "label", "7+ năm")
+        );
+        return ResponseEntity.ok(options);
     }
 
     // Get job postings by user (HR)
@@ -191,6 +183,7 @@ public class JobPostingController {
                     existing.setJobType(job.getJobType());
                     existing.setLevel(job.getLevel());
                     existing.setExperience(job.getExperience());
+                    existing.setExperienceYearsMin(job.getExperienceYearsMin());
                     existing.setDescription(job.getDescription());
                     existing.setRequirements(job.getRequirements());
                     existing.setBenefits(job.getBenefits());

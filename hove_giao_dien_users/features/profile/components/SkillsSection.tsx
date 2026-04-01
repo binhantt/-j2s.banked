@@ -41,7 +41,7 @@ export const SkillsSection = ({ isEditing }: SkillsSectionProps) => {
     try {
       await skillsApi.createSkill({
         userId: user!.id,
-        name: newSkill.trim(),
+        skillName: newSkill.trim(),
         level: 'intermediate',
       });
       setNewSkill('');
@@ -100,7 +100,7 @@ export const SkillsSection = ({ isEditing }: SkillsSectionProps) => {
                 closable={isEditing}
                 onClose={() => handleDeleteSkill(skill.id)}
               >
-                {skill.name}
+                {skill.skillName}
               </Tag>
             ))}
           </div>

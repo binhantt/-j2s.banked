@@ -142,6 +142,11 @@ export const PersonalInfoForm = ({ isEditing, onSaveSuccess }: PersonalInfoFormP
         phone: values.phone,
         location: values.location,
         bio: values.bio,
+        currentPosition: values.currentPosition,
+        hometown: values.hometown,
+        currentLocation: values.currentLocation,
+        certificateImages,
+        domainId: values.domainId,
       });
 
       await userApi.updateUser(user.id, {

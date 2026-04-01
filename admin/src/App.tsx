@@ -6,11 +6,12 @@ import { UserManagementPage } from './features/users/pages/UserManagementPage';
 import { DomainManagementPage } from './features/domains/pages/DomainManagementPage';
 import { BlogManagementPage } from './features/blog/pages/BlogManagementPage';
 import { BlogCreatePage } from './features/blog/pages/BlogCreatePage';
+import { CategoryManagementPage } from './features/blog/pages/CategoryManagementPage';
 import { ChatMonitorPage } from './features/chat/pages/ChatMonitorPage';
 import { LoginPage } from './features/auth/LoginPage';
 import { useAuthStore } from './features/auth/store/useAuthStore';
 
-type AdminView = 'dashboard' | 'users' | 'domains' | 'blog' | 'blogCreate' | 'chat' | 'analytics' | 'settings';
+type AdminView = 'dashboard' | 'users' | 'domains' | 'blog' | 'blogCreate' | 'blogCategory' | 'chat' | 'analytics' | 'settings';
 
 const AppContent = () => {
   const [view, setView] = useState<AdminView>('dashboard');
@@ -35,8 +36,9 @@ const AppContent = () => {
       {(view === 'dashboard' || view === 'analytics') && <DashboardPage />}
       {view === 'users' && <UserManagementPage />}
       {view === 'domains' && <DomainManagementPage />}
-      {view === 'blog' && <BlogManagementPage />}
+      {view === 'blog' && <BlogManagementPage onAdd={() => setView('blogCreate')} />}
       {view === 'blogCreate' && <BlogCreatePage onBackToList={() => setView('blog')} />}
+      {view === 'blogCategory' && <CategoryManagementPage />}
       {view === 'chat' && <ChatMonitorPage />}
       {view === 'settings' && <UserManagementPage />}
     </AdminLayout>

@@ -23,6 +23,7 @@ public class JobPostingResponse {
     private String jobType;
     private String level;
     private String experience;
+    private Integer experienceYearsMin; // Số năm kinh nghiệm tối thiểu
     private String description;
     private String requirements;
     private String benefits;
@@ -51,6 +52,7 @@ public class JobPostingResponse {
                 .jobType(entity.getJobType())
                 .level(entity.getLevel())
                 .experience(entity.getExperience())
+                .experienceYearsMin(entity.getExperienceYearsMin())
                 .description(entity.getDescription())
                 .requirements(entity.getRequirements())
                 .benefits(entity.getBenefits())

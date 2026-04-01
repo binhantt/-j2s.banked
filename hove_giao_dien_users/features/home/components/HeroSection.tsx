@@ -103,7 +103,7 @@ export const HeroSection = () => {
               Bắt đầu tìm việc
             </Button>
           </Link>
-          <Link href="/register">
+          <Link href="/login">
             <Button
               size="large"
               style={{
@@ -113,7 +113,7 @@ export const HeroSection = () => {
                 fontSize: 15, paddingInline: 28,
               }}
             >
-              Dành cho nhà tuyển dụng
+              Đăng nhập ngay
             </Button>
           </Link>
         </div>

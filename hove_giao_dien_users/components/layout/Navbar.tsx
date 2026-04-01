@@ -216,7 +216,6 @@ export const Navbar = () => {
   const userMenuItems: MenuProps['items'] = [
     { key: '1', label: 'Hồ sơ của tôi', onClick: () => router.push('/profile') },
     { key: 'settings', label: 'Cài đặt tài khoản', onClick: () => router.push('/settings/profile') },
-    { key: '2', label: 'Tạo CV Online', icon: <FileTextOutlined />, onClick: () => router.push('/cv-builder') },
     { type: 'divider' },
     { key: '4', label: 'Đăng xuất', danger: true, onClick: logout },
   ];

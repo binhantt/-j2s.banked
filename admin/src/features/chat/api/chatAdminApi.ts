@@ -1,12 +1,6 @@
 import { httpRequest } from '../../../shared/api/httpClient';
 import type { ChatMessageItem, ConversationSummary, PagedResponse } from '../types/chatTypes';
 
-const API_BASE_URL = 'http://localhost:8080/api';
-
-function buildPageParams(page: number, size: number): string {
-  return `?page=${page}&size=${size}`;
-}
-
 export const chatAdminApi = {
   // 1. Danh sách tất cả cuộc trò chuyện (admin endpoint)
   async getConversations(

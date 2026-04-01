@@ -4,6 +4,7 @@ import {
   DollarOutlined,
   ClockCircleOutlined,
   HeartOutlined,
+  HeartFilled,
   UserOutlined,
   EditOutlined,
 } from '@ant-design/icons';
@@ -16,6 +17,10 @@ interface JobDetailHeaderProps {
   onSave: () => void;
   canApply: boolean;
   hasApplied: boolean;
+  /** True khi đơn trước bị rejected → cho phép ứng tuyển lại */
+  isRejected?: boolean;
+  isSaved?: boolean;
+  saveLoading?: boolean;
 }
 
 export const JobDetailHeader = ({
@@ -23,7 +28,10 @@ export const JobDetailHeader = ({
   onApply,
   onSave,
   canApply,
-  hasApplied
+  hasApplied,
+  isRejected = false,
+  isSaved = false,
+  saveLoading = false,
 }: JobDetailHeaderProps) => {
   const router = useRouter();
   const { user } = useAuthStore();
@@ -130,31 +138,41 @@ export const JobDetailHeader = ({
                   type="primary"
                   size="large"
                   onClick={onApply}
-                  disabled={hasApplied || isJobClosed}
+                  disabled={(!hasApplied || isRejected) ? false : isJobClosed}
                   style={{
                     minWidth: 180,
-                    background: hasApplied || isJobClosed ? '#f1f5f9' : 'linear-gradient(135deg, #16a34a, #22c55e)',
+                    background:
+                      isJobClosed ? '#f1f5f9' :
+                      isRejected ? 'linear-gradient(135deg, #f59e0b, #d97706)' :
+                      hasApplied ? '#f1f5f9' :
+                      'linear-gradient(135deg, #16a34a, #22c55e)',
                     border: 'none',
                     borderRadius: 12,
                     fontWeight: 700,
-                    boxShadow: hasApplied || isJobClosed ? 'none' : '0 4px 12px rgba(22,163,74,0.15)',
+                    boxShadow:
+                      isJobClosed ? 'none' :
+                      isRejected ? '0 4px 12px rgba(245,158,11,0.25)' :
+                      hasApplied ? 'none' :
+                      '0 4px 12px rgba(22,163,74,0.15)',
                   }}
                 >
-                  {hasApplied ? 'Đã ứng tuyển' : isJobClosed ? 'Đã đóng' : 'Ứng tuyển ngay'}
+                  {isJobClosed ? 'Đã đóng' : isRejected ? 'Ứng tuyển lại' : hasApplied ? 'Đã ứng tuyển' : 'Ứng tuyển ngay'}
                 </Button>
               )}
               <Button
                 size="large"
-                icon={<HeartOutlined />}
+                icon={isSaved ? <HeartFilled /> : <HeartOutlined />}
                 onClick={onSave}
+                loading={saveLoading}
                 style={{
                   borderRadius: 12,
-                  borderColor: '#16a34a',
+                  borderColor: isSaved ? '#16a34a' : '#d1d5db',
+                  background: isSaved ? '#f0fdf4' : 'transparent',
                   color: '#16a34a',
                   fontWeight: 600,
                 }}
               >
-                Lưu tin
+                {isSaved ? 'Đã lưu' : 'Lưu tin'}
               </Button>
             </>
           )}

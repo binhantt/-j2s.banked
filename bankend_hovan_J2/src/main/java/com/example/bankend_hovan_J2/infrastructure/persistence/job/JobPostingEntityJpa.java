@@ -34,7 +34,10 @@ public class JobPostingEntityJpa {
     private String level;
     
     @Column(name = "experience")
-    private String experience;
+    private String experience; // Text description: "0-1 năm", "1-3 năm", "3-5 năm", "5+ năm"
+
+    @Column(name = "experience_years_min")
+    private Integer experienceYearsMin; // Số năm kinh nghiệm tối thiểu (INT)
     
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
@@ -154,6 +157,14 @@ public class JobPostingEntityJpa {
 
     public void setExperience(String experience) {
         this.experience = experience;
+    }
+
+    public Integer getExperienceYearsMin() {
+        return experienceYearsMin;
+    }
+
+    public void setExperienceYearsMin(Integer experienceYearsMin) {
+        this.experienceYearsMin = experienceYearsMin;
     }
 
     public String getDescription() {

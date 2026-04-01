@@ -25,11 +25,11 @@ public class PasswordLoginUseCase {
         User user = userRepository.findByEmail(new Email(email))
                 .orElseThrow(() -> new RuntimeException("Email hoặc mật khẩu không đúng"));
 
-        // Check if account is active (skip check for admin users)
-        boolean isAdmin = "admin".equalsIgnoreCase(user.getUserType()) || 
-                         "super_admin".equalsIgnoreCase(user.getUserType());
-        
-        if (!isAdmin && user.getIsActive() != null && !user.getIsActive()) {
+        // Check if account is active
+        // Chỉ super_admin được bypass — admin bình thường vẫn bị banned được
+        boolean isSuperAdmin = "super_admin".equalsIgnoreCase(user.getUserType());
+
+        if (!isSuperAdmin && user.getIsActive() != null && !user.getIsActive()) {
             throw new RuntimeException("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.");
         }
 

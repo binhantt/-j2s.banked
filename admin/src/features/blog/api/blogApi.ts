@@ -32,7 +32,10 @@ export const blogApi = {
       category: payload.category,
       readTime: payload.readTime,
       image: payload.image || null,
-      tags: Array.isArray(payload.tags) ? payload.tags.join(',') : '',
+      tags: Array.isArray(payload.tags) ? payload.tags.join(',') : (payload.tags || ''),
+      facebookLink: payload.facebookLink || '',
+      instagramLink: payload.instagramLink || '',
+      zaloLink: payload.zaloLink || '',
       source: 'platform', // Admin creates platform blogs
       companyId: null, // Not needed for platform blogs
     };
@@ -47,6 +50,32 @@ export const blogApi = {
 
   async deletePost(id: string): Promise<void> {
     await httpRequest<void>(`/blog/posts/${id}`, { method: 'DELETE' });
+  },
+
+  async getCategories(): Promise<any[]> {
+    return httpRequest<any[]>('/blog-categories');
+  },
+
+  async getActiveCategories(): Promise<any[]> {
+    return httpRequest<any[]>('/blog-categories/active');
+  },
+
+  async createCategory(data: any): Promise<any> {
+    return httpRequest<any>('/blog-categories', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async updateCategory(id: number, data: any): Promise<any> {
+    return httpRequest<any>(`/blog-categories/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deleteCategory(id: number): Promise<void> {
+    await httpRequest<void>(`/blog-categories/${id}`, { method: 'DELETE' });
   },
 };
 

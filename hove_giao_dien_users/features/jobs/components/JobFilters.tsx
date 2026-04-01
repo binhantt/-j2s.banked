@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
 import { Select, Checkbox, Divider } from 'antd';
-import { JobFilters as JobFiltersType, jobApiService } from '../api/jobApi';
+import { JobFilters as JobFiltersType, ExperienceOption } from '../api/jobApi';
 import { FilterOutlined, DollarOutlined, ExperimentOutlined, ThunderboltOutlined } from '@ant-design/icons';
 
 interface JobFiltersProps {
@@ -27,21 +26,21 @@ const sectionTitleStyle = {
   gap: 10,
 };
 
+// Predefined experience options (INT values)
+const experienceOptions: ExperienceOption[] = [
+  { value: 0, label: 'Không yêu cầu' },
+  { value: 1, label: '1 năm' },
+  { value: 2, label: '2 năm' },
+  { value: 3, label: '3 năm' },
+  { value: 5, label: '5 năm' },
+  { value: 7, label: '7+ năm' },
+];
+
 export default function JobFilters({ filters, onFilterChange }: JobFiltersProps) {
-  const [experiences, setExperiences] = useState<string[]>([]);
-
-  useEffect(() => {
-    jobApiService.getExperiences().then((data) => {
-      if (data && data.length > 0) {
-        setExperiences(data);
-      }
-    });
-  }, []);
-
-  const experienceOptions = [
-    { value: 'all', label: 'Tất cả kinh nghiệm' },
-    ...experiences.map((exp) => ({ value: exp, label: exp })),
-  ];
+  const getExpLabel = (value: number) => {
+    const opt = experienceOptions.find((o) => o.value === value);
+    return opt ? opt.label : `${value} năm`;
+  };
 
   return (
     <aside style={{ position: 'sticky', top: 100 }}>
@@ -100,20 +99,44 @@ export default function JobFilters({ filters, onFilterChange }: JobFiltersProps)
 
         <Divider style={{ margin: '24px 0' }} />
 
-        {/* Experience Filter */}
+        {/* Experience Filter - Range Slider (INT) */}
         <div style={sectionTitleStyle}>
           <ExperimentOutlined style={{ color: '#16a34a' }} />
           Kinh nghiệm
         </div>
+
+        {/* Range display */}
+        <div style={{ marginBottom: 8, fontSize: 13, color: '#64748b', textAlign: 'center' }}>
+          {filters.experienceMin === undefined && filters.experienceMax === undefined
+            ? 'Tất cả kinh nghiệm'
+            : `${getExpLabel(filters.experienceMin ?? 0)} — ${getExpLabel(filters.experienceMax ?? 7)}`}
+        </div>
+
+        {/* Experience Range Select */}
         <Select
           size="large"
           style={{ width: '100%' }}
-          value={filters.experience}
-          onChange={(value) => onFilterChange({ experience: value })}
-          options={experienceOptions}
-          showSearch
-          optionFilterProp="label"
-          placeholder="Chọn kinh nghiệm"
+          placeholder="Chọn khoảng kinh nghiệm"
+          value={
+            filters.experienceMin !== undefined || filters.experienceMax !== undefined
+              ? `${filters.experienceMin ?? 0}-${filters.experienceMax ?? 7}`
+              : 'all'
+          }
+          onChange={(value) => {
+            if (value === 'all') {
+              onFilterChange({ experienceMin: undefined, experienceMax: undefined });
+            } else {
+              const [min, max] = value.split('-').map(Number);
+              onFilterChange({ experienceMin: min, experienceMax: max });
+            }
+          }}
+          options={[
+            { value: 'all', label: 'Tất cả kinh nghiệm' },
+            { value: '0-1', label: 'Không yêu cầu - 1 năm' },
+            { value: '1-3', label: '1 - 3 năm' },
+            { value: '3-5', label: '3 - 5 năm' },
+            { value: '5-7', label: '5 - 7+ năm' },
+          ]}
         />
       </div>
     </aside>

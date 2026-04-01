@@ -51,8 +51,15 @@ public class BlogResponse {
                 .tags(tagList)
                 .companyId(blog.getCompanyId())
                 .date(formatDate(blog.getCreatedAt()))
+                .facebookLink(blog.getFacebookLink())
+                .instagramLink(blog.getInstagramLink())
+                .zaloLink(blog.getZaloLink())
                 .build();
     }
+
+    private String facebookLink;
+    private String instagramLink;
+    private String zaloLink;
 
     private static String formatDate(LocalDateTime dateTime) {
         if (dateTime == null) return "";

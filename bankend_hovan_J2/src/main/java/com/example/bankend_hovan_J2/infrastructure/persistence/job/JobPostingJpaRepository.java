@@ -34,4 +34,31 @@ public interface JobPostingJpaRepository extends JpaRepository<JobPostingEntityJ
 
     @Query("SELECT DISTINCT j.experience FROM JobPostingEntityJpa j WHERE j.status = 'active' AND j.experience IS NOT NULL AND j.experience <> '' ORDER BY j.experience")
     List<String> findDistinctActiveExperiences();
+
+    // Search jobs with all filters at DB level - properly handles salary ranges
+    // Logic: Keep job if job's salary range OVERLAPS with search salary range
+    // - salaryMin filter: keep jobs where salaryMax >= salaryMin (job can pay at least that much)
+    // - salaryMax filter: keep jobs where salaryMin <= salaryMax (job starts at or below that amount)
+    // Experience: filter by experienceYearsMin (INT) range
+    @Query("SELECT j FROM JobPostingEntityJpa j WHERE j.status = 'active' " +
+           "AND EXISTS (SELECT u FROM UserEntityJpa u WHERE u.id = j.userId AND u.isActive = true) " +
+           "AND (:searchText IS NULL OR :searchText = '' OR " +
+           "     LOWER(j.title) LIKE LOWER(CONCAT('%', :searchText, '%')) OR " +
+           "     LOWER(j.description) LIKE LOWER(CONCAT('%', :searchText, '%'))) " +
+           "AND (:location IS NULL OR :location = '' OR :location = 'all' OR " +
+           "     LOWER(j.location) LIKE LOWER(CONCAT('%', :location, '%'))) " +
+           "AND (:jobType IS NULL OR :jobType = '' OR j.jobType = :jobType) " +
+           "AND (:salaryMin IS NULL OR j.salaryMax IS NULL OR j.salaryMax >= :salaryMin) " +
+           "AND (:salaryMax IS NULL OR j.salaryMin IS NULL OR j.salaryMin <= :salaryMax) " +
+           "AND (:experienceMin IS NULL OR j.experienceYearsMin IS NULL OR j.experienceYearsMin >= :experienceMin) " +
+           "AND (:experienceMax IS NULL OR j.experienceYearsMin IS NULL OR j.experienceYearsMin <= :experienceMax)")
+    List<JobPostingEntityJpa> searchJobs(
+            @Param("searchText") String searchText,
+            @Param("location") String location,
+            @Param("jobType") String jobType,
+            @Param("salaryMin") Long salaryMin,
+            @Param("salaryMax") Long salaryMax,
+            @Param("experienceMin") Integer experienceMin,
+            @Param("experienceMax") Integer experienceMax
+    );
 }

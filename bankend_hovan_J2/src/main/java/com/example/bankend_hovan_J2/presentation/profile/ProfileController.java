@@ -67,6 +67,75 @@ public class ProfileController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // ========== Job Seeker Profiles ==========
+    @GetMapping("/job-seeker-profiles/{userId}")
+    public ResponseEntity<JobSeekerProfileEntityJpa> getJobSeekerProfileByUserId(@PathVariable Long userId) {
+        return jobSeekerProfileRepository.findByUserId(userId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> {
+                    JobSeekerProfileEntityJpa newProfile = new JobSeekerProfileEntityJpa();
+                    newProfile.setUserId(userId);
+                    return ResponseEntity.ok(jobSeekerProfileRepository.save(newProfile));
+                });
+    }
+
+    @PostMapping("/job-seeker-profiles")
+    public ResponseEntity<JobSeekerProfileEntityJpa> createOrGetProfile(
+            @RequestBody JobSeekerProfileEntityJpa profile) {
+        if (profile.getUserId() != null) {
+            return jobSeekerProfileRepository.findByUserId(profile.getUserId())
+                    .map(ResponseEntity::ok)
+                    .orElseGet(() -> ResponseEntity.ok(jobSeekerProfileRepository.save(profile)));
+        }
+        return ResponseEntity.ok(jobSeekerProfileRepository.save(profile));
+    }
+
+    @PutMapping("/job-seeker-profiles/by-user/{userId}")
+    public ResponseEntity<JobSeekerProfileEntityJpa> updateJobSeekerProfileByUserId(
+            @PathVariable Long userId,
+            @RequestBody JobSeekerProfileEntityJpa profile) {
+        return jobSeekerProfileRepository.findByUserId(userId)
+                .map(existing -> {
+                    existing.setPhone(profile.getPhone());
+                    existing.setLocation(profile.getLocation());
+                    existing.setBio(profile.getBio());
+                    existing.setCurrentPosition(profile.getCurrentPosition());
+                    existing.setHometown(profile.getHometown());
+                    existing.setCurrentLocation(profile.getCurrentLocation());
+                    existing.setCertificateImages(profile.getCertificateImages());
+                    existing.setDomainId(profile.getDomainId());
+                    return ResponseEntity.ok(jobSeekerProfileRepository.save(existing));
+                })
+                .orElseGet(() -> {
+                    // Create new profile if doesn't exist
+                    JobSeekerProfileEntityJpa newProfile = new JobSeekerProfileEntityJpa();
+                    newProfile.setUserId(userId);
+                    newProfile.setPhone(profile.getPhone());
+                    newProfile.setLocation(profile.getLocation());
+                    newProfile.setBio(profile.getBio());
+                    newProfile.setCurrentPosition(profile.getCurrentPosition());
+                    newProfile.setHometown(profile.getHometown());
+                    newProfile.setCurrentLocation(profile.getCurrentLocation());
+                    newProfile.setCertificateImages(profile.getCertificateImages());
+                    newProfile.setDomainId(profile.getDomainId());
+                    return ResponseEntity.ok(jobSeekerProfileRepository.save(newProfile));
+                });
+    }
+
+    @PutMapping("/job-seeker-profiles/{id}")
+    public ResponseEntity<JobSeekerProfileEntityJpa> updateJobSeekerProfileRoot(
+            @PathVariable Long id,
+            @RequestBody JobSeekerProfileEntityJpa profile) {
+        return jobSeekerProfileRepository.findById(id)
+                .map(existing -> {
+                    existing.setPhone(profile.getPhone());
+                    existing.setLocation(profile.getLocation());
+                    existing.setBio(profile.getBio());
+                    return ResponseEntity.ok(jobSeekerProfileRepository.save(existing));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     // ========== HR Profile APIs ==========
     @GetMapping("/hr/{userId}")
     public ResponseEntity<HRProfileEntityJpa> getHRProfile(@PathVariable Long userId) {

@@ -110,7 +110,6 @@ export const Footer = () => {
                 { href: '/freelance', label: 'Freelance' },
                 { href: '/companies', label: 'Công ty' },
                 { href: '/blog', label: 'Blog' },
-                { href: '/cv-builder', label: 'Tạo CV online' },
               ].map((item) => (
                 <li key={item.href} style={{ marginBottom: 12 }}>
                   <Link

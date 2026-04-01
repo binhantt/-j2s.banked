@@ -74,6 +74,10 @@ public class CompanyRepositoryImpl implements CompanyRepository {
                 .benefits(company.getBenefits())
                 .workingHours(company.getWorkingHours())
                 .imageGallery(company.getImageGallery())
+                .tags(company.getTags())
+                .facebookLink(company.getFacebookLink())
+                .instagramLink(company.getInstagramLink())
+                .zaloLink(company.getZaloLink())
                 .createdAt(company.getCreatedAt())
                 .updatedAt(company.getUpdatedAt())
                 .build();
@@ -99,6 +103,10 @@ public class CompanyRepositoryImpl implements CompanyRepository {
                 .benefits(entity.getBenefits())
                 .workingHours(entity.getWorkingHours())
                 .imageGallery(entity.getImageGallery())
+                .tags(entity.getTags())
+                .facebookLink(entity.getFacebookLink())
+                .instagramLink(entity.getInstagramLink())
+                .zaloLink(entity.getZaloLink())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
