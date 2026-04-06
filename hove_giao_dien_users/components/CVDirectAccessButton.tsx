@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, message } from 'antd';
-import { FileTextOutlined, ExportOutlined } from '@ant-design/icons';
+import { ExportOutlined } from '@ant-design/icons';
 import { cvApi } from '../lib/cvApi';
 import { CVSecurity, useCVSecurity } from '../lib/cvSecurity';
 
@@ -72,21 +72,9 @@ export const CVDirectAccessButton: React.FC<CVDirectAccessButtonProps> = ({
         }
         
       } catch (tokenError) {
-        console.warn('Token generation failed, trying direct access:', tokenError);
-        
-        // Fallback: Truy cập trực tiếp mà không cần token
-        const directUrl = `http://localhost:8080/uploads/cv/45297142-cbf8-4ca8-977b-7dfc470af5b1.pdf?viewerId=${hrId}&embed=true`;
-        
-        const newWindow = window.open(directUrl, '_blank', 'noopener,noreferrer');
-        
-        if (newWindow) {
-          logSecurityEvent('CV_OPENED_DIRECT_FALLBACK', {
-            cvId, hrId, candidateUserId
-          });
-          message.success(`Đang mở CV của ${candidateName} (direct access)`);
-        } else {
-          throw new Error('Cannot open CV - popup blocked');
-        }
+        console.warn('Token generation failed:', tokenError);
+        message.error('Không thể tạo quyền truy cập CV. Vui lòng thử lại sau.');
+        return;
       }
       
     } catch (error: any) {

@@ -18,6 +18,12 @@ public class BankendHovanJ2Application {
 	public CommandLineRunner schemaFix(JdbcTemplate jdbcTemplate) {
 		return args -> {
 			try {
+				boolean activeColumnExists = !jdbcTemplate.queryForList("SHOW COLUMNS FROM blog_categories LIKE 'active'").isEmpty();
+				if (!activeColumnExists) {
+					System.out.println("=== blog_categories.active already removed, skipping schema fix ===");
+					return;
+				}
+
 				System.out.println("=== Running schema migration fix for blog_categories ===");
 				jdbcTemplate.execute("ALTER TABLE blog_categories DROP COLUMN active");
 				System.out.println("=== Schema fix completed successfully ===");

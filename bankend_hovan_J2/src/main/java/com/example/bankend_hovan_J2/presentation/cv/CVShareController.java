@@ -4,6 +4,7 @@ import com.example.bankend_hovan_J2.domain.cv.entity.UserCV;
 import com.example.bankend_hovan_J2.domain.cv.repository.UserCVRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,7 @@ public class CVShareController {
     
     // Generate share link for public CVs only
     @PostMapping("/generate-share-link")
-    public ResponseEntity<?> generateShareLink(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<?> generateShareLink(HttpServletRequest servletRequest, @RequestBody Map<String, Object> request) {
         try {
             log.info("=== Generate Share Link Request ===");
             log.info("Request body: {}", request);
@@ -64,7 +65,7 @@ public class CVShareController {
             // Tạo share URL
             String filename = cv.getFileUrl().substring(cv.getFileUrl().lastIndexOf('/') + 1);
             String shareUrl = String.format("/uploads/cv/%s?allowShare=true", filename);
-            String fullUrl = String.format("http://localhost:8080%s", shareUrl);
+            String fullUrl = buildFullUrl(servletRequest, shareUrl);
             
             log.info("Share link generated successfully: {}", fullUrl);
             
@@ -130,7 +131,7 @@ public class CVShareController {
     
     // Generate access token for CV owner
     @PostMapping("/generate-owner-token")
-    public ResponseEntity<?> generateOwnerToken(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<?> generateOwnerToken(HttpServletRequest servletRequest, @RequestBody Map<String, Object> request) {
         try {
             log.info("=== Generate Owner Token Request ===");
             log.info("Request body: {}", request);
@@ -164,7 +165,7 @@ public class CVShareController {
             String filename = cv.getFileUrl().substring(cv.getFileUrl().lastIndexOf('/') + 1);
             String secureUrl = String.format("/uploads/cv/%s?viewerId=%d&embed=true&token=%s", 
                     filename, userId, token);
-            String fullUrl = String.format("http://localhost:8080%s", secureUrl);
+            String fullUrl = buildFullUrl(servletRequest, secureUrl);
             
             log.info("Owner token generated successfully for CV {}", cvId);
             
@@ -185,7 +186,7 @@ public class CVShareController {
     
     // Generate HR access token for viewing candidate CVs
     @PostMapping("/generate-hr-token")
-    public ResponseEntity<?> generateHRAccessToken(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<?> generateHRAccessToken(HttpServletRequest servletRequest, @RequestBody Map<String, Object> request) {
         try {
             log.info("=== Generate HR Access Token Request ===");
             log.info("Request body: {}", request);
@@ -223,15 +224,11 @@ public class CVShareController {
             
             // For application_only CVs, verify HR has received application from candidate
             if ("application_only".equals(cv.getVisibility())) {
-                // Temporary: Skip application check for testing
-                log.info("Skipping application check for testing purposes");
-                /*
                 if (!hasApplicationFromUser(hrId, candidateUserId)) {
                     log.warn("HR {} has not received application from candidate {}", hrId, candidateUserId);
                     return ResponseEntity.status(HttpStatus.FORBIDDEN)
                             .body(Map.of("error", "HR can only access CVs from candidates who applied to their jobs"));
                 }
-                */
             }
             
             // Generate HR token
@@ -241,7 +238,7 @@ public class CVShareController {
             String filename = cv.getFileUrl().substring(cv.getFileUrl().lastIndexOf('/') + 1);
             String secureUrl = String.format("/uploads/cv/%s?viewerId=%d&embed=true&token=%s", 
                     filename, hrId, token);
-            String fullUrl = String.format("http://localhost:8080%s", secureUrl);
+            String fullUrl = buildFullUrl(servletRequest, secureUrl);
             
             log.info("HR access token generated successfully for CV {}. Full URL: {}", cvId, fullUrl);
             
@@ -350,6 +347,21 @@ public class CVShareController {
             log.error("Error checking applications", e);
             return false;
         }
+    }
+
+    private String buildFullUrl(HttpServletRequest request, String path) {
+        String scheme = request.getScheme();
+        String host = request.getServerName();
+        int port = request.getServerPort();
+
+        boolean standardPort = ("http".equalsIgnoreCase(scheme) && port == 80)
+                || ("https".equalsIgnoreCase(scheme) && port == 443);
+
+        String baseUrl = standardPort
+                ? scheme + "://" + host
+                : scheme + "://" + host + ":" + port;
+
+        return baseUrl + path;
     }
     
     // Invalidate token when user changes tab (called by frontend)

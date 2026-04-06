@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, message } from 'antd';
 import { ExportOutlined } from '@ant-design/icons';
 import { cvApi } from '../lib/cvApi';
-import { CVSecurity, useCVSecurity } from '../lib/cvSecurity';
+import { useCVSecurity } from '../lib/cvSecurity';
 
 interface CVOwnerAccessButtonProps {
   cvId: number;
@@ -24,8 +24,6 @@ export const CVOwnerAccessButton: React.FC<CVOwnerAccessButtonProps> = ({
   showIcon = true
 }) => {
   const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [cvUrl, setCvUrl] = useState('');
   const { validateBasicAccess, logSecurityEvent } = useCVSecurity();
 
   const handleViewCV = async () => {
@@ -81,11 +79,6 @@ export const CVOwnerAccessButton: React.FC<CVOwnerAccessButtonProps> = ({
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleModalClose = () => {
-    setModalVisible(false);
-    setCvUrl('');
   };
 
   return (

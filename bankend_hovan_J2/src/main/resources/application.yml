@@ -22,7 +22,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/hovan?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true&cachePrepStmts=true&useServerPrepStmts=true&rewriteBatchedStatements=true
     username: root
-    password: ""
+    password: ${DB_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 100
@@ -63,27 +63,27 @@ spring:
           max-wait: 1000
 
 google:
-  client-id: 273697303002-9pbu7fmp2og73cvfoqes1buh1779eftu.apps.googleusercontent.com
+  client-id: ${GOOGLE_CLIENT_ID:273697303002-9pbu7fmp2og73cvfoqes1buh1779eftu.apps.googleusercontent.com}
 
 github:
-  client-id: Ov23lilqZFdq7a0Euerg
-  client-secret: d7d2a239ed12224db1311e95395379627a122dc5
+  client-id: ${GITHUB_CLIENT_ID:Ov23lilqZFdq7a0Euerg}
+  client-secret: ${GITHUB_CLIENT_SECRET:}
 
 facebook:
-  app-id:
-  app-secret: ${FACEBOOK_APP_SECRET:your-facebook-app-secret}
+  app-id: ${FACEBOOK_APP_ID:}
+  app-secret: ${FACEBOOK_APP_SECRET:}
 
 jwt:
-  secret: hovan_google_login_system_super_secure_jwt_secret_key_2026_512bits_minimum_length_token_auth
+  secret: ${JWT_SECRET:}
   expiration: 604800000
 
 security:
   aes:
-    key: MDEyMzQ1Njc4OUFCQ0RFRjAxMjM0NTY3ODlBQkNERUY=
+    key: ${AES_KEY:}
 
 imgbb:
   api:
-    key: 76cbe35884a59e2a3cee66b8113d0753
+    key: ${IMGBB_API_KEY:}
 
 management:
   endpoints:
@@ -159,3 +159,10 @@ rate-limit:
     default:                    # Fallback
       limit: 100
       window-seconds: 60
+
+anti-debug:
+  guard:
+    violation-threshold: ${ANTI_DEBUG_VIOLATION_THRESHOLD:3}
+    violation-window-seconds: ${ANTI_DEBUG_VIOLATION_WINDOW_SECONDS:300}
+    lock-duration-seconds: ${ANTI_DEBUG_LOCK_DURATION_SECONDS:900}
+    max-audit-events: ${ANTI_DEBUG_MAX_AUDIT_EVENTS:500}

@@ -16,13 +16,9 @@ export class CVSecurity {
         return isOwner;
         
       case 'application_only':
-        // Chủ sở hữu hoặc HR có đơn ứng tuyển
-        if (isOwner) return true;
-        if (accessType === 'hr') {
-          // TODO: Kiểm tra HR có đơn ứng tuyển từ candidate không
-          return true; // Tạm thời cho phép HR
-        }
-        return false;
+        // Chỉ chủ sở hữu mới được coi là có quyền chắc chắn ở lớp UI.
+        // Quyền HR được xác nhận ở backend qua token nghiệp vụ.
+        return isOwner;
         
       case 'public':
         // Mọi người đều có thể xem (nhưng vẫn cần token)

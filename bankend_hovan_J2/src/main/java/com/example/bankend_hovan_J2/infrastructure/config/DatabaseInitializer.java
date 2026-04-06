@@ -29,40 +29,55 @@ public class DatabaseInitializer implements CommandLineRunner {
     }
 
     private void ensureSavedJobsTable() {
-        String checkTableSql = "SHOW TABLES LIKE 'saved_jobs'";
-        var tables = jdbcTemplate.queryForList(checkTableSql, String.class);
-
-        if (!tables.isEmpty()) {
-            try {
-                String checkColumnSql = "SHOW COLUMNS FROM saved_jobs LIKE 'job_posting_id'";
-                var columns = jdbcTemplate.queryForList(checkColumnSql);
-
-                if (!columns.isEmpty()) {
-                    System.out.println("=== Detected old saved_jobs table schema, recreating... ===");
-                    jdbcTemplate.execute("DROP TABLE IF EXISTS saved_jobs");
-                    System.out.println("Dropped old saved_jobs table");
-                    createSavedJobsTable();
-                } else {
-                    System.out.println("=== saved_jobs table already has correct schema ===");
-                }
-            } catch (Exception e) {
-                System.out.println("Error checking column: " + e.getMessage());
-            }
-        } else {
+        if (!tableExists("saved_jobs")) {
             System.out.println("=== Creating saved_jobs table... ===");
             createSavedJobsTable();
+            return;
         }
+
+        boolean legacyJobPostingColumnExists = columnExists("saved_jobs", "job_posting_id");
+        boolean currentJobColumnExists = columnExists("saved_jobs", "job_id");
+
+        if (legacyJobPostingColumnExists && !currentJobColumnExists) {
+            System.out.println("=== Migrating saved_jobs.job_posting_id -> job_id ===");
+            jdbcTemplate.execute("ALTER TABLE saved_jobs CHANGE COLUMN job_posting_id job_id BIGINT NOT NULL");
+            System.out.println("=== saved_jobs schema migration completed successfully ===");
+            return;
+        }
+
+        if (legacyJobPostingColumnExists) {
+            System.out.println("=== saved_jobs has both legacy and current job columns; leaving schema untouched ===");
+            return;
+        }
+
+        if (!currentJobColumnExists) {
+            System.out.println("=== saved_jobs table is missing job_id, recreating table ===");
+            jdbcTemplate.execute("DROP TABLE IF EXISTS saved_jobs");
+            createSavedJobsTable();
+            return;
+        }
+
+        System.out.println("=== saved_jobs table already has correct schema ===");
     }
 
     private void ensureUsersPasswordColumn() {
-        var columns = jdbcTemplate.queryForList("SHOW COLUMNS FROM users LIKE 'encrypted_password'");
-        if (columns.isEmpty()) {
+        if (!tableExists("users")) {
+            System.out.println("=== users table is not available yet, skipping encrypted_password check ===");
+            return;
+        }
+
+        if (!columnExists("users", "encrypted_password")) {
             jdbcTemplate.execute("ALTER TABLE users ADD COLUMN encrypted_password VARCHAR(1024) NULL");
             System.out.println("=== Added encrypted_password column to users table ===");
         }
     }
 
     private void ensureDefaultAdminAccount() {
+        if (!tableExists("users")) {
+            System.out.println("=== users table is not available yet, skipping default admin seeding ===");
+            return;
+        }
+
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM users WHERE email = ?",
                 Integer.class,
@@ -105,5 +120,13 @@ public class DatabaseInitializer implements CommandLineRunner {
 
         jdbcTemplate.execute(createTableSql);
         System.out.println("=== Created saved_jobs table successfully ===");
+    }
+
+    private boolean tableExists(String tableName) {
+        return !jdbcTemplate.queryForList("SHOW TABLES LIKE ?", String.class, tableName).isEmpty();
+    }
+
+    private boolean columnExists(String tableName, String columnName) {
+        return !jdbcTemplate.queryForList("SHOW COLUMNS FROM " + tableName + " LIKE ?", String.class, columnName).isEmpty();
     }
 }
